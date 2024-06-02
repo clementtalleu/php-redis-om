@@ -104,6 +104,7 @@ docker compose up -d
 
 ### Running tests
 
+
 ```console
 docker compose exec php vendor/bin/phpunit tests
 ```
