@@ -14,7 +14,7 @@ class RedisAbstractTestCase extends TestCase
 {
     public static function createClient(): RedisClient
     {
-        return RedisClient::createClient(['host' => $_SERVER['REDIS_HOST'] ?? 'redis']);
+        return RedisClient::createClient();
     }
 
     public static function emptyRedis(): void
@@ -29,7 +29,7 @@ class RedisAbstractTestCase extends TestCase
 
     public static function loadRedisFixtures(string $format): array
     {
-        $objectManager = new RedisObjectManager(['host' => $_SERVER['REDIS_HOST'] ?? 'redis']);
+        $objectManager = new RedisObjectManager();
         $dummies = FixturesGenerator::generateDummies($format);
         foreach ($dummies as $dummy) {
             $objectManager->persist($dummy);

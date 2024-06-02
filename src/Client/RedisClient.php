@@ -13,7 +13,7 @@ class RedisClient extends \Redis implements RedisClientInterface
     public static function createClient(?array $options = null): self
     {
         $client = new self($options);
-        $client->pconnect($options['host'] ?? 'redis');
+        $client->pconnect($options['host'] ?? $_SERVER['REDIS_HOST'] ?? 'redis');
 
         return $client;
     }
