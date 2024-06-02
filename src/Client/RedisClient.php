@@ -92,6 +92,7 @@ class RedisClient extends \Redis implements RedisClientInterface
 
             /** @var Property $property */
             $property = $propertyAttribute[0]->newInstance();
+            // @todo, pour l'instant les filtres ne supportent que les champs scalaires
             if (!in_array($reflectionProperty->getType()->getName(), ['int', 'string', 'float', 'bool'])) {
                 continue;
             }

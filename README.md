@@ -2,7 +2,7 @@
 
 # php-redis-om
 
-A PHP object mapper for redis
+A PHP object mapper for [Redis](https://redis.io/).
 
 An Object Mapper for Redis, designed to providing an intuitive and familiar interface for PHP developers to interact
 with Redis.
@@ -15,7 +15,7 @@ with Redis.
 
 ## Requirements
 
-- PHP 8.0 or higher
+- PHP 8.2 or higher
 - Redis 4.0 or higher
 - php-redis extension
 - Redis JSON and Redisearch modules (optional)
@@ -25,7 +25,7 @@ with Redis.
 
 Install the library via Composer:
 
-```bash
+```console
 composer require talleu/php-redis-om
 ```
 
@@ -37,7 +37,6 @@ Add the RedisOm attribute to your class to map it to a Redis schema:
 <?php 
 
 use Talleu\RedisOm\Om\Mapping as RedisOm;
-use Talleu\RedisOm\Om\RedisObjectManager;
 
 #[RedisOm\Entity]
 class User
@@ -45,23 +44,29 @@ class User
     #[RedisOm\Id]
     #[RedisOm\Property]
     public int $id;
-    
+
     #[RedisOm\Property]
     public string $name;
-    
+
     #[RedisOm\Property]
-    public \DateTime $createdAt;
+    public \DateTimeImmutable $createdAt;
 }
 ```
 
 After add the RedisOm attribute to your class,
 you have to run the following command to create the Redis schema for the given source directory: 
-```bash
+
+```console
 vendor/bin/redisMigration src
 ```
 
 Then you can use the ObjectManager to persist your objects from Redis:
+
 ```php
+<?php
+
+use Talleu\RedisOm\Om\RedisObjectManager;
+
 $user = new User()
 $user->id = 1;
 $user->name = 'John Doe';
@@ -71,10 +76,12 @@ $objectManager = new ObjectManager();
 $objectManager->persist($user);
 $objectManager->flush();
 ```
+
 🥳 Congratulations, your PHP object is now registered in Redis !
 
 
 You can now retrieve your user wherever you like using the ObjectManager:
+
 ```php
 // Retrieve the object from redis 
 $user = $objectManager->find(User::class, 1);
@@ -88,15 +95,16 @@ $users = $objectManager->getRepository(User::class)->findBy(['name' => 'John Doe
 
 ### Docker
 
-The package provide a docker-compose configuration to run a Redis 
+The package provide a Docker Compose configuration to run a Redis 
 server with the required modules (RedisJSON and Redisearch) for testing purposes.
 
-```bash
+```console
 docker compose up -d
 ```
 
 ### Running tests
 
-```bash
-docker compose exec php vendor/bin/phpunit
+
+```console
+docker compose exec php vendor/bin/phpunit tests
 ```
