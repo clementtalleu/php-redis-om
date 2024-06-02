@@ -80,4 +80,26 @@ class ObjectManagerTest extends RedisAbstractTestCase
         $object3 = $objectManager->find(DummyHash::class, 3);
         $this->assertEquals($object3, $dummies[2]);
     }
+
+    public function testRemove()
+    {
+        static::emptyRedis();
+        static::generateIndex();
+        $dummies = static::loadRedisFixtures(RedisFormat::HASH);
+        /** @var DummyHash $object */
+        $object = $dummies[0];
+
+        $objectManager = new RedisObjectManager();
+        $objectManager->persist($object);
+        $objectManager->flush();
+
+        $retrieveObject = $objectManager->find(DummyHash::class, $object->id);
+        $this->assertInstanceOf(DummyHash::class, $retrieveObject);
+        
+        // Then remove the object
+        $objectManager->remove($object);
+        $objectManager->flush();
+        $retrieveObject = $objectManager->find(DummyHash::class, $object->id);
+        $this->assertNull($retrieveObject);
+    }
 }

@@ -101,7 +101,7 @@ class HashObjectConverter extends AbstractObjectConverter
                 } elseif (!is_array($current[$innerKey])) {
                     $current[$innerKey] = [$current[$innerKey]];
                 }
-                
+
                 $current = &$current[$innerKey];
             }
 
