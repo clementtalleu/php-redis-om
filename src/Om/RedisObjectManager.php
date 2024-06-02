@@ -22,7 +22,7 @@ class RedisObjectManager implements RedisObjectManagerInterface
     protected ?KeyGenerator $keyGenerator = null;
 
     public function __construct(
-        private ?array $options = [],
+        private readonly ?array $options = [],
     ) {
         $this->keyGenerator = new KeyGenerator();
     }
@@ -35,7 +35,7 @@ class RedisObjectManager implements RedisObjectManagerInterface
         $this->objectsToFlush[] = $persister->persist($objectMapper, $object);
     }
 
-    public function remove(object $object)
+    public function remove(object $object): void
     {
         $objectMapper = $this->getEntityMapper($object);
         $persister = $this->registerPersister($objectMapper, $object);
@@ -101,7 +101,7 @@ class RedisObjectManager implements RedisObjectManagerInterface
         // TODO: Implement initializeObject() method.
     }
 
-    public function contains(object $object)
+    public function contains(object $object): bool
     {
         $objectMapper = $this->getEntityMapper($object);
         $identifierProperty = $this->keyGenerator->getIdentifier(new \ReflectionClass($object));
