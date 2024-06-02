@@ -10,7 +10,7 @@ use Talleu\RedisOm\Om\RedisFormat;
 
 class RedisClient extends \Redis implements RedisClientInterface
 {
-    public static function createClient(?array $options = null): RedisClient
+    public static function createClient(?array $options = null): self
     {
         $client = new self($options);
         $client->pconnect($options['host'] ?? 'redis');

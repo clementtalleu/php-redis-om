@@ -12,7 +12,7 @@ use Talleu\RedisOm\Om\Converters\ScalarConverter;
 class ConverterFactory extends AbstractConverterFactory
 {
     /**
-     * @var ConverterInterface[]
+     * @return ConverterInterface[]
      */
     protected static function getConvertersCollection(): array
     {

@@ -7,24 +7,25 @@ namespace Talleu\RedisOm\Om;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use Doctrine\Persistence\Mapping\ClassMetadataFactory;
 use Doctrine\Persistence\ObjectRepository;
+use Talleu\RedisOm\Om\Repository\RepositoryInterface;
 
 interface RedisObjectManagerInterface
 {
-    public function persist(object $object);
+    public function persist(object $object): void;
 
-    public function remove(object $object);
+    public function remove(object $object): void;
 
-    public function find(string $className, $id);
+    public function find(string $className, $id): ?object;
 
-    public function clear();
+    public function clear(): void;
 
-    public function detach(object $object);
+    public function detach(object $object): void;
 
-    public function refresh(object $object);
+    public function refresh(object $object): object;
 
-    public function flush();
+    public function flush(): void;
 
-    public function getRepository(string $className);
+    public function getRepository(string $className): RepositoryInterface;
 
     public function getClassMetadata(string $className);
 
@@ -32,5 +33,5 @@ interface RedisObjectManagerInterface
 
     public function initializeObject(object $obj);
 
-    public function contains(object $object);
+    public function contains(object $object): bool;
 }
