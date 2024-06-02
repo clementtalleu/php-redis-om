@@ -12,11 +12,9 @@ use Talleu\RedisOm\Tests\Fixtures\FixturesGenerator;
 
 class RedisAbstractTestCase extends TestCase
 {
-    public const OPTIONS = ['host' => 'redis'];
-
     public static function createClient(): RedisClient
     {
-        return RedisClient::createClient(static::OPTIONS);
+        return RedisClient::createClient(['host' => $_SERVER['REDIS_HOST'] ?? 'redis']);
     }
 
     public static function emptyRedis(): void
@@ -31,7 +29,7 @@ class RedisAbstractTestCase extends TestCase
 
     public static function loadRedisFixtures(string $format): array
     {
-        $objectManager = new RedisObjectManager(static::OPTIONS);
+        $objectManager = new RedisObjectManager(['host' => $_SERVER['REDIS_HOST'] ?? 'redis']);
         $dummies = FixturesGenerator::generateDummies($format);
         foreach ($dummies as $dummy) {
             $objectManager->persist($dummy);
