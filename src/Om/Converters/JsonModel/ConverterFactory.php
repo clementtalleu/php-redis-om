@@ -9,7 +9,7 @@ use Talleu\RedisOm\Om\Converters\ConverterInterface;
 use Talleu\RedisOm\Om\Converters\EnumConverter;
 use Talleu\RedisOm\Om\Converters\ScalarConverter;
 
-class ConverterFactory extends AbstractConverterFactory
+final class ConverterFactory extends AbstractConverterFactory
 {
     /**
      * @var ConverterInterface[]

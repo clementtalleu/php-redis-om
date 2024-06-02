@@ -8,7 +8,7 @@ use Talleu\RedisOm\Om\Converters\AbstractObjectConverter;
 use Talleu\RedisOm\Om\Converters\AbstractDateTimeConverter;
 use Talleu\RedisOm\Om\Mapping\Property;
 
-class HashObjectConverter extends AbstractObjectConverter
+final class HashObjectConverter extends AbstractObjectConverter
 {
     /**
      * @return string
@@ -33,7 +33,7 @@ class HashObjectConverter extends AbstractObjectConverter
             }
 
             if ($converter instanceof HashObjectConverter || $converter instanceof ArrayConverter) {
-                $propertyName = $parentProperty ? sprintf('%s.%s', $parentProperty, $property->getName()) : $property->getName();
+                $propertyName = $parentProperty ? sprintf("%s.%s", $parentProperty, $property->getName()) : $property->getName();
                 $hashData = $converter->convert(data: $value, hashData:  $hashData, parentProperty: $propertyName);
                 continue;
             }
@@ -41,7 +41,7 @@ class HashObjectConverter extends AbstractObjectConverter
             $convertedValue = $converter->convert($value);
 
             if ($parentProperty) {
-                $hashData[sprintf('%s.%s', $parentProperty, $property->getName())] = $convertedValue;
+                $hashData[sprintf("%s.%s", $parentProperty, $property->getName())] = $convertedValue;
                 continue;
             }
 

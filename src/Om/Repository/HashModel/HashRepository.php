@@ -9,7 +9,7 @@ use Talleu\RedisOm\Om\Repository\AbstractObjectRepository;
 
 final class HashRepository extends AbstractObjectRepository
 {
-    public ?string $format = RedisFormat::HASH;
+    public ?string $format = RedisFormat::HASH->value;
 
     public function find(string $identifier): ?object
     {

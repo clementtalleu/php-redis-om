@@ -6,7 +6,7 @@ namespace Talleu\RedisOm\Om\Converters\HashModel;
 
 use Talleu\RedisOm\Om\Converters\AbstractNullConverter;
 
-class NullConverter extends AbstractNullConverter
+final class NullConverter extends AbstractNullConverter
 {
     /**
      * @param null $data

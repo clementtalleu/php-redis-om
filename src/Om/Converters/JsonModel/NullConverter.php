@@ -6,7 +6,7 @@ namespace Talleu\RedisOm\Om\Converters\JsonModel;
 
 use Talleu\RedisOm\Om\Converters\AbstractNullConverter;
 
-class NullConverter extends AbstractNullConverter
+final class NullConverter extends AbstractNullConverter
 {
     /**
      * @param null $data

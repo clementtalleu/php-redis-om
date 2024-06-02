@@ -6,7 +6,7 @@ namespace Talleu\RedisOm\Om\Converters\HashModel;
 
 use Talleu\RedisOm\Om\Converters\AbstractDateTimeConverter;
 
-class DateTimeConverter extends AbstractDateTimeConverter
+final class DateTimeConverter extends AbstractDateTimeConverter
 {
     public function convert($data): string
     {

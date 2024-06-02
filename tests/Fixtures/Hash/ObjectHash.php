@@ -8,7 +8,7 @@ use Talleu\RedisOm\Om\Mapping as RedisOm;
 use Talleu\RedisOm\Om\RedisFormat;
 use Talleu\RedisOm\Tests\Fixtures\AbstractObject;
 
-#[RedisOm\Entity(format: RedisFormat::HASH)]
+#[RedisOm\Entity(format: RedisFormat::HASH->value)]
 class ObjectHash extends AbstractObject
 {
 }

@@ -21,7 +21,7 @@ abstract class AbstractPersister implements PersisterInterface
 
     public function __construct(?array $options = null)
     {
-        $this->redis = RedisClient::createClient($options);
+        $this->redis = (new RedisClient($options));
 
         $this->keyGenerator = new KeyGenerator();
     }

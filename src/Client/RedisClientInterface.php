@@ -8,7 +8,7 @@ use Talleu\RedisOm\Om\RedisFormat;
 
 interface RedisClientInterface
 {
-    public static function createClient(?array $options = null);
+    // public function createClient(?array $options = null);
 
     public function hashMultiSet(string $key, array $data);
     public function hashGetAll(string $key): array;
@@ -24,6 +24,6 @@ interface RedisClientInterface
     public function createIndex(string $prefixKey, ?string $format = 'HASH', ?array $properties = []): bool;
     public function dropIndex(string $prefixKey): bool;
     public function count(string $prefixKey, array $criterias = []): int;
-    public function search(string $prefixKey, array $search, array $orderBy, ?string $format = RedisFormat::HASH, ?int $numberOfResults = null): array;
+    public function search(string $prefixKey, array $search, array $orderBy, ?string $format = RedisFormat::HASH->value, ?int $numberOfResults = null): array;
     public function scanKeys(string $prefixKey): array;
 }
