@@ -15,7 +15,7 @@ with Redis.
 
 ## Requirements
 
-- PHP 8.0 or higher
+- PHP 8.2 or higher
 - Redis 4.0 or higher
 - php-redis extension
 - Redis JSON and Redisearch modules (optional)
