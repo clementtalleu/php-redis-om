@@ -92,22 +92,19 @@ class HashObjectConverter extends AbstractObjectConverter
         $output = [];
 
         foreach ($array as $key => $value) {
-            // Sépare les clés par les points
             $keys = explode('.', $key);
-            // Référence l'output pour y ajouter les sous-tableaux
             $current = &$output;
 
-            // Parcours les clés sauf la dernière pour créer les sous-tableaux
             foreach ($keys as $innerKey) {
                 if (!isset($current[$innerKey])) {
                     $current[$innerKey] = [];
                 } elseif (!is_array($current[$innerKey])) {
                     $current[$innerKey] = [$current[$innerKey]];
                 }
+                
                 $current = &$current[$innerKey];
             }
 
-            // Ajoute la valeur à la dernière clé
             $current = $value;
         }
 
