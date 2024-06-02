@@ -98,5 +98,5 @@ docker compose up -d
 ### Running tests
 
 ```bash
-docker compose exec php vendor/bin/phpunit tests
+docker compose exec php vendor/bin/phpunit
 ```
