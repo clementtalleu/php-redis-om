@@ -86,3 +86,17 @@ $users = $objectManager->getRepository(User::class)->findAll();
 $users = $objectManager->getRepository(User::class)->findBy(['name' => 'John Doe'], ['createdAt' => 'DESC'], 10);
 ```
 
+### Docker
+
+The package provide a docker-compose configuration to run a Redis 
+server with the required modules (RedisJSON and Redisearch) for testing purposes.
+
+```bash
+docker compose up -d
+```
+
+### Running tests
+
+```bash
+docker compose exec php vendor/bin/phpunit tests
+```
