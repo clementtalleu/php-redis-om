@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Om\Converters\HashModel;
 
+use Talleu\RedisOm\Exception\BadPropertyConfigurationException;
 use Talleu\RedisOm\Om\Converters\AbstractObjectConverter;
 use Talleu\RedisOm\Om\Converters\AbstractDateTimeConverter;
 use Talleu\RedisOm\Om\Mapping\Property;
@@ -13,16 +14,18 @@ final class HashObjectConverter extends AbstractObjectConverter
     public function convert($data, ?array $hashData = [], ?string $parentProperty = null): array
     {
         $reflection = new \ReflectionClass($data);
-        $properties = $reflection->getProperties(\ReflectionProperty::IS_PUBLIC);
+        $properties = $reflection->getProperties(\ReflectionProperty::IS_PUBLIC | \ReflectionProperty::IS_PROTECTED | \ReflectionProperty::IS_PRIVATE);
 
         foreach ($properties as $property) {
 
+            /** @var Property $propertyAttribute */
             $propertyAttribute = $property->getAttributes(Property::class) !== [] ? $property->getAttributes(Property::class)[0]->newInstance() : null;
             if (!$propertyAttribute) {
                 continue;
             }
 
-            $value = $data->{$property->getName()};
+            $value = $this->extractPropertyValue($propertyAttribute, $property, $data);
+
             $valueType = $property->getType() ? $property->getType()->getName() : (is_object($value) ? get_class($value) : gettype($value));
             $converter = ConverterFactory::getConverter($valueType, $value);
             if (!$converter) {
@@ -78,7 +81,7 @@ final class HashObjectConverter extends AbstractObjectConverter
             }
 
             $revertedValue = $reverter->revert($value, $valueType);
-            $object->{$key} = $revertedValue;
+            $this->assignValue($object, $key, $revertedValue, $type, $reflectionProperty ?? null);
         }
 
         return $object;

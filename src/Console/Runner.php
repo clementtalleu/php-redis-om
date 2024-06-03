@@ -19,7 +19,5 @@ final class Runner
         }
 
         GenerateSchema::generateSchema($dirPath);
-
-        echo 'Schema generated successfully' . PHP_EOL;
     }
 }
