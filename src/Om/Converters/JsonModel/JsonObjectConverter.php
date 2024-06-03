@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Om\Converters\JsonModel;
 
+use Talleu\RedisOm\Exception\BadPropertyConfigurationException;
 use Talleu\RedisOm\Om\Converters\AbstractDateTimeConverter;
 use Talleu\RedisOm\Om\Converters\AbstractObjectConverter;
 use Talleu\RedisOm\Om\Mapping\Property;
@@ -16,7 +17,7 @@ final class JsonObjectConverter extends AbstractObjectConverter
     public function convert($data): array
     {
         $reflection = new \ReflectionClass($data);
-        $properties = $reflection->getProperties(\ReflectionProperty::IS_PUBLIC);
+        $properties = $reflection->getProperties(\ReflectionProperty::IS_PUBLIC | \ReflectionProperty::IS_PROTECTED | \ReflectionProperty::IS_PRIVATE);
         $convertedData = [];
 
         foreach ($properties as $property) {
@@ -26,8 +27,8 @@ final class JsonObjectConverter extends AbstractObjectConverter
                 continue;
             }
 
-            $value = $data->{$property->getName()};
-            $valueType = $property->getType() ? (string) $property->getType()->getName() : (is_object($value) ? get_class($value) : gettype($value));
+            $value = $this->extractPropertyValue($propertyAttribute, $property, $data);
+            $valueType = $property->getType() ? $property->getType()->getName() : (is_object($value) ? get_class($value) : gettype($value));
             $converter = ConverterFactory::getConverter($valueType, $value);
             if (!$converter) {
                 continue;
@@ -56,7 +57,6 @@ final class JsonObjectConverter extends AbstractObjectConverter
             if (!property_exists($object, $key)) {
                 continue;
             }
-
             if (is_array($value) && array_key_exists('#type', $value)) {
                 $valueType = $value['#type'];
             } elseif (($reflectionProperty = new \ReflectionProperty($type, $key)) && $reflectionProperty->getType()) {
@@ -71,7 +71,7 @@ final class JsonObjectConverter extends AbstractObjectConverter
             }
 
             $revertedValue = $reverter->revert($value, $valueType);
-            $object->{$key} = $revertedValue;
+            $this->assignValue($object, $key, $revertedValue, $type, $reflectionProperty ?? null);
         }
 
         return $object;
