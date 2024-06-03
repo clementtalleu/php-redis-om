@@ -11,11 +11,6 @@ use Talleu\RedisOm\Om\Mapping\Entity;
 
 abstract class AbstractPersister implements PersisterInterface
 {
-    public const OPERATION_PERSIST = 'doPersist';
-    public const OPERATION_DELETE = 'doDelete';
-    public const OPERATION_KEY_NAME = 'operation';
-    public const PERSISTER_KEY_NAME = 'persister';
-
     protected RedisClientInterface $redis;
     private KeyGenerator $keyGenerator;
 
@@ -34,8 +29,8 @@ abstract class AbstractPersister implements PersisterInterface
         $key = $this->keyGenerator->generateKey($objectMapper, $object);
 
         return [
-            static::PERSISTER_KEY_NAME => get_class($objectMapper->persister),
-            static::OPERATION_KEY_NAME => static::OPERATION_PERSIST,
+            PersisterOperations::PERSISTER_KEY_NAME->value => get_class($objectMapper->persister),
+            PersisterOperations::OPERATION_KEY_NAME->value => PersisterOperations::OPERATION_PERSIST->value,
             'key' => $key,
             'value' => $objectMapper->converter->convert(data: $object)
         ];
@@ -50,8 +45,8 @@ abstract class AbstractPersister implements PersisterInterface
         $key = sprintf('%s:%s', $objectMapper->prefix ?: get_class($object), $object->{$identifier->getName()});
 
         return [
-            static::PERSISTER_KEY_NAME => get_class($objectMapper->persister),
-            static::OPERATION_KEY_NAME => static::OPERATION_DELETE,
+            PersisterOperations::PERSISTER_KEY_NAME->value => get_class($objectMapper->persister),
+            PersisterOperations::OPERATION_KEY_NAME->value => PersisterOperations::OPERATION_DELETE->value,
             'key' => $key
         ];
     }

@@ -12,6 +12,7 @@ use Talleu\RedisOm\Om\Key\KeyGenerator;
 use Talleu\RedisOm\Om\Mapping\Entity;
 use Talleu\RedisOm\Om\Persister\AbstractPersister;
 use Talleu\RedisOm\Om\Persister\PersisterInterface;
+use Talleu\RedisOm\Om\Persister\PersisterOperations;
 use Talleu\RedisOm\Om\Repository\RepositoryInterface;
 
 final class RedisObjectManager implements RedisObjectManagerInterface
@@ -48,7 +49,7 @@ final class RedisObjectManager implements RedisObjectManagerInterface
     public function flush(): void
     {
         foreach ($this->objectsToFlush as $key => $object) {
-            $this->persisters[$object[AbstractPersister::PERSISTER_KEY_NAME]]->{$object['operation']}($key, $object['value']);
+            $this->persisters[$object[PersisterOperations::PERSISTER_KEY_NAME->value]]->{$object['operation']}($key, $object['value']);
             unset($this->objectsToFlush[$key]);
         }
     }
