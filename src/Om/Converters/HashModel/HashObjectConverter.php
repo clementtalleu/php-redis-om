@@ -10,9 +10,6 @@ use Talleu\RedisOm\Om\Mapping\Property;
 
 final class HashObjectConverter extends AbstractObjectConverter
 {
-    /**
-     * @return string
-     */
     public function convert($data, ?array $hashData = [], ?string $parentProperty = null): array
     {
         $reflection = new \ReflectionClass($data);
