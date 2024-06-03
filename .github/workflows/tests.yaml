@@ -35,7 +35,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
-          extensions: redis
+          extensions: redis, xdebug
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       -
@@ -52,11 +52,15 @@ jobs:
       -
         name: Install dependencies
         run: composer install --prefer-dist
+      - name: Configure Xdebug
+        run: |
+          echo "xdebug.mode=coverage" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini
       - name: Run tests
-        run: vendor/bin/phpunit
+        run: phpdbg -qrr vendor/bin/phpunit --coverage-clover=coverage/clover.xml
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
+          files: coverage/clover.xml
           verbose: true
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
