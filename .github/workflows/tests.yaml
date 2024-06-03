@@ -27,38 +27,32 @@ jobs:
     env:
       REDIS_HOST: localhost
     steps:
-      -
-        name: Checkout
+      - name: Checkout
         uses: actions/checkout@v4
-      -
-        name: Setup PHP
+      - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
           extensions: redis, xdebug
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      -
-        name: Get composer cache directory
+      - name: Configure Xdebug
+        run: echo "xdebug.mode=coverage" | sudo tee -a /etc/php/${{ matrix.php-versions }}/cli/conf.d/20-xdebug.ini
+      - name: Get composer cache directory
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-      -
-        name: Cache dependencies
+      - name: Cache dependencies
         uses: actions/cache@v4
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
           restore-keys: ${{ runner.os }}-composer-
-      -
-        name: Install dependencies
+      - name: Install dependencies
         run: composer install --prefer-dist
-      - name: Configure Xdebug
-        run: |
-          echo "xdebug.mode=coverage" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini
-      - name: Run phpstan
-        run: vendor/bin/phpstan analyse src
-      - name: Run tests
-        run: phpdbg -qrr vendor/bin/phpunit --coverage-clover=coverage/clover.xml
+      - name: Run PHPStan
+        run: vendor/bin/phpstan analyse
+      - name: Run tests with coverage
+        run: vendor/bin/phpunit --coverage-clover=coverage/clover.xml
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
