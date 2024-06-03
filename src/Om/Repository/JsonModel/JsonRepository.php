@@ -9,7 +9,7 @@ use Talleu\RedisOm\Om\Repository\AbstractObjectRepository;
 
 final class JsonRepository extends AbstractObjectRepository
 {
-    public ?string $format = RedisFormat::JSON;
+    public ?string $format = RedisFormat::JSON->value;
 
     public function find(string $identifier): ?object
     {

@@ -14,7 +14,7 @@ use Talleu\RedisOm\Om\Persister\AbstractPersister;
 use Talleu\RedisOm\Om\Persister\PersisterInterface;
 use Talleu\RedisOm\Om\Repository\RepositoryInterface;
 
-class RedisObjectManager implements RedisObjectManagerInterface
+final class RedisObjectManager implements RedisObjectManagerInterface
 {
     /** @var PersisterInterface[] */
     protected array $persisters = [];
@@ -32,20 +32,23 @@ class RedisObjectManager implements RedisObjectManagerInterface
         $objectMapper = $this->getEntityMapper($object);
         $persister = $this->registerPersister($objectMapper, $object);
 
-        $this->objectsToFlush[] = $persister->persist($objectMapper, $object);
+        $objectToPersist = $persister->persist($objectMapper, $object);
+        $this->objectsToFlush[$objectToPersist['key']] = $objectToPersist;
     }
 
     public function remove(object $object): void
     {
         $objectMapper = $this->getEntityMapper($object);
         $persister = $this->registerPersister($objectMapper, $object);
-        $this->objectsToFlush[] = $persister->delete($objectMapper, $object);
+
+        $objectToRemove = $persister->delete($objectMapper, $object);
+        $this->objectsToFlush[$objectToRemove['key']] = $persister->delete($objectMapper, $object);
     }
 
     public function flush(): void
     {
         foreach ($this->objectsToFlush as $key => $object) {
-            $this->persisters[$object[AbstractPersister::PERSISTER_KEY_NAME]]->{$object['operation']}($object['key'], $object['value']);
+            $this->persisters[$object[AbstractPersister::PERSISTER_KEY_NAME]]->{$object['operation']}($key, $object['value']);
             unset($this->objectsToFlush[$key]);
         }
     }
@@ -128,8 +131,8 @@ class RedisObjectManager implements RedisObjectManagerInterface
 
         $redisEntity->repository->setPrefix($redisEntity->prefix ?? $reflectionClass->getName());
         $redisEntity->repository->setClassName($reflectionClass->getName());
-        $redisEntity->repository->setConverter($redisEntity->converter ?? ($redisEntity->format === RedisFormat::HASH ? new HashObjectConverter() : new JsonObjectConverter()));
-        $redisEntity->repository->setRedisClient($redisEntity->redisClient ?? RedisClient::createClient($this->options));
+        $redisEntity->repository->setConverter($redisEntity->converter ?? ($redisEntity->format === RedisFormat::HASH->value ? new HashObjectConverter() : new JsonObjectConverter()));
+        $redisEntity->repository->setRedisClient($redisEntity->redisClient ?? (new RedisClient($this->options)));
         $redisEntity->repository->setFormat($redisEntity->format);
 
         return $redisEntity;
@@ -138,7 +141,7 @@ class RedisObjectManager implements RedisObjectManagerInterface
     protected function registerPersister(Entity $redisEntity, object $object): PersisterInterface
     {
         if (($persister = $redisEntity->persister) === null) {
-            throw new RedisOmInvalidArgumentException(sprintf('No persister found for %s object.', get_class($object)));
+            throw new RedisOmInvalidArgumentException(sprintf("No persister found for %s object.", get_class($object)));
         }
 
         $persisterClass = get_class($persister);

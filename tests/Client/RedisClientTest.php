@@ -12,8 +12,7 @@ final class RedisClientTest extends TestCase
 {
     public function testCreateClient(): void
     {
-        $redisClient = RedisClient::createClient();
+        $redisClient = (new RedisClient());
         $this->assertInstanceOf(RedisClientInterface::class, $redisClient);
-        $this->assertInstanceOf(\Redis::class, $redisClient);
     }
 }

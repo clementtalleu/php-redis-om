@@ -6,7 +6,7 @@ namespace Talleu\RedisOm\Om\Converters\HashModel;
 
 use Talleu\RedisOm\Om\Converters\AbstractDateTimeImmutableConverter;
 
-class DateTimeImmutableConverter extends AbstractDateTimeImmutableConverter
+final class DateTimeImmutableConverter extends AbstractDateTimeImmutableConverter
 {
     public function revert($data, string $type): \DateTimeImmutable
     {

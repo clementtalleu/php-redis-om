@@ -45,7 +45,7 @@ class GenerateSchema
             /** @var Entity $entity */
             $entity = $attributes[0]->newInstance();
             $entity->redisClient->dropIndex($entity->prefix ?? $fqcn);
-            $entity->redisClient->createIndex($entity->prefix ?? $fqcn, $entity->format ?? RedisFormat::HASH, $properties);
+            $entity->redisClient->createIndex($entity->prefix ?? $fqcn, $entity->format ?? RedisFormat::HASH->value, $properties);
         }
     }
 

@@ -6,7 +6,7 @@ namespace Talleu\RedisOm\Om\Converters\JsonModel;
 
 use Talleu\RedisOm\Om\Converters\AbstractArrayConverter;
 
-class ArrayConverter extends AbstractArrayConverter
+final class ArrayConverter extends AbstractArrayConverter
 {
     /**
      * @param array $data

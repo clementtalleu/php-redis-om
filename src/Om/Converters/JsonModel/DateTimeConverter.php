@@ -6,7 +6,7 @@ namespace Talleu\RedisOm\Om\Converters\JsonModel;
 
 use Talleu\RedisOm\Om\Converters\AbstractDateTimeConverter;
 
-class DateTimeConverter extends AbstractDateTimeConverter
+final class DateTimeConverter extends AbstractDateTimeConverter
 {
     /**
      * @param \DateTime $data

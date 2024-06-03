@@ -17,9 +17,9 @@ class ObjectManagerTest extends RedisAbstractTestCase
     {
         static::emptyRedis();
         static::generateIndex();
-        static::loadRedisFixtures(RedisFormat::HASH);
+        static::loadRedisFixtures(RedisFormat::HASH->value);
 
-        $keys = static::createClient()->keys('*');
+        $keys = $this->createClient()->keys('*');
         $classNameConverted = RedisClient::convertPrefix(DummyHash::class);
         $this->assertTrue(in_array($classNameConverted.':1', $keys));
         $this->assertTrue(in_array($classNameConverted.':2', $keys));
@@ -30,9 +30,9 @@ class ObjectManagerTest extends RedisAbstractTestCase
     {
         static::emptyRedis();
         static::generateIndex();
-        static::loadRedisFixtures(RedisFormat::JSON);
+        static::loadRedisFixtures(RedisFormat::JSON->value);
 
-        $keys = static::createClient()->keys('*');
+        $keys = $this->createClient()->keys('*');
         $classNameConverted = RedisClient::convertPrefix(DummyJson::class);
         $this->assertTrue(in_array($classNameConverted.':1', $keys));
         $this->assertTrue(in_array($classNameConverted.':2', $keys));
@@ -43,7 +43,7 @@ class ObjectManagerTest extends RedisAbstractTestCase
     {
         static::emptyRedis();
         static::generateIndex();
-        $dummies = static::loadRedisFixtures(RedisFormat::JSON);
+        $dummies = static::loadRedisFixtures(RedisFormat::JSON->value);
 
         $objectManager = new RedisObjectManager();
         /** @var DummyJson $object */
@@ -64,7 +64,7 @@ class ObjectManagerTest extends RedisAbstractTestCase
     {
         static::emptyRedis();
         static::generateIndex();
-        $dummies = static::loadRedisFixtures(RedisFormat::HASH);
+        $dummies = static::loadRedisFixtures(RedisFormat::HASH->value);
 
         $objectManager = new RedisObjectManager();
 
@@ -85,7 +85,7 @@ class ObjectManagerTest extends RedisAbstractTestCase
     {
         static::emptyRedis();
         static::generateIndex();
-        $dummies = static::loadRedisFixtures(RedisFormat::HASH);
+        $dummies = static::loadRedisFixtures(RedisFormat::HASH->value);
         /** @var DummyHash $object */
         $object = $dummies[0];
 

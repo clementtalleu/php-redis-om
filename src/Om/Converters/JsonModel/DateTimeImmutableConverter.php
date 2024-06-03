@@ -6,7 +6,7 @@ namespace Talleu\RedisOm\Om\Converters\JsonModel;
 
 use Talleu\RedisOm\Om\Converters\AbstractDateTimeImmutableConverter;
 
-class DateTimeImmutableConverter extends AbstractDateTimeImmutableConverter
+final class DateTimeImmutableConverter extends AbstractDateTimeImmutableConverter
 {
     /**
      * @param \DateTimeImmutable $data

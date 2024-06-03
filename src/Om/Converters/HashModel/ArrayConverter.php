@@ -6,7 +6,7 @@ namespace Talleu\RedisOm\Om\Converters\HashModel;
 
 use Talleu\RedisOm\Om\Converters\AbstractArrayConverter;
 
-class ArrayConverter extends AbstractArrayConverter
+final class ArrayConverter extends AbstractArrayConverter
 {
     /**
      * @param array $data
@@ -22,7 +22,7 @@ class ArrayConverter extends AbstractArrayConverter
             }
 
             if ($converter instanceof HashObjectConverter || $converter instanceof ArrayConverter) {
-                $propertyKey = $parentProperty ? sprintf('%s.%s', $parentProperty, $key) : $key;
+                $propertyKey = $parentProperty ? sprintf("%s.%s", $parentProperty, $key) : $key;
                 $hashData = $converter->convert(data: $value, hashData:  $hashData, parentProperty: $propertyKey);
                 continue;
             }
@@ -30,10 +30,10 @@ class ArrayConverter extends AbstractArrayConverter
             $convertedValue = $converter->convert($value);
 
             if ($parentProperty) {
-                $hashData[sprintf('%s.%s', $parentProperty, $key)] = $convertedValue;
+                $hashData[sprintf("%s.%s", $parentProperty, $key)] = $convertedValue;
 
                 if ('string' !== $valueType) {
-                    $hashData[sprintf('%s.%s.#type', $parentProperty, $key)] = $valueType;
+                    $hashData[sprintf("%s.%s.#type", $parentProperty, $key)] = $valueType;
                 }
 
                 continue;

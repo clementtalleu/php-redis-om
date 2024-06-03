@@ -8,7 +8,7 @@ use Talleu\RedisOm\Om\Converters\AbstractDateTimeConverter;
 use Talleu\RedisOm\Om\Converters\AbstractObjectConverter;
 use Talleu\RedisOm\Om\Mapping\Property;
 
-class JsonObjectConverter extends AbstractObjectConverter
+final class JsonObjectConverter extends AbstractObjectConverter
 {
     /**
      * @param object $data

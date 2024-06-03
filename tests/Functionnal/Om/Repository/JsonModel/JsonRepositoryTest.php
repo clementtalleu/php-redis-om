@@ -15,7 +15,7 @@ final class JsonRepositoryTest extends RedisAbstractTestCase
     {
         static::emptyRedis();
         static::generateIndex();
-        static::loadRedisFixtures(RedisFormat::JSON);
+        static::loadRedisFixtures(RedisFormat::JSON->value);
 
         $objectManager = new RedisObjectManager();
         $repository = $objectManager->getRepository(DummyJson::class);
@@ -31,7 +31,7 @@ final class JsonRepositoryTest extends RedisAbstractTestCase
     {
         static::emptyRedis();
         static::generateIndex();
-        static::loadRedisFixtures(RedisFormat::JSON);
+        static::loadRedisFixtures(RedisFormat::JSON->value);
 
         $objectManager = new RedisObjectManager();
         $repository = $objectManager->getRepository(DummyJson::class);
@@ -49,7 +49,7 @@ final class JsonRepositoryTest extends RedisAbstractTestCase
     {
         static::emptyRedis();
         static::generateIndex();
-        static::loadRedisFixtures(RedisFormat::JSON);
+        static::loadRedisFixtures(RedisFormat::JSON->value);
 
         $objectManager = new RedisObjectManager();
         $repository = $objectManager->getRepository(DummyJson::class);
@@ -79,7 +79,7 @@ final class JsonRepositoryTest extends RedisAbstractTestCase
     {
         static::emptyRedis();
         static::generateIndex();
-        static::loadRedisFixtures(RedisFormat::JSON);
+        static::loadRedisFixtures(RedisFormat::JSON->value);
 
         $objectManager = new RedisObjectManager();
         $repository = $objectManager->getRepository(DummyJson::class);
@@ -98,7 +98,7 @@ final class JsonRepositoryTest extends RedisAbstractTestCase
     {
         static::emptyRedis();
         static::generateIndex();
-        static::loadRedisFixtures(RedisFormat::JSON);
+        static::loadRedisFixtures(RedisFormat::JSON->value);
 
         $objectManager = new RedisObjectManager();
         $repository = $objectManager->getRepository(DummyJson::class);

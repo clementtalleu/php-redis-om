@@ -76,6 +76,6 @@ abstract class AbstractObjectRepository implements RepositoryInterface
 
     public function setFormat(?string $format = null): void
     {
-        $this->format = $format ?? RedisFormat::HASH;
+        $this->format = $format ?? RedisFormat::HASH->value;
     }
 }

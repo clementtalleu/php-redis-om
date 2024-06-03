@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Om;
 
-class RedisFormat
+enum RedisFormat: string
 {
-    public const HASH = 'HASH';
-    public const JSON = 'JSON';
+    case HASH = 'HASH';
+    case JSON = 'JSON';
 }

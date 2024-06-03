@@ -8,7 +8,7 @@ use Talleu\RedisOm\Om\Mapping as RedisOm;
 use Talleu\RedisOm\Om\RedisFormat;
 use Talleu\RedisOm\Tests\Fixtures\AbstractDummy;
 
-#[RedisOm\Entity(format: RedisFormat::JSON)]
+#[RedisOm\Entity(format: RedisFormat::JSON->value)]
 class DummyJson extends AbstractDummy
 {
 

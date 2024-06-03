@@ -31,9 +31,9 @@ final class Entity
         public ?RepositoryInterface  $repository = null,
         public ?RedisClientInterface $redisClient = null,
     ) {
-        $this->persister = $persister ?? ($format === RedisFormat::JSON ? new JsonPersister($options) : new HashPersister($options));
-        $this->converter = $converter ?? ($format === RedisFormat::JSON ? new JsonObjectConverter() : new HashObjectConverter());
-        $this->repository = $repository ?? ($format === RedisFormat::JSON ? new JsonRepository() : new HashRepository());
-        $this->redisClient = $redisClient ?? RedisClient::createClient($options);
+        $this->persister = $persister ?? ($format === RedisFormat::JSON->value ? new JsonPersister($options) : new HashPersister($options));
+        $this->converter = $converter ?? ($format === RedisFormat::JSON->value ? new JsonObjectConverter() : new HashObjectConverter());
+        $this->repository = $repository ?? ($format === RedisFormat::JSON->value ? new JsonRepository() : new HashRepository());
+        $this->redisClient = $redisClient ?? (new RedisClient($options));
     }
 }
