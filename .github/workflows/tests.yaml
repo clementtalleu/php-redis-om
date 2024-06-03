@@ -55,6 +55,8 @@ jobs:
       - name: Configure Xdebug
         run: |
           echo "xdebug.mode=coverage" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini
+      - name: Run phpstan
+        run: vendor/bin/phpstan analyse src
       - name: Run tests
         run: phpdbg -qrr vendor/bin/phpunit --coverage-clover=coverage/clover.xml
       - name: Upload coverage to Codecov
