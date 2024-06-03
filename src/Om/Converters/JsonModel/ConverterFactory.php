@@ -23,7 +23,6 @@ final class ConverterFactory extends AbstractConverterFactory
             new NullConverter(),
             new DateTimeConverter(),
             new DateTimeImmutableConverter(),
-            new EnumConverter(),
         ];
     }
 }

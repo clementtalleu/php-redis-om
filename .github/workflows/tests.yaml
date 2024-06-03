@@ -52,5 +52,7 @@ jobs:
       -
         name: Install dependencies
         run: composer install --prefer-dist
+      - name: Run phpstan
+        run: vendor/bin/phpstan analyse src
       - name: Run tests
         run: vendor/bin/phpunit
