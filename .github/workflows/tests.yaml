@@ -12,16 +12,20 @@ jobs:
     runs-on: ubuntu-latest
     services:
       redis:
-        image: redis
+        image: redis/redis-stack-server
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+        ports:
+          - 6379:6379
     strategy:
       fail-fast: false
       matrix:
         php-versions: ['8.2', '8.3']
+    env:
+      REDIS_HOST: localhost
     steps:
       -
         name: Checkout

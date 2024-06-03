@@ -11,7 +11,6 @@ final class Runner
     public static function generateSchema(string $dirPath): void
     {
         if (!is_dir($dirPath)) {
-
             // Not a valid directory absolute path, try to find the directory in the project root
             $dirPath = __DIR__ . '/../../../../../' . $dirPath;
             if (!is_dir($dirPath)) {

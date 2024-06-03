@@ -15,7 +15,7 @@ class RedisClient implements RedisClientInterface
     public function __construct(?array $options = null)
     {
         $this->redis = new \Redis($options);
-        $this->redis->pconnect($options['host'] ?? 'redis');
+        $this->redis->pconnect($options['host'] ?? $_SERVER['REDIS_HOST'] ?? 'redis');
     }
 
     public function hashMultiSet(string $key, array $data): bool|self
