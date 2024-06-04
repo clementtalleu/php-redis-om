@@ -95,7 +95,7 @@ class ObjectManagerTest extends RedisAbstractTestCase
 
         $retrieveObject = $objectManager->find(DummyHash::class, $object->id);
         $this->assertInstanceOf(DummyHash::class, $retrieveObject);
-        
+
         // Then remove the object
         $objectManager->remove($object);
         $objectManager->flush();

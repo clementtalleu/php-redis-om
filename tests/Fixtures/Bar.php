@@ -15,11 +15,12 @@ class Bar
     #[RedisOm\Property]
     public ?\DateTimeInterface $updatedAt = null;
 
-    public static function create(?int                 $id,
-                                  ?string              $title,
-                                  ?array              $types = null,
-                                  ?\DateTimeInterface $updatedAt = null): self
-    {
+    public static function create(
+        ?int                 $id,
+        ?string              $title,
+        ?array              $types = null,
+        ?\DateTimeInterface $updatedAt = null
+    ): self {
         $bar = new self();
         $bar->id = $id;
         $bar->title = $title;
