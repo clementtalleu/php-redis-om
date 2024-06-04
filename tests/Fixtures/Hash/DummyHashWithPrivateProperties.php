@@ -7,7 +7,7 @@ namespace Talleu\RedisOm\Tests\Fixtures\Hash;
 use Talleu\RedisOm\Om\Mapping as RedisOm;
 use Talleu\RedisOm\Tests\Fixtures\AbstractDummyWithPrivateProperties;
 
-#[RedisOm\Entity(options: ['host' => 'redis'])]
+#[RedisOm\Entity()]
 class DummyHashWithPrivateProperties extends AbstractDummyWithPrivateProperties
 {
 }

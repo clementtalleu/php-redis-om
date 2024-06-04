@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace Talleu\RedisOm\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Talleu\RedisOm\Client\RedisClient;
 use Talleu\RedisOm\Console\Runner;
 use Talleu\RedisOm\Om\RedisObjectManager;
+use Talleu\RedisOm\Tests\Client\Client;
 use Talleu\RedisOm\Tests\Fixtures\FixturesGenerator;
 
 class RedisAbstractTestCase extends TestCase
 {
-    public static function createClient(): RedisClient
+    public static function createClient(): Client
     {
-        return new RedisClient(options: ['host' => 'redis']);
+        return new Client();
     }
 
     public static function emptyRedis(): void

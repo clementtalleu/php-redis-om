@@ -7,27 +7,12 @@ namespace Talleu\RedisOm\Client;
 use Talleu\RedisOm\Exception\RedisClientResponseException;
 use Talleu\RedisOm\Om\Mapping\Property;
 use Talleu\RedisOm\Om\RedisFormat;
-use Talleu\RedisOm\Exception\ConnectionException;
 
 class RedisClient implements RedisClientInterface
 {
-    public function __construct(private ?\Redis $redis = null, ?array $options = [])
+    public function __construct(protected ?\Redis $redis = null)
     {
-        $this->redis = $redis ?? new \Redis();
-        $this->setConnection($options, $options['persistent'] ?? false);
-    }
-
-    protected function setConnection(?array $options = [], ?bool $isPersistent = false): void
-    {
-        try {
-            if ($isPersistent) {
-                $this->redis->pconnect(...$this->getConnectionValues($options));
-            }
-
-            $this->redis->connect(...$this->getConnectionValues($options));
-        } catch (\Exception $e) {
-            throw new ConnectionException($e->getMessage());
-        }
+        $this->redis = $redis ?? new \Redis($_SERVER['REDIS_HOST'] ? ['host' => $_SERVER['REDIS_HOST']] : null);
     }
 
     public function hashMultiSet(string $key, array $data): bool|self
@@ -104,7 +89,6 @@ class RedisClient implements RedisClientInterface
 
             /** @var Property $property */
             $property = $propertyAttribute[0]->newInstance();
-            // @todo, pour l'instant les filtres ne supportent que les champs scalaires
             if (!in_array($reflectionProperty->getType()->getName(), ['int', 'string', 'float', 'bool'])) {
                 continue;
             }
@@ -239,17 +223,5 @@ class RedisClient implements RedisClientInterface
         throw new RedisClientResponseException(
             sprintf("something was wrong when executing %s command, reason: %s", $command, $errorMessage)
         );
-    }
-
-    private function getConnectionValues(?array $options = []): array
-    {
-        return [
-            $options['host'] ?? 'localhost',
-            $options['port'] ?? 6379,
-            $options['timeout'] ?? 0,
-            $options['persistent_id'] ?? null,
-            $options['retry_interval'] ?? 0,
-            $options['read_timeout'] ?? 0,
-        ];
     }
 }

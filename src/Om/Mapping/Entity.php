@@ -22,19 +22,17 @@ use Talleu\RedisOm\Om\Repository\RepositoryInterface;
 final class Entity
 {
     public function __construct(
-        public ?array                $options = [],
         public ?string               $prefix = null,
         public ?int                  $expires = null,
         public ?string               $format = null,
-        public ?bool                 $persistentConnection = null,
         public ?PersisterInterface   $persister = null,
         public ?ConverterInterface   $converter = null,
         public ?RepositoryInterface  $repository = null,
         public ?RedisClientInterface $redisClient = null,
     ) {
-        $this->persister = $persister ?? ($format === RedisFormat::JSON->value ? new JsonPersister($options) : new HashPersister($options));
+        $this->persister = $persister ?? ($format === RedisFormat::JSON->value ? new JsonPersister() : new HashPersister());
         $this->converter = $converter ?? ($format === RedisFormat::JSON->value ? new JsonObjectConverter() : new HashObjectConverter());
         $this->repository = $repository ?? ($format === RedisFormat::JSON->value ? new JsonRepository() : new HashRepository());
-        $this->redisClient = $redisClient ?? (new RedisClient(options: $options));
+        $this->redisClient = $redisClient ?? (new RedisClient());
     }
 }
