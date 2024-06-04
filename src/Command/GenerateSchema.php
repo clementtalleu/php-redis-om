@@ -49,7 +49,7 @@ class GenerateSchema
         }
     }
 
-    private static function getFQCNFromFile(string $filePath): ?string
+    protected static function getFQCNFromFile(string $filePath): ?string
     {
         $tokens = token_get_all(file_get_contents($filePath));
         $count = count($tokens);

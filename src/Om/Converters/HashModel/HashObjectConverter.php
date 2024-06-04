@@ -26,7 +26,9 @@ final class HashObjectConverter extends AbstractObjectConverter
 
             $value = $this->extractPropertyValue($propertyAttribute, $property, $data);
 
-            $valueType = $property->getType() ? $property->getType()->getName() : (is_object($value) ? get_class($value) : gettype($value));
+            /** @var \ReflectionNamedType|null $propertyType */
+            $propertyType = $property->getType();
+            $valueType = $propertyType ? $propertyType->getName() : (is_object($value) ? get_class($value) : gettype($value));
             $converter = ConverterFactory::getConverter($valueType, $value);
             if (!$converter) {
                 continue;
@@ -68,7 +70,9 @@ final class HashObjectConverter extends AbstractObjectConverter
             if (is_array($value) && array_key_exists('#type', $value)) {
                 $valueType = $value['#type'];
             } elseif (($reflectionProperty = new \ReflectionProperty($type, $key)) && $reflectionProperty->getType()) {
-                $valueType = $reflectionProperty->getType()->getName();
+                /** @var \ReflectionNamedType|null $propertyType */
+                $propertyType = $reflectionProperty->getType();
+                $valueType = $propertyType->getName();
             } else {
                 $valueType = is_object($value) ? get_class($value) : gettype($value);
             }

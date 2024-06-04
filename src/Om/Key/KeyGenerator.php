@@ -20,7 +20,9 @@ class KeyGenerator
         $identifierValue = $object->{$identifierProperty->getName()};
         if (!$identifierValue) {
             $identifierValue = uniqid();
-            if ($identifierProperty->getType()?->getName() === 'int') {
+            /** @var \ReflectionNamedType|null $propertyType */
+            $propertyType = $identifierProperty->getType();
+            if ($propertyType?->getName() === 'int') {
                 $identifierValue = (int) hexdec($identifierValue);
             }
             $object->{$identifierProperty->getName()} = $identifierValue;

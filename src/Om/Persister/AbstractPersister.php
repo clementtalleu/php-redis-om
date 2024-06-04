@@ -20,9 +20,6 @@ abstract class AbstractPersister implements PersisterInterface
         $this->keyGenerator = $keyGenerator ?? new KeyGenerator();
     }
 
-    /**
-     * @return array<string, ObjectToPersist>
-     */
     public function persist(Entity $objectMapper, $object): ObjectToPersist
     {
         $key = $this->keyGenerator->generateKey($objectMapper, $object);
@@ -35,9 +32,6 @@ abstract class AbstractPersister implements PersisterInterface
         );
     }
 
-    /**
-     * @return array<string, string>
-     */
     public function delete(Entity $objectMapper, $object): ObjectToPersist
     {
         $identifier = $this->keyGenerator->getIdentifier(new \ReflectionClass($object));
