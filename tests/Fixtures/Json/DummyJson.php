@@ -11,5 +11,4 @@ use Talleu\RedisOm\Tests\Fixtures\AbstractDummy;
 #[RedisOm\Entity(format: RedisFormat::JSON->value, )]
 class DummyJson extends AbstractDummy
 {
-
 }

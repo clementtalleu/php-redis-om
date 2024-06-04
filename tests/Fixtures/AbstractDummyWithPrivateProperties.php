@@ -6,7 +6,6 @@ namespace Talleu\RedisOm\Tests\Fixtures;
 
 use Talleu\RedisOm\Om\Mapping as RedisOm;
 
-
 class AbstractDummyWithPrivateProperties
 {
     #[RedisOm\Id]
@@ -43,8 +42,7 @@ class AbstractDummyWithPrivateProperties
         ?int                $id,
         ?string             $name,
         ?int                $age,
-    ): self
-    {
+    ): self {
         $dummy = new static();
         $dummy->id = $id;
         $dummy->setAge($age);

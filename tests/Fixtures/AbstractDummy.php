@@ -57,8 +57,7 @@ abstract class AbstractDummy
         array              $datesArray = [],
         bool               $enabled = true,
         array              $complexData = [],
-    ): self
-    {
+    ): self {
         $dummy = new static();
         $dummy->id = $id;
         $dummy->age = $age;
