@@ -14,7 +14,7 @@ class RedisAbstractTestCase extends TestCase
 {
     public static function createClient(): RedisClient
     {
-        return (new RedisClient());
+        return new RedisClient(options: ['host' => 'redis']);
     }
 
     public static function emptyRedis(): void

@@ -8,7 +8,7 @@ use Talleu\RedisOm\Om\Mapping as RedisOm;
 use Talleu\RedisOm\Om\RedisFormat;
 use Talleu\RedisOm\Tests\Fixtures\AbstractArray;
 
-#[RedisOm\Entity(format: RedisFormat::JSON->value)]
+#[RedisOm\Entity(format: RedisFormat::JSON->value, options: ['host' => 'redis'])]
 class ArrayJson extends AbstractArray
 {
 }

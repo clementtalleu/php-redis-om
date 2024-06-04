@@ -7,15 +7,27 @@ namespace Talleu\RedisOm\Client;
 use Talleu\RedisOm\Exception\RedisClientResponseException;
 use Talleu\RedisOm\Om\Mapping\Property;
 use Talleu\RedisOm\Om\RedisFormat;
+use Talleu\RedisOm\Exception\ConnectionException;
 
 class RedisClient implements RedisClientInterface
 {
-    private \Redis $redis;
-
-    public function __construct(?array $options = null)
+    public function __construct(private ?\Redis $redis = null, ?array $options = [])
     {
-        $this->redis = new \Redis($options);
-        $this->redis->pconnect($options['host'] ?? $_SERVER['REDIS_HOST'] ?? 'redis');
+        $this->redis = $redis ?? new \Redis();
+        $this->setConnection($options, $options['persistent'] ?? false);
+    }
+
+    protected function setConnection(?array $options = [], ?bool $isPersistent = false): void
+    {
+        try {
+            if ($isPersistent) {
+                $this->redis->pconnect(...$this->getConnectionValues($options));
+            }
+
+            $this->redis->connect(...$this->getConnectionValues($options));
+        } catch (\Exception $e) {
+            throw new ConnectionException($e->getMessage());
+        }
     }
 
     public function hashMultiSet(string $key, array $data): bool|self
@@ -227,5 +239,17 @@ class RedisClient implements RedisClientInterface
         throw new RedisClientResponseException(
             sprintf("something was wrong when executing %s command, reason: %s", $command, $errorMessage)
         );
+    }
+
+    private function getConnectionValues(?array $options = []): array
+    {
+        return [
+            $options['host'] ?? '127.0.0.1',
+            $options['port'] ?? 6379,
+            $options['timeout'] ?? 0,
+            $options['persistent_id'] ?? null,
+            $options['retry_interval'] ?? 0,
+            $options['read_timeout'] ?? 0,
+        ];
     }
 }

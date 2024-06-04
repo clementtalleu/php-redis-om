@@ -10,7 +10,6 @@ use Talleu\RedisOm\Om\Converters\HashModel\HashObjectConverter;
 use Talleu\RedisOm\Om\Converters\JsonModel\JsonObjectConverter;
 use Talleu\RedisOm\Om\Key\KeyGenerator;
 use Talleu\RedisOm\Om\Mapping\Entity;
-use Talleu\RedisOm\Om\Persister\AbstractPersister;
 use Talleu\RedisOm\Om\Persister\PersisterInterface;
 use Talleu\RedisOm\Om\Persister\PersisterOperations;
 use Talleu\RedisOm\Om\Repository\RepositoryInterface;
@@ -133,7 +132,7 @@ final class RedisObjectManager implements RedisObjectManagerInterface
         $redisEntity->repository->setPrefix($redisEntity->prefix ?? $reflectionClass->getName());
         $redisEntity->repository->setClassName($reflectionClass->getName());
         $redisEntity->repository->setConverter($redisEntity->converter ?? ($redisEntity->format === RedisFormat::HASH->value ? new HashObjectConverter() : new JsonObjectConverter()));
-        $redisEntity->repository->setRedisClient($redisEntity->redisClient ?? (new RedisClient($this->options)));
+        $redisEntity->repository->setRedisClient($redisEntity->redisClient ?? (new RedisClient()));
         $redisEntity->repository->setFormat($redisEntity->format);
 
         return $redisEntity;
