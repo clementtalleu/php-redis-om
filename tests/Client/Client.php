@@ -11,6 +11,6 @@ class Client extends RedisClient
     public function __construct()
     {
         parent::__construct();
-        $this->redis->pconnect('redis');
+        $this->redis->pconnect($_SERVER['REDIS_HOST']);
     }
 }

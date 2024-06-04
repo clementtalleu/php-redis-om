@@ -8,9 +8,9 @@ use Talleu\RedisOm\Om\RedisFormat;
 
 interface RedisClientInterface
 {
-    public function hashMultiSet(string $key, array $data): bool|self;
-    public function hashGetAll(string $key): array;
-    public function remove(string $key): false|int|self;
+    public function hMSet(string $key, array $data): void;
+    public function hGetAll(string $key): array;
+    public function del(string $key): void;
     public function jsonGet(string $key): ?string;
     public function jsonSet(string $key, ?string $path = '$', ?string $value = '{}'): ?bool;
     public function jsonDel(string $key, ?string $path = '$'): ?bool;
