@@ -244,7 +244,7 @@ class RedisClient implements RedisClientInterface
     private function getConnectionValues(?array $options = []): array
     {
         return [
-            $options['host'] ?? '127.0.0.1',
+            $options['host'] ?? 'localhost',
             $options['port'] ?? 6379,
             $options['timeout'] ?? 0,
             $options['persistent_id'] ?? null,
