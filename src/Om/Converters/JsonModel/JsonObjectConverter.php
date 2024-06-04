@@ -28,7 +28,10 @@ final class JsonObjectConverter extends AbstractObjectConverter
             }
 
             $value = $this->extractPropertyValue($propertyAttribute, $property, $data);
-            $valueType = $property->getType() ? $property->getType()->getName() : (is_object($value) ? get_class($value) : gettype($value));
+
+            /** @var \ReflectionNamedType|null $propertyType */
+            $propertyType = $property->getType();
+            $valueType = $propertyType ? $propertyType->getName() : (is_object($value) ? get_class($value) : gettype($value));
             $converter = ConverterFactory::getConverter($valueType, $value);
             if (!$converter) {
                 continue;
@@ -57,10 +60,14 @@ final class JsonObjectConverter extends AbstractObjectConverter
             if (!property_exists($object, $key)) {
                 continue;
             }
+
+            $reflectionProperty = new \ReflectionProperty($type, $key);
             if (is_array($value) && array_key_exists('#type', $value)) {
                 $valueType = $value['#type'];
-            } elseif (($reflectionProperty = new \ReflectionProperty($type, $key)) && $reflectionProperty->getType()) {
-                $valueType = $reflectionProperty->getType()->getName();
+            } elseif ($reflectionProperty->getType()) {
+                /** @var \ReflectionNamedType $propertyType */
+                $propertyType = $reflectionProperty->getType();
+                $valueType = $propertyType->getName();
             } else {
                 $valueType = is_object($value) ? get_class($value) : gettype($value);
             }
@@ -71,7 +78,7 @@ final class JsonObjectConverter extends AbstractObjectConverter
             }
 
             $revertedValue = $reverter->revert($value, $valueType);
-            $this->assignValue($object, $key, $revertedValue, $type, $reflectionProperty ?? null);
+            $this->assignValue($object, $key, $revertedValue, $type, $reflectionProperty);
         }
 
         return $object;

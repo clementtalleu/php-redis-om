@@ -98,7 +98,10 @@ class RedisClient implements RedisClientInterface
 
             /** @var Property $property */
             $property = $propertyAttribute[0]->newInstance();
-            if (!in_array($reflectionProperty->getType()->getName(), ['int', 'string', 'float', 'bool'])) {
+
+            /** @var \ReflectionNamedType|null $propertyType */
+            $propertyType = $reflectionProperty->getType();
+            if (!in_array($propertyType?->getName(), ['int', 'string', 'float', 'bool'])) {
                 continue;
             }
 
@@ -156,9 +159,12 @@ class RedisClient implements RedisClientInterface
         return $keys;
     }
 
-    public function flushAll(): bool
+    public function flushAll(): void
     {
-        return $this->redis->flushAll();
+        $result = $this->redis->flushAll();
+        if (!$result) {
+            $this->handleError(__METHOD__, $this->redis->getLastError());
+        }
     }
 
     public function keys(string $pattern): array
@@ -188,17 +194,21 @@ class RedisClient implements RedisClientInterface
         }
 
         try {
-            $rawResult = call_user_func_array([$this->redis, 'rawCommand'], $arguments);
+            $result = call_user_func_array([$this->redis, 'rawCommand'], $arguments);
         } catch (\RedisException $e) {
             $this->handleError(RedisCommands::SEARCH->value, $e->getMessage());
         }
 
-        if ($rawResult[0] === 0) {
+        if (isset($result) && $result === false) {
+            $this->handleError(RedisCommands::SEARCH->value, $this->redis->getLastError());
+        }
+
+        if ($result[0] === 0) {
             return [];
         }
 
         $entities = [];
-        foreach ($rawResult as $key => $redisData) {
+        foreach ($result as $key => $redisData) {
             if ($key > 0 && $key % 2 == 0) {
 
                 if ($format === RedisFormat::JSON->value) {

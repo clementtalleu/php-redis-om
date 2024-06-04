@@ -11,7 +11,7 @@ final class ArrayConverter extends AbstractArrayConverter
     /**
      * @param array $data
      */
-    public function convert($data, ?array $propertiesMapped = [], ?array $hashData = [], ?string $parentProperty = null): array
+    public function convert($data, ?array $hashData = [], ?string $parentProperty = null): array
     {
         foreach ($data as $key => $value) {
             $valueType = is_object($value) ? get_class($value) : gettype($value);

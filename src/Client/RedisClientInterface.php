@@ -19,4 +19,5 @@ interface RedisClientInterface
     public function count(string $prefixKey, array $criterias = []): int;
     public function search(string $prefixKey, array $search, array $orderBy, ?string $format = RedisFormat::HASH->value, ?int $numberOfResults = null): array;
     public function scanKeys(string $prefixKey): array;
+    public function flushAll(): void;
 }

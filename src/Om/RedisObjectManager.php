@@ -70,7 +70,7 @@ final class RedisObjectManager implements RedisObjectManagerInterface
     public function detach(object $object, ?string $keyObject = null): void
     {
         foreach ($this->objectsToFlush as $key => $objectToFlush) {
-            if ($objectToFlush['key'] === $keyObject) {
+            if ($objectToFlush->redisKey === $keyObject) {
                 unset($this->objectsToFlush[$key]);
             }
         }
@@ -111,7 +111,7 @@ final class RedisObjectManager implements RedisObjectManagerInterface
         $objectMapper = $this->getEntityMapper($object);
         $identifierProperty = $this->keyGenerator->getIdentifier(new \ReflectionClass($object));
         foreach ($this->objectsToFlush as $objectToFlush) {
-            if ($objectToFlush['key'] === $objectMapper->prefix.':'.$object->{$identifierProperty->getName()}) {
+            if ($objectToFlush->redisKey === $objectMapper->prefix.':'.$object->{$identifierProperty->getName()}) {
                 return true;
             }
         }
