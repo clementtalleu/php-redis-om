@@ -10,12 +10,9 @@ use Talleu\RedisOm\Om\RedisFormat;
 
 class RedisClient implements RedisClientInterface
 {
-    private \Redis $redis;
-
-    public function __construct(?array $options = null)
+    public function __construct(protected ?\Redis $redis = null)
     {
-        $this->redis = new \Redis($options);
-        $this->redis->pconnect($options['host'] ?? $_SERVER['REDIS_HOST'] ?? 'redis');
+        $this->redis = $redis ?? new \Redis($_SERVER['REDIS_HOST'] ? ['host' => $_SERVER['REDIS_HOST']] : null);
     }
 
     public function hashMultiSet(string $key, array $data): bool|self
@@ -92,7 +89,6 @@ class RedisClient implements RedisClientInterface
 
             /** @var Property $property */
             $property = $propertyAttribute[0]->newInstance();
-            // @todo, pour l'instant les filtres ne supportent que les champs scalaires
             if (!in_array($reflectionProperty->getType()->getName(), ['int', 'string', 'float', 'bool'])) {
                 continue;
             }

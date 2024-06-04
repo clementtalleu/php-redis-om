@@ -14,7 +14,7 @@ interface PersisterInterface
     /**
      * Request object persistence.
      */
-    public function persist(Entity $objectMapper, $object): array;
+    public function persist(Entity $objectMapper, $object): ObjectToPersist;
 
     /**
      * Persists the object to redis.
@@ -24,7 +24,7 @@ interface PersisterInterface
     /**
      * Request object deletion.
      */
-    public function delete(Entity $objectMapper, $object): array;
+    public function delete(Entity $objectMapper, $object): ObjectToPersist;
 
     /**
      * Deletes an object from redis.
