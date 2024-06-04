@@ -13,36 +13,32 @@ use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
 class ArrayConsistencyTest extends RedisAbstractTestCase
 {
-    // public function testArrayHash(): void
-    // {
-    //     self::emptyRedis();
-    //     self::generateIndex();
-    //
-    //     $arrayHash = new ArrayHash();
-    //     $arrayHash->id = 1;
-    //     $arrayHash->data = [
-    //         'createdAt' => new \DateTime('2021-01-01'),
-    //         'foo' => [
-    //             'bar' => 'baz',
-    //             0 => 'test',
-    //         ],
-    //         'types' => [
-    //             'key' => 'value',
-    //             'bar1' => $this->createBar(1, 'Title'),
-    //             'bar2' => $this->createBar(2, 'Title2'),
-    //         ]
-    //     ];
-    //
-    //     $objectManager = new RedisObjectManager();
-    //     $objectManager->persist($arrayHash);
-    //     $objectManager->flush();
-    //
-    //     dump($arrayHash);
-    //     dump($objectManager->find(ArrayHash::class, 1));
-    //     die;
-    //
-    //     $this->assertEquals($arrayHash, $objectManager->find(ArrayHash::class, 1));
-    // }
+    public function testArrayHash(): void
+    {
+        self::emptyRedis();
+        self::generateIndex();
+
+        $arrayHash = new ArrayHash();
+        $arrayHash->id = 1;
+        $arrayHash->data = [
+            'createdAt' => new \DateTime('2021-01-01'),
+            'foo' => [
+                'bar' => 'baz',
+                0 => 'test',
+            ],
+            'types' => [
+                'key' => 'value',
+                'bar1' => $this->createBar(1, 'Title'),
+                'bar2' => $this->createBar(2, 'Title2'),
+            ]
+        ];
+
+        $objectManager = new RedisObjectManager();
+        $objectManager->persist($arrayHash);
+        $objectManager->flush();
+
+        $this->assertEquals($arrayHash, $objectManager->find(ArrayHash::class, 1));
+    }
 
     public function testArrayJson(): void
     {
