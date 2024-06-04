@@ -52,6 +52,8 @@ jobs:
       -
         name: Install dependencies
         run: composer install --prefer-dist
+      - name: Test cs-fixer
+        run: vendor/bin/php-cs-fixer fix src --dry-run --diff --no-ansi
       - name: Run phpstan
         run: vendor/bin/phpstan analyse src
       - name: Run tests

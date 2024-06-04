@@ -13,7 +13,7 @@ final class HashRepository extends AbstractObjectRepository
 
     public function find(string $identifier): ?object
     {
-        $data = $this->redisClient->hashGetAll("$this->prefix:$identifier");
+        $data = $this->redisClient->hGetAll("$this->prefix:$identifier");
         if (!$data) {
             return null;
         }

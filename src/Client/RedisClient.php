@@ -15,31 +15,40 @@ class RedisClient implements RedisClientInterface
         $this->redis = $redis ?? new \Redis($_SERVER['REDIS_HOST'] ? ['host' => $_SERVER['REDIS_HOST']] : null);
     }
 
-    public function hashMultiSet(string $key, array $data): bool|self
+    public function hMSet(string $key, array $data): void
     {
-        return $this->redis->hMSet(RedisClient::convertPrefix($key), $data);
+        $result = $this->redis->hMSet(RedisClient::convertPrefix($key), $data);
+
+        if (!$result) {
+            $this->handleError(__METHOD__, $this->redis->getLastError());
+        }
     }
 
-    public function hashGetAll(string $key): array
+    public function hGetAll(string $key): array
     {
-        return $this->redis->hGetAll(RedisClient::convertPrefix($key));
+        $result = $this->redis->hGetAll(RedisClient::convertPrefix($key));
+
+        if ($result === false) {
+            $this->handleError(__METHOD__, $this->redis->getLastError());
+        }
+
+        return $result;
     }
 
-    public function remove(string $key): false|int|self
+    public function del(string $key): void
     {
-        return $this->redis->del(RedisClient::convertPrefix($key));
+        $result = $this->redis->del(RedisClient::convertPrefix($key));
+        if (!$result) {
+            $this->handleError(__METHOD__, $this->redis->getLastError());
+        }
     }
 
     public function jsonGet(string $key): ?string
     {
         $result = $this->redis->rawCommand(RedisCommands::JSON_GET->value, static::convertPrefix($key));
 
-        if (!$result) {
-            if (($error = $this->redis->getLastError()) === null) {
-                return null;
-            }
-
-            $this->handleError(RedisCommands::JSON_GET->value, $error);
+        if ($result === false) {
+            $this->handleError(RedisCommands::JSON_GET->value, $this->redis->getLastError());
         }
 
         return $result;

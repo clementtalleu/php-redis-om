@@ -21,7 +21,7 @@ abstract class AbstractPersister implements PersisterInterface
     }
 
     /**
-     * @return array<string, string>
+     * @return array<string, ObjectToPersist>
      */
     public function persist(Entity $objectMapper, $object): ObjectToPersist
     {
