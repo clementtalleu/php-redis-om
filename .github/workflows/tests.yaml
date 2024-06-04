@@ -24,6 +24,8 @@ jobs:
       fail-fast: false
       matrix:
         php-versions: ['8.2', '8.3']
+    env:
+      REDIS_HOST: localhost
     steps:
       -
         name: Checkout
