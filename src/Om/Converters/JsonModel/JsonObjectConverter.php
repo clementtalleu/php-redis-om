@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Om\Converters\JsonModel;
 
-use Talleu\RedisOm\Exception\BadPropertyConfigurationException;
 use Talleu\RedisOm\Om\Converters\AbstractDateTimeConverter;
 use Talleu\RedisOm\Om\Converters\AbstractObjectConverter;
 use Talleu\RedisOm\Om\Mapping\Property;
@@ -32,13 +31,14 @@ final class JsonObjectConverter extends AbstractObjectConverter
             /** @var \ReflectionNamedType|null $propertyType */
             $propertyType = $property->getType();
             $valueType = $propertyType ? $propertyType->getName() : (is_object($value) ? get_class($value) : gettype($value));
+
             $converter = ConverterFactory::getConverter($valueType, $value);
             if (!$converter) {
                 continue;
             }
 
             $convertedValue = $converter->convert($value);
-            if ($converter instanceof JsonObjectConverter || $converter instanceof ArrayConverter) {
+            if ($converter instanceof JsonObjectConverter || $converter instanceof ArrayConverter || $converter instanceof StandardClassConverter) {
                 $convertedData[$property->getName()]['#type'] = $valueType;
             }
 
@@ -54,6 +54,7 @@ final class JsonObjectConverter extends AbstractObjectConverter
      */
     public function revert($data, string $type): mixed
     {
+
         $object = new $type();
         foreach ($data as $key => $value) {
 
@@ -73,6 +74,7 @@ final class JsonObjectConverter extends AbstractObjectConverter
             }
 
             $reverter = ConverterFactory::getReverter($valueType, $value);
+
             if (!$reverter) {
                 continue;
             }
@@ -86,6 +88,6 @@ final class JsonObjectConverter extends AbstractObjectConverter
 
     public function supportsReversion(string $type, mixed $value): bool
     {
-        return $value !== null && class_exists($type) && !in_array($type, AbstractDateTimeConverter::DATETYPES_NAMES);
+        return $value !== null && class_exists($type) && $type !== 'stdClass' && !in_array($type, AbstractDateTimeConverter::DATETYPES_NAMES);
     }
 }

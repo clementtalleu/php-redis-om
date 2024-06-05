@@ -27,7 +27,7 @@ class RedisAbstractTestCase extends TestCase
         Runner::generateSchema('tests');
     }
 
-    public static function loadRedisFixtures(string $format): array
+    public static function loadRedisFixtures(string $format, ?bool $flush = true): array
     {
         $objectManager = new RedisObjectManager();
         $dummies = FixturesGenerator::generateDummies($format);
@@ -35,7 +35,10 @@ class RedisAbstractTestCase extends TestCase
             $objectManager->persist($dummy);
         }
 
-        $objectManager->flush();
+        if ($flush) {
+            $objectManager->flush();
+        }
+
         return $dummies;
     }
 }

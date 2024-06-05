@@ -6,7 +6,6 @@ namespace Talleu\RedisOm\Om\Converters\HashModel;
 
 use Talleu\RedisOm\Om\Converters\AbstractConverterFactory;
 use Talleu\RedisOm\Om\Converters\ConverterInterface;
-use Talleu\RedisOm\Om\Converters\EnumConverter;
 use Talleu\RedisOm\Om\Converters\ScalarConverter;
 
 final class ConverterFactory extends AbstractConverterFactory
@@ -19,6 +18,7 @@ final class ConverterFactory extends AbstractConverterFactory
         return [
             new HashObjectConverter(),
             new ArrayConverter(),
+            new StandardClassConverter(),
             new ScalarConverter(),
             new NullConverter(),
             new DateTimeConverter(),

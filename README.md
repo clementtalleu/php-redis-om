@@ -12,13 +12,16 @@ with Redis.
 - Doctrine-like methods and architecture
 - Easy integration with existing PHP applications
 - High performance and scalability with Redis
+- Support for Redis JSON module
+- Automatic schema generation
+- Search and query capabilities
 
 ## Requirements
 
 - PHP 8.2 or higher
 - Redis 4.0 or higher
-- php-redis extension
-- Redis JSON and Redisearch modules (optional)
+- php-redis extension (or your favorite Redis client)
+- Redis JSON module (optional)
 - Composer
 
 ## Installation
@@ -104,7 +107,9 @@ docker compose up -d
 
 ### Running tests
 
-
 ```console
 docker compose exec php vendor/bin/phpunit tests
 ```
+
+
+## Advanced mapping configuration

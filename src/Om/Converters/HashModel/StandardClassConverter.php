@@ -4,16 +4,14 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Om\Converters\HashModel;
 
-use Talleu\RedisOm\Om\Converters\AbstractArrayConverter;
+use Talleu\RedisOm\Om\Converters\AbstractStandardClassConverter;
 
-final class ArrayConverter extends AbstractArrayConverter
+final class StandardClassConverter extends AbstractStandardClassConverter
 {
-    /**
-     * @param array $data
-     */
     public function convert($data, ?array $hashData = [], ?string $parentProperty = null, ?string $parentPropertyType = null): array
     {
         foreach ($data as $key => $value) {
+
             $valueType = is_object($value) ? get_class($value) : gettype($value);
             $converter = ConverterFactory::getConverter($valueType, $value);
 
@@ -46,9 +44,9 @@ final class ArrayConverter extends AbstractArrayConverter
         return $hashData;
     }
 
-    public function revert($data, string $type): mixed
+    public function revert($data, string $type): \stdClass
     {
-        $revertedArray = [];
+        $revertedStdClass = new \stdClass();
         foreach ($data as $key => $value) {
 
             if (is_array($value) && array_key_exists('#type', $value)) {
@@ -62,9 +60,9 @@ final class ArrayConverter extends AbstractArrayConverter
                 continue;
             }
 
-            $revertedArray[$key] = $reverter->revert($value, $valueType);
+            $revertedStdClass->{$key} = $reverter->revert($value, $valueType);
         }
 
-        return $revertedArray;
+        return $revertedStdClass;
     }
 }

@@ -15,17 +15,17 @@ abstract class AbstractArrayConverter implements ConverterInterface
 
     public function supportsConversion(string $type, mixed $data): bool
     {
-        return $type === 'array' && $data !== null;
+        return ($type === 'array' || $type === 'iterable') && $data !== null;
     }
 
     abstract public function revert($data, string $type): mixed;
 
     public function supportsReversion(string $type, mixed $value): bool
     {
-        if (is_array($value) && array_key_exists('date', $value) &&  array_key_exists('timezone', $value)) {
-            return false;
-        }
+        // if (is_array($value) && array_key_exists('date', $value) &&  array_key_exists('timezone', $value)) {
+        //     return false;
+        // }
 
-        return $type === 'array';
+        return $type === 'array' || $type === 'iterable' && $value !== null;
     }
 }

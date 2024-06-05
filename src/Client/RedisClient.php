@@ -150,7 +150,7 @@ class RedisClient implements RedisClientInterface
         $keys = [];
         $iterator = null;
         while($iterator !== 0) {
-            $scans = $this->redis->scan($iterator, sprintf('%s*', static::convertPrefix($prefixKey)));
+            $scans = $this->redis->scan($iterator, sprintf("%s*", static::convertPrefix($prefixKey)));
             foreach($scans as $scan) {
                 $keys[] = $scan;
             }
@@ -212,7 +212,15 @@ class RedisClient implements RedisClientInterface
             if ($key > 0 && $key % 2 == 0) {
 
                 if ($format === RedisFormat::JSON->value) {
-                    $data = json_decode($redisData[1], true);
+                    foreach ($redisData as $data) {
+                        if (!str_starts_with($data, '{')) {
+                            continue;
+                        }
+                        $entities[] = json_decode($data, true);
+                        break;
+                    }
+
+                    continue;
                 } else {
                     $data = [];
                     for ($i = 0; $i < count($redisData); $i += 2) {
@@ -223,6 +231,7 @@ class RedisClient implements RedisClientInterface
                 }
 
                 $entities[] = $data;
+
                 if (count($entities) === $numberOfResults) {
                     return $entities;
                 }

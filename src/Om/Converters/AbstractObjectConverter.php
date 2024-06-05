@@ -9,11 +9,11 @@ use Talleu\RedisOm\Om\Mapping\Property;
 
 abstract class AbstractObjectConverter implements ConverterInterface
 {
-    abstract public function convert($data): \stdClass|array;
+    abstract public function convert($data): array;
 
     public function supportsConversion(string $type, mixed $data): bool
     {
-        return $data !== null && class_exists($type) && !in_array($type, AbstractDateTimeConverter::DATETYPES_NAMES);
+        return $data !== null && class_exists($type) && $type !== \stdClass::class && !in_array($type, AbstractDateTimeConverter::DATETYPES_NAMES);
     }
 
     abstract public function revert($data, string $type): mixed;

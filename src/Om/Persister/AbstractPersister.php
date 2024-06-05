@@ -35,7 +35,7 @@ abstract class AbstractPersister implements PersisterInterface
     public function delete(Entity $objectMapper, $object): ObjectToPersist
     {
         $identifier = $this->keyGenerator->getIdentifier(new \ReflectionClass($object));
-        $key = sprintf('%s:%s', $objectMapper->prefix ?: get_class($object), $object->{$identifier->getName()});
+        $key = sprintf("%s:%s", $objectMapper->prefix ?: get_class($object), $object->{$identifier->getName()});
 
         return new ObjectToPersist(
             persisterClass: get_class($objectMapper->persister),
