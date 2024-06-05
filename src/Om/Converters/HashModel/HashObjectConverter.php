@@ -35,7 +35,7 @@ final class HashObjectConverter extends AbstractObjectConverter
                 continue;
             }
 
-            if ($converter instanceof HashObjectConverter || $converter instanceof ArrayConverter) {
+            if ($converter instanceof HashObjectConverter || $converter instanceof ArrayConverter|| $converter instanceof StandardClassConverter) {
                 $propertyName = $parentProperty ? sprintf("%s.%s", $parentProperty, $property->getName()) : $property->getName();
                 $hashData = $converter->convert(data: $value, hashData:  $hashData, parentProperty: $propertyName, parentPropertyType: $valueType);
                 continue;
@@ -83,7 +83,6 @@ final class HashObjectConverter extends AbstractObjectConverter
             }
 
             $reverter = ConverterFactory::getReverter($valueType, $value);
-
             if (!$reverter) {
                 continue;
             }
@@ -121,6 +120,6 @@ final class HashObjectConverter extends AbstractObjectConverter
 
     public function supportsReversion(string $type, mixed $value): bool
     {
-        return class_exists($type) && $value !== 'null' && !in_array($type, AbstractDateTimeConverter::DATETYPES_NAMES);
+        return class_exists($type) && $type !== \stdClass::class && $value !== 'null' && !in_array($type, AbstractDateTimeConverter::DATETYPES_NAMES);
     }
 }

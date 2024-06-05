@@ -6,7 +6,6 @@ namespace Talleu\RedisOm\Om\Converters\JsonModel;
 
 use Talleu\RedisOm\Om\Converters\AbstractConverterFactory;
 use Talleu\RedisOm\Om\Converters\ConverterInterface;
-use Talleu\RedisOm\Om\Converters\EnumConverter;
 use Talleu\RedisOm\Om\Converters\ScalarConverter;
 
 final class ConverterFactory extends AbstractConverterFactory
@@ -20,6 +19,7 @@ final class ConverterFactory extends AbstractConverterFactory
             new JsonObjectConverter(),
             new ArrayConverter(),
             new ScalarConverter(),
+            new StandardClassConverter(),
             new NullConverter(),
             new DateTimeConverter(),
             new DateTimeImmutableConverter(),

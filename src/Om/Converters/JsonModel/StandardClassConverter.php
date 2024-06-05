@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Om\Converters\JsonModel;
 
-use Talleu\RedisOm\Om\Converters\AbstractArrayConverter;
+use Talleu\RedisOm\Om\Converters\AbstractStandardClassConverter;
+use Talleu\RedisOm\Om\Converters\HashModel\ArrayConverter;
+use Talleu\RedisOm\Om\Converters\HashModel\ConverterFactory;
+use Talleu\RedisOm\Om\Converters\HashModel\HashObjectConverter;
 
-final class ArrayConverter extends AbstractArrayConverter
+final class StandardClassConverter extends AbstractStandardClassConverter
 {
-    /**
-     * @param array $data
-     */
-    public function convert($data): array
+    public function convert($data, ?array $hashData = [], ?string $parentProperty = null, ?string $parentPropertyType = null): array
     {
         $convertedData = [];
         foreach ($data as $key => $value) {
@@ -26,7 +26,7 @@ final class ArrayConverter extends AbstractArrayConverter
             $convertedValue = $converter->convert($value);
             $convertedData[$key] = $convertedValue;
 
-            if ($converter instanceof JsonObjectConverter || $converter instanceof ArrayConverter || $converter instanceof StandardClassConverter) {
+            if ($converter instanceof JsonObjectConverter || $converter instanceof \Talleu\RedisOm\Om\Converters\JsonModel\ArrayConverter) {
                 $convertedData[$key]['#type'] = $valueType;
             }
         }
@@ -34,9 +34,9 @@ final class ArrayConverter extends AbstractArrayConverter
         return $convertedData;
     }
 
-    public function revert($data, string $type): mixed
+    public function revert($data, string $type): \stdClass
     {
-        $revertedArray = [];
+        $revertedStdClass = new \stdClass();
         foreach ($data as $key => $value) {
 
             if (is_array($value) && array_key_exists('#type', $value)) {
@@ -45,21 +45,14 @@ final class ArrayConverter extends AbstractArrayConverter
             } else {
                 $valueType = gettype($value);
             }
-
             $reverter = ConverterFactory::getReverter($valueType, $value);
-
             if (!$reverter) {
                 continue;
             }
 
-            $revertedArray[$key] = $reverter->revert($value, $valueType);
+            $revertedStdClass->{$key} = $reverter->revert($value, $valueType);
         }
 
-        return $revertedArray;
-    }
-
-    public function supportsReversion(string $type, mixed $value): bool
-    {
-        return ($type === 'array' || $type === 'iterable') && $value !== null;
+        return $revertedStdClass;
     }
 }

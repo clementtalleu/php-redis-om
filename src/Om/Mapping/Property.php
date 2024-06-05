@@ -14,7 +14,6 @@ final class Property
 
     public function __construct(
         public ?string $name = null,
-        public ?string $format = null,
         public ?string $getter = null,
         public ?string $setter = null,
     ) {
