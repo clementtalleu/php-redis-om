@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Client;
 
+use Talleu\RedisOm\Exception\BadPropertyConfigurationException;
 use Talleu\RedisOm\Exception\RedisClientResponseException;
 use Talleu\RedisOm\Om\Mapping\Property;
 use Talleu\RedisOm\Om\RedisFormat;
@@ -112,6 +113,10 @@ class RedisClient implements RedisClientInterface
             $arguments[] = $property->name ?? $reflectionProperty->name;
             $arguments[] = $type;
             $arguments[] = 'SORTABLE';
+        }
+
+        if (array_key_last($arguments) === 'SCHEMA') {
+            throw new BadPropertyConfigurationException(sprintf("Your class %s does not have any typed property", $prefixKey));
         }
 
         /** @var bool $rawResult */
