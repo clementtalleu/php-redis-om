@@ -33,7 +33,11 @@ class GenerateSchema
                 continue;
             }
 
-            $reflectionClass = new \ReflectionClass($fqcn);
+            try {
+                $reflectionClass = new \ReflectionClass($fqcn);
+            } catch (\ReflectionException $e) {
+                continue;
+            }
 
             $attributes = $reflectionClass->getAttributes(Entity::class);
             if ($attributes === []) {
