@@ -6,7 +6,6 @@ namespace Talleu\RedisOm\Om\Repository;
 
 use Talleu\RedisOm\Client\RedisClientInterface;
 use Talleu\RedisOm\Om\Converters\ConverterInterface;
-use Talleu\RedisOm\Om\Mapping\Entity;
 
 interface RepositoryInterface
 {

@@ -44,7 +44,7 @@ final class JsonObjectConverter extends AbstractObjectConverter
 
             $convertedData[$property->getName()] = $convertedValue;
         }
-        
+
         return $convertedData;
     }
 
@@ -54,6 +54,7 @@ final class JsonObjectConverter extends AbstractObjectConverter
      */
     public function revert($data, string $type): mixed
     {
+
         $object = new $type();
         foreach ($data as $key => $value) {
 
@@ -73,6 +74,7 @@ final class JsonObjectConverter extends AbstractObjectConverter
             }
 
             $reverter = ConverterFactory::getReverter($valueType, $value);
+
             if (!$reverter) {
                 continue;
             }

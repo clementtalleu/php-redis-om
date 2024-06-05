@@ -56,13 +56,13 @@ class ObjectConsistencyTest extends RedisAbstractTestCase
         $retrieveBook = $objectManager->getRepository(BookJson::class)->find('678CUIO');
         $this->assertEquals($retrieveBook, $book);
     }
-    
+
     private function createTag(string $key, array $values): \stdClass
     {
         $tag = new \stdClass();
         $tag->key = $key;
         $tag->values = $values;
-        
+
         return $tag;
-     }   
+    }
 }
