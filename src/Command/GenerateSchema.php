@@ -24,16 +24,16 @@ class GenerateSchema
         }
 
         foreach ($phpFiles as $phpFile) {
-            $fqcn = static::getFQCNFromFile($phpFile);
+
+            $namespace = static::getNamespace($phpFile);
+            $class = static::getClass($phpFile);
+            $fqcn = $namespace.'\\'.$class;
+
             if (!$fqcn) {
                 continue;
             }
 
-            try {
-                $reflectionClass = new \ReflectionClass($fqcn);
-            } catch (\Exception $e) {
-                continue;
-            }
+            $reflectionClass = new \ReflectionClass($fqcn);
 
             $attributes = $reflectionClass->getAttributes(Entity::class);
             if ($attributes === []) {
@@ -49,53 +49,31 @@ class GenerateSchema
         }
     }
 
-    protected static function getFQCNFromFile(string $filePath): ?string
+    protected static function getNamespace(string $filePath): ?string
     {
-        $tokens = token_get_all(file_get_contents($filePath));
-        $count = count($tokens);
-
-        $nextTokenNs = false;
-        $namespace = '';
-        for ($i = 0; $i < $count; $i++) {
-
-            if (!is_array($tokens[$i])) {
-                continue;
-            }
-
-            if ($tokens[$i][1] === 'namespace') {
-                $nextTokenNs = true;
-                continue;
-            }
-
-            if ($nextTokenNs && !ctype_space($tokens[$i][1])) {
-                $namespace = $tokens[$i][1];
-                break;
-            }
-        }
-
-        $nextTokenClass = false;
-        $className = null;
-        for ($i = 0; $i < $count; $i++) {
-
-            if (!is_array($tokens[$i])) {
-                continue;
-            }
-
-            if ($tokens[$i][1] === 'class') {
-                $nextTokenClass = true;
-                continue;
-            }
-
-            if ($nextTokenClass && !ctype_space($tokens[$i][1])) {
-                $className = $tokens[$i][1];
-                break;
-            }
-        }
-
-        if (!$className) {
+        if (!file_exists($filePath)) {
             return null;
         }
 
-        return $namespace.'\\'.$className;
+        $src = file_get_contents($filePath);
+        if (preg_match('#^namespace\s+(.+?);$#sm', $src, $m)) {
+            return $m[1];
+        }
+
+        return null;
+    }
+
+    protected static function getClass(string $filePath): ?string
+    {
+        if (!file_exists($filePath)) {
+            return null;
+        }
+
+        $src = file_get_contents($filePath);
+        if (preg_match('/\bclass\s+(\w+)\s*[^{]/', $src, $matches)) {
+            return $matches[1];
+        }
+
+        return null;
     }
 }

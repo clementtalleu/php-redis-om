@@ -12,7 +12,7 @@ class RedisClient implements RedisClientInterface
 {
     public function __construct(protected ?\Redis $redis = null)
     {
-        $this->redis = $redis ?? new \Redis($_SERVER['REDIS_HOST'] ? ['host' => $_SERVER['REDIS_HOST']] : null);
+        $this->redis = $redis ?? new \Redis(array_key_exists('REDIS_HOST', $_SERVER) ? ['host' => $_SERVER['REDIS_HOST']] : null);
     }
 
     public function hMSet(string $key, array $data): void
