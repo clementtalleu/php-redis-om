@@ -111,3 +111,11 @@ Each of these parameters are optional and can be omitted. Here is a description 
     - Example: `withName`
     - Default: `null`
     - Type: `string`
+
+## Update the schema
+After each modification of your classes, you have to update the schema in Redis. You can do it by running the following command:
+
+```console
+vendor/bin/redisMigration <YOUR DIRECTORY PATH>
+```
+the default path is `./src`.

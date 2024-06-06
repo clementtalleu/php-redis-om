@@ -54,7 +54,6 @@ final class JsonObjectConverter extends AbstractObjectConverter
      */
     public function revert($data, string $type): mixed
     {
-
         $object = new $type();
         foreach ($data as $key => $value) {
 

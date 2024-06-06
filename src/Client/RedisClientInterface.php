@@ -8,6 +8,7 @@ use Talleu\RedisOm\Om\RedisFormat;
 
 interface RedisClientInterface
 {
+    public function createPersistentConnection(?string $host = null, ?int $port = null, ?int $timeout = 0): void;
     public function hMSet(string $key, array $data): void;
     public function hGetAll(string $key): array;
     public function del(string $key): void;

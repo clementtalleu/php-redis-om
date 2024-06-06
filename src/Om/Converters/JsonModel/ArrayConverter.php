@@ -57,9 +57,4 @@ final class ArrayConverter extends AbstractArrayConverter
 
         return $revertedArray;
     }
-
-    public function supportsReversion(string $type, mixed $value): bool
-    {
-        return ($type === 'array' || $type === 'iterable') && $value !== null;
-    }
 }
