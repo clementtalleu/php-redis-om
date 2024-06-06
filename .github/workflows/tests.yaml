@@ -58,3 +58,7 @@ jobs:
         run: vendor/bin/phpstan analyse src --level=3
       - name: Run tests
         run: vendor/bin/phpunit
+      - name: composer audit
+        run: composer audit
+      - name: composer validate
+        run: composer validate

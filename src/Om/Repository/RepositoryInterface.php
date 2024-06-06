@@ -9,7 +9,7 @@ use Talleu\RedisOm\Om\Converters\ConverterInterface;
 
 interface RepositoryInterface
 {
-    public function find(string $identifier): ?object;
+    public function find($identifier): ?object;
     public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): array;
     public function findAll(): array;
     public function findOneBy(array $criteria, ?array $orderBy = null): ?object;

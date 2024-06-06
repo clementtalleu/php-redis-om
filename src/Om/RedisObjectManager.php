@@ -12,7 +12,6 @@ use Talleu\RedisOm\Om\Key\KeyGenerator;
 use Talleu\RedisOm\Om\Mapping\Entity;
 use Talleu\RedisOm\Om\Persister\ObjectToPersist;
 use Talleu\RedisOm\Om\Persister\PersisterInterface;
-use Talleu\RedisOm\Om\Persister\PersisterOperations;
 use Talleu\RedisOm\Om\Repository\RepositoryInterface;
 
 final class RedisObjectManager implements RedisObjectManagerInterface
@@ -24,7 +23,7 @@ final class RedisObjectManager implements RedisObjectManagerInterface
     protected array $objectsToFlush = [];
     protected ?KeyGenerator $keyGenerator = null;
 
-    public function __construct()
+    public function __construct(private readonly ?bool $createPersistentConnection = null)
     {
         $this->keyGenerator = new KeyGenerator();
     }
@@ -136,7 +135,12 @@ final class RedisObjectManager implements RedisObjectManagerInterface
         $redisEntity->repository->setPrefix($redisEntity->prefix ?? $reflectionClass->getName());
         $redisEntity->repository->setClassName($reflectionClass->getName());
         $redisEntity->repository->setConverter($redisEntity->converter ?? ($redisEntity->format === RedisFormat::HASH->value ? new HashObjectConverter() : new JsonObjectConverter()));
-        $redisEntity->repository->setRedisClient($redisEntity->redisClient ?? (new RedisClient()));
+
+        $redisClient = $redisEntity->redisClient ?? new RedisClient();
+        if ($this->createPersistentConnection === true) {
+            $redisClient->createPersistentConnection();
+        }
+        $redisEntity->repository->setRedisClient($redisClient);
         $redisEntity->repository->setFormat($redisEntity->format);
 
         return $redisEntity;

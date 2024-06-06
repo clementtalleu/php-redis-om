@@ -16,6 +16,15 @@ class RedisClient implements RedisClientInterface
         $this->redis = $redis ?? new \Redis(array_key_exists('REDIS_HOST', $_SERVER) ? ['host' => $_SERVER['REDIS_HOST']] : null);
     }
 
+    public function createPersistentConnection(?string $host = null, ?int $port = null, ?int $timeout = 0): void
+    {
+        $this->redis->pconnect(
+            $host ?? $this->redis->getHost(),
+            $port ?? $this->redis->getPort(),
+            $timeout ?? $this->redis->getTimeout(),
+        );
+    }
+
     public function hMSet(string $key, array $data): void
     {
         $result = $this->redis->hMSet(RedisClient::convertPrefix($key), $data);
@@ -147,16 +156,16 @@ class RedisClient implements RedisClientInterface
 
         $rawResult = call_user_func_array([$this->redis, 'rawCommand'], $arguments);
 
-        return (int) $rawResult[0];
+        return (int)$rawResult[0];
     }
 
     public function scanKeys(string $prefixKey): array
     {
         $keys = [];
         $iterator = null;
-        while($iterator !== 0) {
+        while ($iterator !== 0) {
             $scans = $this->redis->scan($iterator, sprintf("%s*", static::convertPrefix($prefixKey)));
-            foreach($scans as $scan) {
+            foreach ($scans as $scan) {
                 $keys[] = $scan;
             }
         }
