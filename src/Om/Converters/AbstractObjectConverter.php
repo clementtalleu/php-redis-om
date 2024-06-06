@@ -41,7 +41,7 @@ abstract class AbstractObjectConverter implements ConverterInterface
         return $value;
     }
 
-    protected function assignValue(object &$object, string $key, mixed $revertedValue, string $type, \ReflectionProperty $reflectionProperty = null): void
+    protected function assignValue(object &$object, string $key, mixed $revertedValue, string $type, ?\ReflectionProperty $reflectionProperty = null): void
     {
         $reflectionProperty = $reflectionProperty ?? new \ReflectionProperty($type, $key);
         if ($reflectionProperty->isPublic()) {
@@ -49,10 +49,10 @@ abstract class AbstractObjectConverter implements ConverterInterface
             return;
         }
 
-        /** @var Property $propertyAttribute */
+        /** @var Property|null $propertyAttribute */
         $propertyAttribute = $reflectionProperty->getAttributes(Property::class) !== [] ? $reflectionProperty->getAttributes(Property::class)[0]->newInstance() : null;
 
-        if ($propertyAttribute && $propertyAttribute->setter) {
+        if ($propertyAttribute && $propertyAttribute->setter !== null) {
             if (!method_exists($object, $propertyAttribute->setter)) {
                 throw new BadPropertyConfigurationException(sprintf("The setter you provide %s() does not exist in class %s", $propertyAttribute->setter, get_class($object)));
             }

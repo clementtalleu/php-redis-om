@@ -115,7 +115,7 @@ class RedisClient implements RedisClientInterface
                 continue;
             }
 
-            $type = ($reflectionProperty->getType() === 'int' || $reflectionProperty->getType() === 'float') ? Property::NUMERIC_TYPE : Property::TEXT_TYPE;
+            $type = ($propertyType === 'int' || $propertyType === 'float') ? Property::NUMERIC_TYPE : Property::TEXT_TYPE;
 
             $arguments[] = ($format === RedisFormat::JSON->value ? '$.' : '') . ($property->name !== null ? $property->name : $reflectionProperty->name);
             $arguments[] = 'AS';

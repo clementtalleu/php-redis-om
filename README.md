@@ -1,4 +1,6 @@
-# [WIP] BETA VERSION IN PROGRESS
+
+[![Build Status](https://github.com/clementtalleu/php-redis-om/actions/workflows/tests.yaml/badge.svg)](https://github.com/clementtalleu/php-redis-om/actions)
+![PHPStan](https://img.shields.io/badge/PHPStan-OK-brightgreen)
 
 # php-redis-om
 
