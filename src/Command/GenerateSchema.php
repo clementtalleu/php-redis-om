@@ -29,10 +29,6 @@ class GenerateSchema
             $class = static::getClass($phpFile);
             $fqcn = $namespace.'\\'.$class;
 
-            if (!$fqcn) {
-                continue;
-            }
-
             try {
                 $reflectionClass = new \ReflectionClass($fqcn);
             } catch (\ReflectionException $e) {

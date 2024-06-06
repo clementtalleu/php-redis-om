@@ -18,9 +18,9 @@ final class HashObjectConverter extends AbstractObjectConverter
 
         foreach ($properties as $property) {
 
-            /** @var Property $propertyAttribute */
+            /** @var Property|null $propertyAttribute */
             $propertyAttribute = $property->getAttributes(Property::class) !== [] ? $property->getAttributes(Property::class)[0]->newInstance() : null;
-            if (!$propertyAttribute) {
+            if ($propertyAttribute === null) {
                 continue;
             }
 
@@ -72,9 +72,10 @@ final class HashObjectConverter extends AbstractObjectConverter
                 continue;
             }
 
+            $reflectionProperty = new \ReflectionProperty($type, $key);
             if (is_array($value) && array_key_exists('#type', $value)) {
                 $valueType = $value['#type'];
-            } elseif (($reflectionProperty = new \ReflectionProperty($type, $key)) && $reflectionProperty->getType() && $value !== null) {
+            } elseif ($reflectionProperty->getType() && $value !== null) {
                 /** @var \ReflectionNamedType|null $propertyType */
                 $propertyType = $reflectionProperty->getType();
                 $valueType = $propertyType->getName();
@@ -88,18 +89,20 @@ final class HashObjectConverter extends AbstractObjectConverter
             }
 
             $revertedValue = $reverter->revert($value, $valueType);
-            $this->assignValue($object, $key, $revertedValue, $type, $reflectionProperty ?? null);
+            $this->assignValue($object, $key, $revertedValue, $type, $reflectionProperty);
         }
 
         return $object;
     }
 
-    private function redisArrayUnflatten(array $array)
+    private function redisArrayUnflatten(array $data)
     {
         $output = [];
 
-        foreach ($array as $key => $value) {
+        foreach ($data as $key => $value) {
             $keys = explode('.', $key);
+
+            /** @var array<string, mixed> $current */
             $current = &$output;
 
             foreach ($keys as $innerKey) {

@@ -115,16 +115,14 @@ class RedisClient implements RedisClientInterface
                 continue;
             }
 
-            $type = ($reflectionProperty->getType() === 'int' || $reflectionProperty->getType() === 'float') ? Property::NUMERIC_TYPE : Property::TEXT_TYPE;
-
             $arguments[] = ($format === RedisFormat::JSON->value ? '$.' : '') . ($property->name !== null ? $property->name : $reflectionProperty->name);
             $arguments[] = 'AS';
             $arguments[] = $property->name ?? $reflectionProperty->name;
-            $arguments[] = $type;
+            $arguments[] = Property::TEXT_TYPE;
             $arguments[] = 'SORTABLE';
         }
 
-        if (array_key_last($arguments) === 'SCHEMA') {
+        if (end($arguments) === 'SCHEMA') {
             throw new BadPropertyConfigurationException(sprintf("Your class %s does not have any typed property", $prefixKey));
         }
 

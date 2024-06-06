@@ -21,7 +21,7 @@ final class JsonRepositoryTest extends RedisAbstractTestCase
         $repository = $objectManager->getRepository(DummyJson::class);
 
         $collection = $repository->findAll();
-
+        $this->assertCount(3, $collection);
         foreach ($collection as $dummy) {
             $this->assertInstanceOf(DummyJson::class, $dummy);
         }
