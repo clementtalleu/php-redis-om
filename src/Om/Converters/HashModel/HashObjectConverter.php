@@ -101,6 +101,8 @@ final class HashObjectConverter extends AbstractObjectConverter
 
         foreach ($data as $key => $value) {
             $keys = explode('.', $key);
+
+            /** @var array<string, mixed> $current */
             $current = &$output;
 
             foreach ($keys as $innerKey) {

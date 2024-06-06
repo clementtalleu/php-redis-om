@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Om;
 
-use Doctrine\Persistence\Mapping\ClassMetadata;
-use Doctrine\Persistence\Mapping\ClassMetadataFactory;
-use Doctrine\Persistence\ObjectRepository;
 use Talleu\RedisOm\Om\Repository\RepositoryInterface;
 
 interface RedisObjectManagerInterface

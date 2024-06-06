@@ -1,6 +1,9 @@
 
 [![Build Status](https://github.com/clementtalleu/php-redis-om/actions/workflows/tests.yaml/badge.svg)](https://github.com/clementtalleu/php-redis-om/actions)
 ![PHPStan](https://img.shields.io/badge/PHPStan-OK-brightgreen)
+[![Packagist Version](https://img.shields.io/packagist/v/talleu/php-redis-om.svg)](https://packagist.org/packages/talleu/php-redis-om)
+[![GitHub](https://img.shields.io/github/license/clementtalleu/php-redis-om.svg)](https://github.com/averias/phpredis-json)
+
 
 # php-redis-om
 
@@ -114,3 +117,4 @@ $users = $objectManager->getRepository(User::class)->findBy(['name' => 'John Doe
 - [Configuration](https://github.com/clementtalleu/php-redis-om/blob/main/docs/configuration.md)
 - [Docker integration](https://github.com/clementtalleu/php-redis-om/blob/main/docs/docker_integration.md)
 - [Mapping ](https://github.com/clementtalleu/php-redis-om/blob/main/docs/mapping.md)
+- [Advanced usage ](https://github.com/clementtalleu/php-redis-om/blob/main/docs/advanced_usage.md)

@@ -55,7 +55,7 @@ jobs:
       - name: Test cs-fixer
         run: vendor/bin/php-cs-fixer fix src --dry-run --diff --no-ansi
       - name: Run phpstan
-        run: vendor/bin/phpstan analyse src --level=3
+        run: vendor/bin/phpstan analyse src --level=5
       - name: Run tests
         run: vendor/bin/phpunit
       - name: composer audit
