@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace Talleu\RedisOm\Om\Converters\JsonModel;
 
 use Talleu\RedisOm\Om\Converters\AbstractStandardClassConverter;
-use Talleu\RedisOm\Om\Converters\HashModel\ArrayConverter;
 use Talleu\RedisOm\Om\Converters\HashModel\ConverterFactory;
-use Talleu\RedisOm\Om\Converters\HashModel\HashObjectConverter;
 
 final class StandardClassConverter extends AbstractStandardClassConverter
 {
