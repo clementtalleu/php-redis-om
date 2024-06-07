@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Om\Converters\HashModel;
 
-use Talleu\RedisOm\Exception\BadPropertyConfigurationException;
 use Talleu\RedisOm\Om\Converters\AbstractObjectConverter;
 use Talleu\RedisOm\Om\Converters\AbstractDateTimeConverter;
 use Talleu\RedisOm\Om\Mapping\Property;

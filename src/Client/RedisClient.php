@@ -58,25 +58,27 @@ class RedisClient implements RedisClientInterface
         $result = $this->redis->rawCommand(RedisCommands::JSON_GET->value, static::convertPrefix($key));
 
         if ($result === false) {
-            $this->handleError(RedisCommands::JSON_GET->value, $this->redis->getLastError());
+            $this->handleError(__METHOD__, $this->redis->getLastError());
         }
 
         return $result;
     }
 
-    public function jsonSet(string $key, ?string $path = '$', ?string $value = '{}'): ?bool
+    public function jsonSet(string $key, ?string $path = '$', ?string $value = '{}'): void
     {
         $result = $this->redis->rawCommand(RedisCommands::JSON_SET->value, static::convertPrefix($key), $path, $value);
         if (!$result) {
-            $this->handleError(RedisCommands::JSON_SET->value, $this->redis->getLastError());
+            $this->handleError(__METHOD__, $this->redis->getLastError());
         }
-
-        return true;
     }
 
-    public function jsonDel(string $key, ?string $path = '$'): ?bool
+    public function jsonDel(string $key, ?string $path = '$'): void
     {
-        return $this->redis->rawCommand(RedisCommands::JSON_DELETE->value, static::convertPrefix($key), $path);
+        $result = $this->redis->rawCommand(RedisCommands::JSON_DELETE->value, static::convertPrefix($key), $path);
+
+        if (!$result) {
+            $this->handleError(__METHOD__, $this->redis->getLastError());
+        }
     }
 
     /**
