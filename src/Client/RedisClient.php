@@ -84,7 +84,7 @@ class RedisClient implements RedisClientInterface
     /**
      * @param \ReflectionProperty[] $properties
      */
-    public function createIndex(string $prefixKey, ?string $format = 'HASH', ?array $properties = []): bool
+    public function createIndex(string $prefixKey, ?string $format = 'HASH', ?array $properties = []): void
     {
         $prefixKey = static::convertPrefix($prefixKey);
 
@@ -128,10 +128,11 @@ class RedisClient implements RedisClientInterface
             throw new BadPropertyConfigurationException(sprintf("Your class %s does not have any typed property", $prefixKey));
         }
 
-        /** @var bool $rawResult */
         $rawResult = call_user_func_array([$this->redis, 'rawCommand'], $arguments);
 
-        return $rawResult;
+        if (!$rawResult) {
+            $this->handleError(__METHOD__, $this->redis->getLastError());
+        }
     }
 
     public function dropIndex(string $prefixKey): bool
@@ -156,7 +157,11 @@ class RedisClient implements RedisClientInterface
 
         $rawResult = call_user_func_array([$this->redis, 'rawCommand'], $arguments);
 
-        return (int)$rawResult[0];
+        if (!$rawResult) {
+            $this->handleError(__METHOD__, $this->redis->getLastError());
+        }
+
+        return (int) $rawResult[0];
     }
 
     public function scanKeys(string $prefixKey): array
