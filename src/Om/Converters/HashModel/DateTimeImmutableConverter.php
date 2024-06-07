@@ -16,13 +16,4 @@ final class DateTimeImmutableConverter extends AbstractDateTimeImmutableConverte
 
         return new \DateTimeImmutable($data);
     }
-
-    public function supportsReversion(string $type, mixed $value): bool
-    {
-        if ($type === 'DateTimeImmutable') {
-            return true;
-        }
-
-        return false;
-    }
 }

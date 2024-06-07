@@ -23,9 +23,4 @@ final class DateTimeImmutableConverter extends AbstractDateTimeImmutableConverte
     {
         return new \DateTimeImmutable($data['date'], new \DateTimeZone($data['timezone']));
     }
-
-    public function supportsReversion(string $type, mixed $value): bool
-    {
-        return $type === 'DateTimeImmutable';
-    }
 }

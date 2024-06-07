@@ -18,10 +18,7 @@ abstract class AbstractObjectConverter implements ConverterInterface
 
     abstract public function revert($data, string $type): mixed;
 
-    public function supportsReversion(string $type, mixed $value): bool
-    {
-        return class_exists($type) && !in_array($type, AbstractDateTimeConverter::DATETYPES_NAMES);
-    }
+    abstract public function supportsReversion(string $type, mixed $value): bool;
 
     protected function extractPropertyValue(Property $propertyAttribute, \ReflectionProperty $property, object $data): mixed
     {

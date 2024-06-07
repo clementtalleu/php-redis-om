@@ -27,5 +27,8 @@ abstract class AbstractDateTimeConverter implements ConverterInterface
 
     abstract public function revert($data, string $type): \DateTime;
 
-    abstract public function supportsReversion(string $type, mixed $value): bool;
+    public function supportsReversion(string $type, mixed $value): bool
+    {
+        return $type === 'DateTime' || $type === 'DateTimeInterface';
+    }
 }
