@@ -58,7 +58,7 @@ class RedisClient implements RedisClientInterface
         $result = $this->redis->rawCommand(RedisCommands::JSON_GET->value, static::convertPrefix($key));
 
         if ($result === false) {
-            $this->handleError(__METHOD__, $this->redis->getLastError());
+            return null;
         }
 
         return $result;
