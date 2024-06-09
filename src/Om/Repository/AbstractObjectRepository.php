@@ -33,6 +33,18 @@ abstract class AbstractObjectRepository implements RepositoryInterface
         return $collection;
     }
 
+    public function findLike(string $search, ?int $limit = null): array
+    {
+        $data = $this->redisClient->searchLike($this->prefix, $search, $this->format, $limit);
+
+        $collection = [];
+        foreach ($data as $item) {
+            $collection[] = $this->converter->revert($item, $this->className);
+        }
+
+        return $collection;
+    }
+
     public function findAll(): array
     {
         return $this->findBy([]);

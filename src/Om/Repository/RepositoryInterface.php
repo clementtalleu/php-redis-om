@@ -11,6 +11,7 @@ interface RepositoryInterface
 {
     public function find($identifier): ?object;
     public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): array;
+    public function findLike(string $search, ?int $limit = null): array;
     public function findAll(): array;
     public function findOneBy(array $criteria, ?array $orderBy = null): ?object;
     public function setRedisClient(RedisClientInterface $redisClient): void;

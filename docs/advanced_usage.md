@@ -26,6 +26,7 @@ $userRepository->findOneBy(['name' => 'John Doe']); // Will retrieve 1 user with
 $userRepository->findBy(['name' => 'John']); // Will retrieve all users with the name 'John'
 $userRepository->findBy(['name' => 'John'], ['age' => 'ASC']); // Will retrieve all users with the name 'John' sorted by age in ascending order
 $userRepository->findBy(['name' => 'John'], ['age' => 'ASC'], 5); // Will retrieve 5 users with the name 'John' sorted by age in ascending order
+$userRepository->findLike('John', 5); // Will retrieve all users with a field containing 'John', whatever the field. Second parameter is the limit of results (optional)
 $userRepository->count(['name' => 'John']); // Will retrieve an integer representing the number of users with the name 'John'
 ```
 

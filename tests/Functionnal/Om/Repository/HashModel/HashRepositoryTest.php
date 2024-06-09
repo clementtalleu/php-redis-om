@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Tests\Functionnal\Om\Repository\HashModel;
 
-use Talleu\RedisOm\Om\RedisFormat;
 use Talleu\RedisOm\Om\RedisObjectManager;
 use Talleu\RedisOm\Tests\Fixtures\Hash\DummyHash;
 use Talleu\RedisOm\Tests\RedisAbstractTestCase;
@@ -91,6 +90,24 @@ final class HashRepositoryTest extends RedisAbstractTestCase
             $this->assertInstanceOf(DummyHash::class, $dummy);
             $this->assertEquals('Olivier', $dummy->name);
             $this->assertEquals('34', $dummy->age);
+        }
+    }
+
+    public function testFindLike()
+    {
+        static::emptyRedis();
+        static::generateIndex();
+        static::loadRedisFixtures();
+
+        $objectManager = new RedisObjectManager();
+        $repository = $objectManager->getRepository(DummyHash::class);
+
+        $collection = $repository->findLike('olivier');
+
+        $this->assertCount(2, $collection);
+        foreach ($collection as $dummy) {
+            $this->assertInstanceOf(DummyHash::class, $dummy);
+            $this->assertEquals('Olivier', $dummy->name);
         }
     }
 

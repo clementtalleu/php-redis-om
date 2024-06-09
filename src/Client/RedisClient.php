@@ -226,6 +226,46 @@ class RedisClient implements RedisClientInterface
             return [];
         }
 
+        return $this->extractRedisData($result, $format, $numberOfResults);
+    }
+
+    public function searchLike(string $prefixKey, string $search, ?string $format = RedisFormat::HASH->value, ?int $numberOfResults = null): array
+    {
+        $arguments = [RedisCommands::SEARCH->value, static::convertPrefix($prefixKey)];
+
+        $arguments[] = $search;
+
+        try {
+            $result = call_user_func_array([$this->redis, 'rawCommand'], $arguments);
+        } catch (\RedisException $e) {
+            $this->handleError(RedisCommands::SEARCH->value, $e->getMessage());
+        }
+
+        if (isset($result) && $result === false) {
+            $this->handleError(RedisCommands::SEARCH->value, $this->redis->getLastError());
+        }
+
+        if ($result[0] === 0) {
+            return [];
+        }
+
+        return $this->extractRedisData($result, $format, $numberOfResults);
+    }
+
+    public static function convertPrefix(string $key): string
+    {
+        return str_replace('\\', '_', $key);
+    }
+
+    private function handleError(string $command, ?string $errorMessage = 'Unknown error'): void
+    {
+        throw new RedisClientResponseException(
+            sprintf("something was wrong when executing %s command, reason: %s", $command, $errorMessage)
+        );
+    }
+
+    private function extractRedisData(array $result, string $format, ?int $numberOfResults = null): array
+    {
         $entities = [];
         foreach ($result as $key => $redisData) {
             if ($key > 0 && $key % 2 == 0) {
@@ -258,17 +298,5 @@ class RedisClient implements RedisClientInterface
         }
 
         return $entities;
-    }
-
-    public static function convertPrefix(string $key): string
-    {
-        return str_replace('\\', '_', $key);
-    }
-
-    private function handleError(string $command, ?string $errorMessage = 'Unknown error'): void
-    {
-        throw new RedisClientResponseException(
-            sprintf("something was wrong when executing %s command, reason: %s", $command, $errorMessage)
-        );
     }
 }
