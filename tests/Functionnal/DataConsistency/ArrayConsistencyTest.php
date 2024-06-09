@@ -7,7 +7,6 @@ namespace Talleu\RedisOm\Tests\Functionnal\DataConsistency;
 use Talleu\RedisOm\Om\RedisObjectManager;
 use Talleu\RedisOm\Tests\Fixtures\Bar;
 use Talleu\RedisOm\Tests\Fixtures\Hash\ArrayHash;
-use Talleu\RedisOm\Tests\Fixtures\Hash\DateHash;
 use Talleu\RedisOm\Tests\Fixtures\Json\ArrayJson;
 use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
