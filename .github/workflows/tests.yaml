@@ -58,11 +58,9 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
-          token: ${{ secrets.CODE_COV_TOKEN }}
+          token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.xml
           verbose: true
-#        env:
-#          CODECOV_TOKEN: ${{ secrets.CODECOV_ORG_TOKEN }}
       - name: composer audit
         run: composer audit
       - name: composer validate
