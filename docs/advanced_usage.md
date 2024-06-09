@@ -28,3 +28,11 @@ $userRepository->findBy(['name' => 'John'], ['age' => 'ASC']); // Will retrieve 
 $userRepository->findBy(['name' => 'John'], ['age' => 'ASC'], 5); // Will retrieve 5 users with the name 'John' sorted by age in ascending order
 $userRepository->count(['name' => 'John']); // Will retrieve an integer representing the number of users with the name 'John'
 ```
+
+## Repository
+
+You can create your own repository to query your objects in Redis. Then inject it in the
+`#[RedisOm\Entity(repository: YourCustomRepository::class)]` attribute to use it.
+
+Then in each custom repository you can add custom methods to query your objects in Redis.
+
