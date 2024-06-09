@@ -23,7 +23,6 @@ final class Entity
 {
     public function __construct(
         public ?string               $prefix = null,
-        public ?int                  $expires = null,
         public ?string               $format = null,
         public ?PersisterInterface   $persister = null,
         public ?ConverterInterface   $converter = null,

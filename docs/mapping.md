@@ -3,7 +3,7 @@
 
 ## Mapping object
 
-You can customize the mapping configuration by adding parameters to you RedisOm\Entity attribute.
+Customize the mapping configuration by adding parameters to you RedisOm\Entity attribute.
 
 ```php
 <?php 
@@ -69,6 +69,15 @@ Each of these parameters are optional and can be omitted. Here is a description 
     - Type: `RedisClientInterface`
     - Note: The redis client must implement the `RedisClientInterface` interface, it could be a php-redis client 
 or any other client that implements the interface.
+
+You could alternate from JSON format to HASH format in each entity by setting the format parameter to `RedisFormat::HASH->value` or `RedisFormat::JSON->value`.
+But be careful, if you switch the format in an entity that already has data stored in Redis, you will lose all the index stored in the previous format.
+
+Dont forget to run the migration command after changing the format of an entity.
+
+```console
+vendor/bin/redisMigration <YOUR DIRECTORY PATH>
+```
 
 
 ## Mapping properties
