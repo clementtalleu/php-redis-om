@@ -10,6 +10,8 @@ use Talleu\RedisOm\Om\Converters\HashModel\HashObjectConverter;
 use Talleu\RedisOm\Om\Converters\JsonModel\JsonObjectConverter;
 use Talleu\RedisOm\Om\Key\KeyGenerator;
 use Talleu\RedisOm\Om\Mapping\Entity;
+use Talleu\RedisOm\Om\Metadata\ClassMetadata;
+use Talleu\RedisOm\Om\Metadata\MetadataFactory;
 use Talleu\RedisOm\Om\Persister\ObjectToPersist;
 use Talleu\RedisOm\Om\Persister\PersisterInterface;
 use Talleu\RedisOm\Om\Repository\RepositoryInterface;
@@ -93,19 +95,19 @@ final class RedisObjectManager implements RedisObjectManagerInterface
         return $objectMapper->repository;
     }
 
-    public function getClassMetadata(string $className)
+    public function getClassMetadata(string $className): ClassMetadata
     {
-        // TODO: Implement getClassMetadata() method.
+        return (new MetadataFactory())->createClassMetadata($className);
     }
 
     public function getMetadataFactory()
     {
-        // TODO: Implement getMetadataFactory() method.
+        return new MetadataFactory();
     }
 
     public function initializeObject(object $obj)
     {
-        // TODO: Implement initializeObject() method.
+        return new $obj();
     }
 
     public function contains(object $object): bool

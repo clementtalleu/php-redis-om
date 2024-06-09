@@ -19,7 +19,7 @@ class ObjectManagerTest extends RedisAbstractTestCase
     {
         static::emptyRedis();
         static::generateIndex();
-        static::loadRedisFixtures(RedisFormat::HASH->value);
+        static::loadRedisFixtures();
 
         $keys = $this->createClient()->keys('*');
         $classNameConverted = RedisClient::convertPrefix(DummyHash::class);
@@ -32,7 +32,7 @@ class ObjectManagerTest extends RedisAbstractTestCase
     {
         static::emptyRedis();
         static::generateIndex();
-        static::loadRedisFixtures(RedisFormat::JSON->value);
+        static::loadRedisFixtures(DummyJson::class);
 
         $keys = $this->createClient()->keys('*');
         $classNameConverted = RedisClient::convertPrefix(DummyJson::class);
@@ -45,7 +45,7 @@ class ObjectManagerTest extends RedisAbstractTestCase
     {
         static::emptyRedis();
         static::generateIndex();
-        $dummies = static::loadRedisFixtures(RedisFormat::JSON->value);
+        $dummies = static::loadRedisFixtures(DummyJson::class);
 
         $objectManager = new RedisObjectManager();
         /** @var DummyJson $object */
@@ -66,7 +66,7 @@ class ObjectManagerTest extends RedisAbstractTestCase
     {
         static::emptyRedis();
         static::generateIndex();
-        $dummies = static::loadRedisFixtures(RedisFormat::HASH->value);
+        $dummies = static::loadRedisFixtures();
 
         $objectManager = new RedisObjectManager();
 
@@ -87,7 +87,7 @@ class ObjectManagerTest extends RedisAbstractTestCase
     {
         static::emptyRedis();
         static::generateIndex();
-        $dummies = static::loadRedisFixtures(RedisFormat::HASH->value);
+        $dummies = static::loadRedisFixtures();
         /** @var DummyHash $object */
         $object = $dummies[0];
 
@@ -119,7 +119,7 @@ class ObjectManagerTest extends RedisAbstractTestCase
     {
         static::emptyRedis();
         static::generateIndex();
-        $dummies = static::loadRedisFixtures(RedisFormat::HASH->value, false);
+        $dummies = static::loadRedisFixtures(flush: false);
         $objectManager = new RedisObjectManager();
         foreach ($dummies as $dummy) {
             $objectManager->persist($dummy);
@@ -134,7 +134,7 @@ class ObjectManagerTest extends RedisAbstractTestCase
     {
         static::emptyRedis();
         static::generateIndex();
-        $dummies = static::loadRedisFixtures(RedisFormat::HASH->value, false);
+        $dummies = static::loadRedisFixtures(flush: false);
         $objectManager = new RedisObjectManager();
         foreach ($dummies as $dummy) {
             $objectManager->persist($dummy);
