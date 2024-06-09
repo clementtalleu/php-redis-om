@@ -4,6 +4,7 @@ RUN install-php-extensions \
 	@composer \
 	intl \
 	json \
+	xdebug \
 	redis
 
 WORKDIR /app
