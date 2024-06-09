@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Tests\Functionnal\Om\Repository\HashModel;
 
+use Talleu\RedisOm\Exception\BadPropertyException;
 use Talleu\RedisOm\Om\RedisObjectManager;
 use Talleu\RedisOm\Tests\Fixtures\Hash\DummyHash;
+use Talleu\RedisOm\Tests\Fixtures\Json\DummyJson;
 use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
 final class HashRepositoryTest extends RedisAbstractTestCase
@@ -123,5 +125,54 @@ final class HashRepositoryTest extends RedisAbstractTestCase
         $object = $repository->findOneBy(['age' => 34]);
         $this->assertInstanceOf(DummyHash::class, $object);
         $this->assertEquals('34', $object->age);
+    }
+
+    public function testGetPropertyValue()
+    {
+        static::emptyRedis();
+        static::generateIndex();
+        $collection = static::loadRedisFixtures();
+
+        $objectManager = new RedisObjectManager();
+        $repository = $objectManager->getRepository(DummyHash::class);
+
+        $value = $repository->getPropertyValue(1, 'createdAt');
+        $value1 = $repository->getPropertyValue(2, 'createdAt');
+        $value2 = $repository->getPropertyValue(3, 'createdAt');
+        $this->assertEquals($value, $collection[0]->createdAt);
+        $this->assertEquals($value1, $collection[1]->createdAt);
+        $this->assertEquals($value2, $collection[2]->createdAt);
+
+        $value = $repository->getPropertyValue(1, 'createdAtImmutable');
+        $this->assertEquals($value, $collection[0]->createdAtImmutable);
+
+        $value = $repository->getPropertyValue(1, 'price');
+        $this->assertEquals($value, $collection[0]->price);
+    }
+
+    public function testGetPropertyValueNotScalarType()
+    {
+        static::emptyRedis();
+        static::generateIndex();
+        $collection = static::loadRedisFixtures();
+
+        $objectManager = new RedisObjectManager();
+        $repository = $objectManager->getRepository(DummyHash::class);
+
+        $this->expectException(BadPropertyException::class);
+        $repository->getPropertyValue(1, 'bar');
+    }
+
+    public function testGetPropertyValuePropertyDoesNotExist()
+    {
+        static::emptyRedis();
+        static::generateIndex();
+        static::loadRedisFixtures();
+
+        $objectManager = new RedisObjectManager();
+        $repository = $objectManager->getRepository(DummyHash::class);
+
+        $this->expectException(BadPropertyException::class);
+        $repository->getPropertyValue(1, 'test');
     }
 }

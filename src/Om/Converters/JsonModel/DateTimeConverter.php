@@ -21,6 +21,6 @@ final class DateTimeConverter extends AbstractDateTimeConverter
 
     public function revert($data, string $type): \DateTime
     {
-        return new \DateTime($data['date'], new \DateTimeZone($data['timezone']));
+        return new \DateTime($data['date'], array_key_exists('timezone', $data) ? new \DateTimeZone($data['timezone']) : null);
     }
 }

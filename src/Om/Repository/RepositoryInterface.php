@@ -10,6 +10,7 @@ use Talleu\RedisOm\Om\Converters\ConverterInterface;
 interface RepositoryInterface
 {
     public function find($identifier): ?object;
+    public function getPropertyValue($identifier, string $property): mixed;
     public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): array;
     public function findLike(string $search, ?int $limit = null): array;
     public function findAll(): array;

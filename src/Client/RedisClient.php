@@ -34,6 +34,17 @@ class RedisClient implements RedisClientInterface
         }
     }
 
+    public function hget(string $key, string $property): string
+    {
+        $result = $this->redis->hget(RedisClient::convertPrefix($key), $property);
+
+        if (!$result) {
+            $this->handleError(__METHOD__, $this->redis->getLastError());
+        }
+
+        return $result;
+    }
+
     public function hGetAll(string $key): array
     {
         $result = $this->redis->hGetAll(RedisClient::convertPrefix($key));
@@ -56,6 +67,17 @@ class RedisClient implements RedisClientInterface
     public function jsonGet(string $key): ?string
     {
         $result = $this->redis->rawCommand(RedisCommands::JSON_GET->value, static::convertPrefix($key));
+
+        if ($result === false) {
+            return null;
+        }
+
+        return $result;
+    }
+
+    public function jsonGetProperty(string $key, string $property): ?string
+    {
+        $result = $this->redis->rawCommand(RedisCommands::JSON_GET->value, static::convertPrefix($key), "$.$property");
 
         if ($result === false) {
             return null;

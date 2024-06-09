@@ -21,6 +21,6 @@ final class DateTimeImmutableConverter extends AbstractDateTimeImmutableConverte
 
     public function revert($data, string $type): \DateTimeImmutable
     {
-        return new \DateTimeImmutable($data['date'], new \DateTimeZone($data['timezone']));
+        return new \DateTimeImmutable($data['date'], array_key_exists('timezone', $data) ? new \DateTimeZone($data['timezone']) : null);
     }
 }

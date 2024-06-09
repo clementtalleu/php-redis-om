@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Tests\Functionnal\Om\Repository\JsonModel;
 
+use Talleu\RedisOm\Exception\BadPropertyException;
 use Talleu\RedisOm\Om\RedisObjectManager;
 use Talleu\RedisOm\Tests\Fixtures\Json\DummyJson;
 use Talleu\RedisOm\Tests\RedisAbstractTestCase;
@@ -125,5 +126,50 @@ final class JsonRepositoryTest extends RedisAbstractTestCase
             $this->assertInstanceOf(DummyJson::class, $dummy);
             $this->assertEquals('Olivier', $dummy->name);
         }
+    }
+
+    public function testGetPropertyValue()
+    {
+        static::emptyRedis();
+        static::generateIndex();
+        $collection = static::loadRedisFixtures(DummyJson::class);
+
+        $objectManager = new RedisObjectManager();
+        $repository = $objectManager->getRepository(DummyJson::class);
+
+        $value = $repository->getPropertyValue(1, 'createdAt');
+        $value1 = $repository->getPropertyValue(2, 'createdAt');
+        $value2 = $repository->getPropertyValue(3, 'createdAt');
+        $this->assertEquals($value, $collection[0]->createdAt);
+        $this->assertEquals($value1, $collection[1]->createdAt);
+        $this->assertEquals($value2, $collection[2]->createdAt);
+
+        $value = $repository->getPropertyValue(1, 'createdAtImmutable');
+        $this->assertEquals($value, $collection[0]->createdAtImmutable);
+
+        $value = $repository->getPropertyValue(1, 'price');
+        $this->assertEquals($value, $collection[0]->price);
+
+        $value = $repository->getPropertyValue(1, 'bar');
+        $this->assertEquals($value, $collection[0]->bar);
+
+        $value = $repository->getPropertyValue(1, 'datesArray');
+        $this->assertEquals($value, $collection[0]->datesArray);
+
+        $value = $repository->getPropertyValue(1, 'complexData');
+        $this->assertEquals($value, $collection[0]->complexData);
+    }
+
+    public function testGetPropertyValuePropertyDoesNotExist()
+    {
+        static::emptyRedis();
+        static::generateIndex();
+        static::loadRedisFixtures(DummyJson::class);
+
+        $objectManager = new RedisObjectManager();
+        $repository = $objectManager->getRepository(DummyJson::class);
+
+        $this->expectException(BadPropertyException::class);
+        $repository->getPropertyValue(1, 'test');
     }
 }

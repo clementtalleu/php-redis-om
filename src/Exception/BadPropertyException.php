@@ -6,6 +6,6 @@ namespace Talleu\RedisOm\Exception;
 
 use Exception;
 
-class BadPropertyConfigurationException extends Exception
+class BadPropertyException extends Exception
 {
 }
