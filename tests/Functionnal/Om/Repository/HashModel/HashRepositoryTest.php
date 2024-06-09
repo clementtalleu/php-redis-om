@@ -15,7 +15,7 @@ final class HashRepositoryTest extends RedisAbstractTestCase
     {
         static::emptyRedis();
         static::generateIndex();
-        static::loadRedisFixtures(RedisFormat::HASH->value);
+        static::loadRedisFixtures();
 
         $objectManager = new RedisObjectManager();
         $repository = $objectManager->getRepository(DummyHash::class);
@@ -31,7 +31,7 @@ final class HashRepositoryTest extends RedisAbstractTestCase
     {
         static::emptyRedis();
         static::generateIndex();
-        static::loadRedisFixtures(RedisFormat::HASH->value);
+        static::loadRedisFixtures();
 
         $objectManager = new RedisObjectManager();
         $repository = $objectManager->getRepository(DummyHash::class);
@@ -49,7 +49,7 @@ final class HashRepositoryTest extends RedisAbstractTestCase
     {
         static::emptyRedis();
         static::generateIndex();
-        static::loadRedisFixtures(RedisFormat::HASH->value);
+        static::loadRedisFixtures();
 
         $objectManager = new RedisObjectManager();
         $repository = $objectManager->getRepository(DummyHash::class);
@@ -79,7 +79,7 @@ final class HashRepositoryTest extends RedisAbstractTestCase
     {
         static::emptyRedis();
         static::generateIndex();
-        static::loadRedisFixtures(RedisFormat::HASH->value);
+        static::loadRedisFixtures();
 
         $objectManager = new RedisObjectManager();
         $repository = $objectManager->getRepository(DummyHash::class);
@@ -98,7 +98,7 @@ final class HashRepositoryTest extends RedisAbstractTestCase
     {
         static::emptyRedis();
         static::generateIndex();
-        static::loadRedisFixtures(RedisFormat::HASH->value);
+        static::loadRedisFixtures();
 
         $objectManager = new RedisObjectManager();
         $repository = $objectManager->getRepository(DummyHash::class);

@@ -4,15 +4,10 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Tests\Fixtures;
 
-use Talleu\RedisOm\Tests\Fixtures\Hash\DummyHash;
-use Talleu\RedisOm\Tests\Fixtures\Json\DummyJson;
-
 class FixturesGenerator
 {
-    public static function generateDummies(string $format): array
+    public static function generateDummies($dummyClass): array
     {
-        $dummyClass = $format === 'JSON' ? DummyJson::class : DummyHash::class;
-
         $dummy =  $dummyClass::create(
             id: 1,
             age: 20,

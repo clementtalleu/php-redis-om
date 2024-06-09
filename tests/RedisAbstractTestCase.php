@@ -9,6 +9,7 @@ use Talleu\RedisOm\Console\Runner;
 use Talleu\RedisOm\Om\RedisObjectManager;
 use Talleu\RedisOm\Tests\Client\Client;
 use Talleu\RedisOm\Tests\Fixtures\FixturesGenerator;
+use Talleu\RedisOm\Tests\Fixtures\Hash\DummyHash;
 
 class RedisAbstractTestCase extends TestCase
 {
@@ -27,10 +28,10 @@ class RedisAbstractTestCase extends TestCase
         Runner::generateSchema('tests');
     }
 
-    public static function loadRedisFixtures(string $format, ?bool $flush = true): array
+    public static function loadRedisFixtures(?string $dummyClass = DummyHash::class, ?bool $flush = true): array
     {
         $objectManager = new RedisObjectManager();
-        $dummies = FixturesGenerator::generateDummies($format);
+        $dummies = FixturesGenerator::generateDummies($dummyClass);
         foreach ($dummies as $dummy) {
             $objectManager->persist($dummy);
         }

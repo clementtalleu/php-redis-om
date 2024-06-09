@@ -7,7 +7,7 @@ namespace  Talleu\RedisOm\Command;
 use Talleu\RedisOm\Om\Mapping\Entity;
 use Talleu\RedisOm\Om\RedisFormat;
 
-class GenerateSchema
+final class GenerateSchema
 {
     public static function generateSchema(string $dir): void
     {
