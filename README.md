@@ -3,7 +3,7 @@
 ![PHPStan](https://img.shields.io/badge/PHPStan-OK-brightgreen)
 [![Packagist Version](https://img.shields.io/packagist/v/talleu/php-redis-om.svg)](https://packagist.org/packages/talleu/php-redis-om)
 [![GitHub](https://img.shields.io/github/license/clementtalleu/php-redis-om.svg)](https://github.com/averias/phpredis-json)
-
+[![codecov.io Code Coverage](https://img.shields.io/codecov/c/github/clementtalleu/php-redis-om.svg)](https://codecov.io/github/clementtalleu/php-redis-om?branch=main)
 
 # php-redis-om
 
