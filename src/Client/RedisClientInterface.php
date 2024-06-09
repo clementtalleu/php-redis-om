@@ -11,8 +11,10 @@ interface RedisClientInterface
     public function createPersistentConnection(?string $host = null, ?int $port = null, ?int $timeout = 0): void;
     public function hMSet(string $key, array $data): void;
     public function hGetAll(string $key): array;
+    public function hget(string $key, string $property): string;
     public function del(string $key): void;
     public function jsonGet(string $key): ?string;
+    public function jsonGetProperty(string $key, string $property): ?string;
     public function jsonSet(string $key, ?string $path = '$', ?string $value = '{}'): void;
     public function jsonDel(string $key, ?string $path = '$'): void;
     public function createIndex(string $prefixKey, ?string $format = 'HASH', ?array $properties = []): void;

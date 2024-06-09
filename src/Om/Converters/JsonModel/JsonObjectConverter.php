@@ -64,7 +64,7 @@ final class JsonObjectConverter extends AbstractObjectConverter
             $reflectionProperty = new \ReflectionProperty($type, $key);
             if (is_array($value) && array_key_exists('#type', $value)) {
                 $valueType = $value['#type'];
-            } elseif ($reflectionProperty->getType()) {
+            } elseif ($reflectionProperty->hasType()) {
                 /** @var \ReflectionNamedType $propertyType */
                 $propertyType = $reflectionProperty->getType();
                 $valueType = $propertyType->getName();
