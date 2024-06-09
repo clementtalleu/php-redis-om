@@ -7,7 +7,7 @@ namespace Talleu\RedisOm\Tests\Fixtures\Hash;
 use Talleu\RedisOm\Om\Mapping as RedisOm;
 use Talleu\RedisOm\Tests\Fixtures\AbstractDummy;
 
-#[RedisOm\Entity]
+#[RedisOm\Entity()]
 class DummyHashWithoutAge extends AbstractDummy
 {
     public ?int $age = null;

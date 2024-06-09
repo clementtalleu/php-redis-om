@@ -15,14 +15,13 @@ final class JsonRepositoryTest extends RedisAbstractTestCase
     {
         static::emptyRedis();
         static::generateIndex();
-        static::loadRedisFixtures(RedisFormat::JSON->value);
+        static::loadRedisFixtures(DummyJson::class);
 
         $objectManager = new RedisObjectManager();
         $repository = $objectManager->getRepository(DummyJson::class);
 
         $collection = $repository->findAll();
-
-
+        $this->assertCount(3, $collection);
         foreach ($collection as $dummy) {
             $this->assertInstanceOf(DummyJson::class, $dummy);
         }
@@ -32,7 +31,7 @@ final class JsonRepositoryTest extends RedisAbstractTestCase
     {
         static::emptyRedis();
         static::generateIndex();
-        static::loadRedisFixtures(RedisFormat::JSON->value);
+        static::loadRedisFixtures(DummyJson::class);
 
         $objectManager = new RedisObjectManager();
         $repository = $objectManager->getRepository(DummyJson::class);
@@ -50,7 +49,7 @@ final class JsonRepositoryTest extends RedisAbstractTestCase
     {
         static::emptyRedis();
         static::generateIndex();
-        static::loadRedisFixtures(RedisFormat::JSON->value);
+        static::loadRedisFixtures(DummyJson::class);
 
         $objectManager = new RedisObjectManager();
         $repository = $objectManager->getRepository(DummyJson::class);
@@ -59,6 +58,7 @@ final class JsonRepositoryTest extends RedisAbstractTestCase
         $this->assertCount(2, $collection);
 
         foreach ($collection as $dummy) {
+            $this->assertEquals($dummy->name, 'Olivier');
             if (isset($age)) {
                 $this->assertGreaterThan($age, $dummy->age);
             }
@@ -69,6 +69,7 @@ final class JsonRepositoryTest extends RedisAbstractTestCase
         $collection = $repository->findBy(['name' => 'Olivier'], ['age' => 'DESC']);
         $this->assertCount(2, $collection);
         foreach ($collection as $dummy) {
+            $this->assertEquals($dummy->name, 'Olivier');
             if (isset($age)) {
                 $this->assertLessThan($age, $dummy->age);
             }
@@ -80,7 +81,7 @@ final class JsonRepositoryTest extends RedisAbstractTestCase
     {
         static::emptyRedis();
         static::generateIndex();
-        static::loadRedisFixtures(RedisFormat::JSON->value);
+        static::loadRedisFixtures(DummyJson::class);
 
         $objectManager = new RedisObjectManager();
         $repository = $objectManager->getRepository(DummyJson::class);
@@ -99,7 +100,7 @@ final class JsonRepositoryTest extends RedisAbstractTestCase
     {
         static::emptyRedis();
         static::generateIndex();
-        static::loadRedisFixtures(RedisFormat::JSON->value);
+        static::loadRedisFixtures(DummyJson::class);
 
         $objectManager = new RedisObjectManager();
         $repository = $objectManager->getRepository(DummyJson::class);

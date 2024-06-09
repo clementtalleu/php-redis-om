@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Om\Converters\JsonModel;
 
-use Talleu\RedisOm\Exception\BadPropertyConfigurationException;
 use Talleu\RedisOm\Om\Converters\AbstractDateTimeConverter;
 use Talleu\RedisOm\Om\Converters\AbstractObjectConverter;
 use Talleu\RedisOm\Om\Mapping\Property;
@@ -28,14 +27,18 @@ final class JsonObjectConverter extends AbstractObjectConverter
             }
 
             $value = $this->extractPropertyValue($propertyAttribute, $property, $data);
-            $valueType = $property->getType() ? $property->getType()->getName() : (is_object($value) ? get_class($value) : gettype($value));
+
+            /** @var \ReflectionNamedType|null $propertyType */
+            $propertyType = $property->getType();
+            $valueType = $propertyType ? $propertyType->getName() : (is_object($value) ? get_class($value) : gettype($value));
+
             $converter = ConverterFactory::getConverter($valueType, $value);
             if (!$converter) {
                 continue;
             }
 
             $convertedValue = $converter->convert($value);
-            if ($converter instanceof JsonObjectConverter || $converter instanceof ArrayConverter) {
+            if ($converter instanceof JsonObjectConverter || $converter instanceof ArrayConverter || $converter instanceof StandardClassConverter) {
                 $convertedData[$property->getName()]['#type'] = $valueType;
             }
 
@@ -57,21 +60,26 @@ final class JsonObjectConverter extends AbstractObjectConverter
             if (!property_exists($object, $key)) {
                 continue;
             }
+
+            $reflectionProperty = new \ReflectionProperty($type, $key);
             if (is_array($value) && array_key_exists('#type', $value)) {
                 $valueType = $value['#type'];
-            } elseif (($reflectionProperty = new \ReflectionProperty($type, $key)) && $reflectionProperty->getType()) {
-                $valueType = $reflectionProperty->getType()->getName();
+            } elseif ($reflectionProperty->getType()) {
+                /** @var \ReflectionNamedType $propertyType */
+                $propertyType = $reflectionProperty->getType();
+                $valueType = $propertyType->getName();
             } else {
                 $valueType = is_object($value) ? get_class($value) : gettype($value);
             }
 
             $reverter = ConverterFactory::getReverter($valueType, $value);
+
             if (!$reverter) {
                 continue;
             }
 
             $revertedValue = $reverter->revert($value, $valueType);
-            $this->assignValue($object, $key, $revertedValue, $type, $reflectionProperty ?? null);
+            $this->assignValue($object, $key, $revertedValue, $type, $reflectionProperty);
         }
 
         return $object;
@@ -79,6 +87,6 @@ final class JsonObjectConverter extends AbstractObjectConverter
 
     public function supportsReversion(string $type, mixed $value): bool
     {
-        return $value !== null && class_exists($type) && !in_array($type, AbstractDateTimeConverter::DATETYPES_NAMES);
+        return $value !== null && class_exists($type) && $type !== 'stdClass' && !in_array($type, AbstractDateTimeConverter::DATETYPES_NAMES);
     }
 }

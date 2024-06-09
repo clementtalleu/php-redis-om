@@ -49,14 +49,17 @@ jobs:
           restore-keys: ${{ runner.os }}-composer-
       - name: Install dependencies
         run: composer install --prefer-dist
-      - name: Run PHPStan
-        run: vendor/bin/phpstan analyse
-      - name: Run tests with coverage
-        run: vendor/bin/phpunit --coverage-clover=coverage/clover.xml
+      - name: Test cs-fixer
+        run: vendor/bin/php-cs-fixer fix src --dry-run --diff --no-ansi
+      - name: Run phpstan
+        run: vendor/bin/phpstan analyse src --level=5
+      - name: Run tests
+        run: vendor/bin/phpunit --coverage-clover coverage.xml .
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
-        with:
-          files: coverage/clover.xml
-          verbose: true
         env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          CODECOV_TOKEN: ${{ secrets.CODECOV_ORG_TOKEN }}
+      - name: composer audit
+        run: composer audit
+      - name: composer validate
+        run: composer validate

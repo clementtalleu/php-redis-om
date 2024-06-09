@@ -23,9 +23,4 @@ final class DateTimeConverter extends AbstractDateTimeConverter
     {
         return new \DateTime($data['date'], new \DateTimeZone($data['timezone']));
     }
-
-    public function supportsReversion(string $type, mixed $value): bool
-    {
-        return $type === 'DateTime' || $type === 'DateTimeInterface';
-    }
 }

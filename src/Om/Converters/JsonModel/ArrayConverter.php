@@ -26,7 +26,7 @@ final class ArrayConverter extends AbstractArrayConverter
             $convertedValue = $converter->convert($value);
             $convertedData[$key] = $convertedValue;
 
-            if ($converter instanceof JsonObjectConverter || $converter instanceof ArrayConverter) {
+            if ($converter instanceof JsonObjectConverter || $converter instanceof ArrayConverter || $converter instanceof StandardClassConverter) {
                 $convertedData[$key]['#type'] = $valueType;
             }
         }
@@ -47,6 +47,7 @@ final class ArrayConverter extends AbstractArrayConverter
             }
 
             $reverter = ConverterFactory::getReverter($valueType, $value);
+
             if (!$reverter) {
                 continue;
             }
@@ -55,10 +56,5 @@ final class ArrayConverter extends AbstractArrayConverter
         }
 
         return $revertedArray;
-    }
-
-    public function supportsReversion(string $type, mixed $value): bool
-    {
-        return $type === 'array' && $value !== null;
     }
 }

@@ -4,12 +4,8 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Tests\Functionnal\Om\Mapping;
 
-use Talleu\RedisOm\Client\RedisClient;
-use Talleu\RedisOm\Om\RedisFormat;
 use Talleu\RedisOm\Om\RedisObjectManager;
-use Talleu\RedisOm\Tests\Fixtures\Hash\DummyHash;
 use Talleu\RedisOm\Tests\Fixtures\Hash\DummyHashWithoutAge;
-use Talleu\RedisOm\Tests\Fixtures\Json\DummyJson;
 use Talleu\RedisOm\Tests\Fixtures\Json\DummyJsonWithoutAge;
 use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 

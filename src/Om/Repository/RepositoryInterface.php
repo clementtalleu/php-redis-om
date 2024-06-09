@@ -6,11 +6,10 @@ namespace Talleu\RedisOm\Om\Repository;
 
 use Talleu\RedisOm\Client\RedisClientInterface;
 use Talleu\RedisOm\Om\Converters\ConverterInterface;
-use Talleu\RedisOm\Om\Mapping\Entity;
 
 interface RepositoryInterface
 {
-    public function find(string $identifier): ?object;
+    public function find($identifier): ?object;
     public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): array;
     public function findAll(): array;
     public function findOneBy(array $criteria, ?array $orderBy = null): ?object;

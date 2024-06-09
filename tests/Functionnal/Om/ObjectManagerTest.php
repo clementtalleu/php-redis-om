@@ -7,6 +7,8 @@ namespace Talleu\RedisOm\Tests\Functionnal\Om;
 use Talleu\RedisOm\Client\RedisClient;
 use Talleu\RedisOm\Om\RedisFormat;
 use Talleu\RedisOm\Om\RedisObjectManager;
+use Talleu\RedisOm\Om\Repository\HashModel\HashRepository;
+use Talleu\RedisOm\Om\Repository\JsonModel\JsonRepository;
 use Talleu\RedisOm\Tests\Fixtures\Hash\DummyHash;
 use Talleu\RedisOm\Tests\Fixtures\Json\DummyJson;
 use Talleu\RedisOm\Tests\RedisAbstractTestCase;
@@ -17,7 +19,7 @@ class ObjectManagerTest extends RedisAbstractTestCase
     {
         static::emptyRedis();
         static::generateIndex();
-        static::loadRedisFixtures(RedisFormat::HASH->value);
+        static::loadRedisFixtures();
 
         $keys = $this->createClient()->keys('*');
         $classNameConverted = RedisClient::convertPrefix(DummyHash::class);
@@ -30,7 +32,7 @@ class ObjectManagerTest extends RedisAbstractTestCase
     {
         static::emptyRedis();
         static::generateIndex();
-        static::loadRedisFixtures(RedisFormat::JSON->value);
+        static::loadRedisFixtures(DummyJson::class);
 
         $keys = $this->createClient()->keys('*');
         $classNameConverted = RedisClient::convertPrefix(DummyJson::class);
@@ -43,7 +45,7 @@ class ObjectManagerTest extends RedisAbstractTestCase
     {
         static::emptyRedis();
         static::generateIndex();
-        $dummies = static::loadRedisFixtures(RedisFormat::JSON->value);
+        $dummies = static::loadRedisFixtures(DummyJson::class);
 
         $objectManager = new RedisObjectManager();
         /** @var DummyJson $object */
@@ -64,7 +66,7 @@ class ObjectManagerTest extends RedisAbstractTestCase
     {
         static::emptyRedis();
         static::generateIndex();
-        $dummies = static::loadRedisFixtures(RedisFormat::HASH->value);
+        $dummies = static::loadRedisFixtures();
 
         $objectManager = new RedisObjectManager();
 
@@ -85,7 +87,7 @@ class ObjectManagerTest extends RedisAbstractTestCase
     {
         static::emptyRedis();
         static::generateIndex();
-        $dummies = static::loadRedisFixtures(RedisFormat::HASH->value);
+        $dummies = static::loadRedisFixtures();
         /** @var DummyHash $object */
         $object = $dummies[0];
 
@@ -95,11 +97,53 @@ class ObjectManagerTest extends RedisAbstractTestCase
 
         $retrieveObject = $objectManager->find(DummyHash::class, $object->id);
         $this->assertInstanceOf(DummyHash::class, $retrieveObject);
-        
+
         // Then remove the object
         $objectManager->remove($object);
         $objectManager->flush();
         $retrieveObject = $objectManager->find(DummyHash::class, $object->id);
         $this->assertNull($retrieveObject);
+    }
+
+    public function testGetRepository()
+    {
+        $objectManager = new RedisObjectManager();
+        $repo = $objectManager->getRepository(DummyHash::class);
+        $this->assertInstanceOf(HashRepository::class, $repo);
+
+        $repo = $objectManager->getRepository(DummyJson::class);
+        $this->assertInstanceOf(JsonRepository::class, $repo);
+    }
+
+    public function testClear()
+    {
+        static::emptyRedis();
+        static::generateIndex();
+        $dummies = static::loadRedisFixtures(flush: false);
+        $objectManager = new RedisObjectManager();
+        foreach ($dummies as $dummy) {
+            $objectManager->persist($dummy);
+        }
+
+        $objectManager->clear();
+        $keys = $this->createClient()->keys('*');
+        $this->assertCount(0, $keys);
+    }
+
+    public function testDetach()
+    {
+        static::emptyRedis();
+        static::generateIndex();
+        $dummies = static::loadRedisFixtures(flush: false);
+        $objectManager = new RedisObjectManager();
+        foreach ($dummies as $dummy) {
+            $objectManager->persist($dummy);
+        }
+
+        $objectManager->detach($dummies[1]);
+        $objectManager->flush();
+        $keys = $this->createClient()->keys('*');
+        $this->assertCount(2, $keys);
+        $this->assertNotContains("Talleu_RedisOm_Tests_Fixtures_Hash_DummyHash:2", $keys);
     }
 }

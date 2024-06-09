@@ -21,5 +21,8 @@ abstract class AbstractDateTimeImmutableConverter implements ConverterInterface
 
     abstract public function revert($data, string $type): \DateTimeImmutable;
 
-    abstract public function supportsReversion(string $type, mixed $value): bool;
+    public function supportsReversion(string $type, mixed $value): bool
+    {
+        return $type === 'DateTimeImmutable';
+    }
 }

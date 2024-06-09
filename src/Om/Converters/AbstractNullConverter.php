@@ -11,7 +11,10 @@ abstract class AbstractNullConverter implements ConverterInterface
      */
     abstract public function convert($data);
 
-    abstract public function revert($data, string $type): mixed;
+    public function revert($data, string $type): null
+    {
+        return null;
+    }
 
     public function supportsConversion(string $type, mixed $data): bool
     {

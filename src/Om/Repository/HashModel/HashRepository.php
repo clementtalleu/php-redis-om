@@ -11,9 +11,9 @@ final class HashRepository extends AbstractObjectRepository
 {
     public ?string $format = RedisFormat::HASH->value;
 
-    public function find(string $identifier): ?object
+    public function find($identifier): ?object
     {
-        $data = $this->redisClient->hashGetAll("$this->prefix:$identifier");
+        $data = $this->redisClient->hGetAll("$this->prefix:$identifier");
         if (!$data) {
             return null;
         }

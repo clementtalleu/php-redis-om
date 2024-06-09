@@ -15,9 +15,4 @@ final class NullConverter extends AbstractNullConverter
     {
         return 'null';
     }
-
-    public function revert($data, string $type): mixed
-    {
-        return null;
-    }
 }

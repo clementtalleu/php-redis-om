@@ -21,13 +21,4 @@ final class DateTimeConverter extends AbstractDateTimeConverter
 
         return new \DateTime($data);
     }
-
-    public function supportsReversion(string $type, mixed $value): bool
-    {
-        if ($type === 'DateTime' || $type === 'DateTimeInterface') {
-            return true;
-        }
-
-        return false;
-    }
 }

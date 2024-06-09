@@ -14,11 +14,11 @@ final class HashPersister extends AbstractPersister
             throw new \InvalidArgumentException('Redis hMSet() method #2 argument must be an array.');
         }
 
-        $this->redis->hashMultiSet($key, $data);
+        $this->redis->hMSet($key, $data);
     }
 
     public function doDelete(string $key): void
     {
-        $this->redis->remove($key);
+        $this->redis->del($key);
     }
 }

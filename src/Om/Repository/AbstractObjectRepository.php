@@ -19,7 +19,7 @@ abstract class AbstractObjectRepository implements RepositoryInterface
     {
     }
 
-    abstract public function find(string $identifier): ?object;
+    abstract public function find($identifier): ?object;
 
     public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): array
     {

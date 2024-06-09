@@ -9,19 +9,16 @@ use Talleu\RedisOm\Om\Mapping\Property;
 
 abstract class AbstractObjectConverter implements ConverterInterface
 {
-    abstract public function convert($data): \stdClass|array;
+    abstract public function convert($data): array;
 
     public function supportsConversion(string $type, mixed $data): bool
     {
-        return $data !== null && class_exists($type) && !in_array($type, AbstractDateTimeConverter::DATETYPES_NAMES);
+        return $data !== null && class_exists($type) && $type !== \stdClass::class && !in_array($type, AbstractDateTimeConverter::DATETYPES_NAMES);
     }
 
     abstract public function revert($data, string $type): mixed;
 
-    public function supportsReversion(string $type, mixed $value): bool
-    {
-        return class_exists($type) && !in_array($type, AbstractDateTimeConverter::DATETYPES_NAMES);
-    }
+    abstract public function supportsReversion(string $type, mixed $value): bool;
 
     protected function extractPropertyValue(Property $propertyAttribute, \ReflectionProperty $property, object $data): mixed
     {
@@ -41,7 +38,7 @@ abstract class AbstractObjectConverter implements ConverterInterface
         return $value;
     }
 
-    protected function assignValue(object &$object, string $key, mixed $revertedValue, string $type, \ReflectionProperty $reflectionProperty = null): void
+    protected function assignValue(object &$object, string $key, mixed $revertedValue, string $type, ?\ReflectionProperty $reflectionProperty = null): void
     {
         $reflectionProperty = $reflectionProperty ?? new \ReflectionProperty($type, $key);
         if ($reflectionProperty->isPublic()) {
@@ -49,10 +46,10 @@ abstract class AbstractObjectConverter implements ConverterInterface
             return;
         }
 
-        /** @var Property $propertyAttribute */
+        /** @var Property|null $propertyAttribute */
         $propertyAttribute = $reflectionProperty->getAttributes(Property::class) !== [] ? $reflectionProperty->getAttributes(Property::class)[0]->newInstance() : null;
 
-        if ($propertyAttribute && $propertyAttribute->setter) {
+        if ($propertyAttribute && $propertyAttribute->setter !== null) {
             if (!method_exists($object, $propertyAttribute->setter)) {
                 throw new BadPropertyConfigurationException(sprintf("The setter you provide %s() does not exist in class %s", $propertyAttribute->setter, get_class($object)));
             }

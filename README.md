@@ -1,4 +1,9 @@
-# [WIP] BETA VERSION IN PROGRESS
+
+[![Build Status](https://github.com/clementtalleu/php-redis-om/actions/workflows/tests.yaml/badge.svg)](https://github.com/clementtalleu/php-redis-om/actions)
+![PHPStan](https://img.shields.io/badge/PHPStan-OK-brightgreen)
+[![Packagist Version](https://img.shields.io/packagist/v/talleu/php-redis-om.svg)](https://packagist.org/packages/talleu/php-redis-om)
+[![GitHub](https://img.shields.io/github/license/clementtalleu/php-redis-om.svg)](https://github.com/averias/phpredis-json)
+
 
 # php-redis-om
 
@@ -12,14 +17,27 @@ with Redis.
 - Doctrine-like methods and architecture
 - Easy integration with existing PHP applications
 - High performance and scalability with Redis
+- Support for Redis JSON module
+- Automatic schema generation
+- Search and query capabilities
 
 ## Requirements
 
 - PHP 8.2 or higher
 - Redis 4.0 or higher
-- php-redis extension
-- Redis JSON and Redisearch modules (optional)
+- Redisearch module ([installation](https://redis.io/docs/latest/operate/oss_and_stack/install/install-stack/))
+- php-redis extension (or your favorite Redis client)
+- Redis JSON module (optional)
 - Composer
+
+## Supported types
+
+- scalar (string, int, float, bool)
+- DateTimeImmutable
+- DateTime
+- array and nested arrays
+- object and nested objects
+- stdClass
 
 ## Installation
 
@@ -54,10 +72,10 @@ class User
 ```
 
 After add the RedisOm attribute to your class,
-you have to run the following command to create the Redis schema for the given source directory: 
+you have to run the following command to create the Redis schema for your classes (default path is `./src`): 
 
 ```console
-vendor/bin/redisMigration src
+vendor/bin/redisMigration <YOUR DIRECTORY PATH>
 ```
 
 Then you can use the ObjectManager to persist your objects from Redis:
@@ -72,7 +90,7 @@ $user->id = 1;
 $user->name = 'John Doe';
 
 // Persist the object in redis
-$objectManager = new ObjectManager();
+$objectManager = new RedisObjectManager();
 $objectManager->persist($user);
 $objectManager->flush();
 ```
@@ -93,18 +111,10 @@ $users = $objectManager->getRepository(User::class)->findAll();
 $users = $objectManager->getRepository(User::class)->findBy(['name' => 'John Doe'], ['createdAt' => 'DESC'], 10);
 ```
 
-### Docker
 
-The package provide a Docker Compose configuration to run a Redis 
-server with the required modules (RedisJSON and Redisearch) for testing purposes.
-
-```console
-docker compose up -d
-```
-
-### Running tests
-
-
-```console
-docker compose exec php vendor/bin/phpunit tests
-```
+## Advanced documentation
+- [Installation](https://github.com/clementtalleu/php-redis-om/blob/main/docs/installation.md)
+- [Configuration](https://github.com/clementtalleu/php-redis-om/blob/main/docs/configuration.md)
+- [Docker integration](https://github.com/clementtalleu/php-redis-om/blob/main/docs/docker_integration.md)
+- [Mapping ](https://github.com/clementtalleu/php-redis-om/blob/main/docs/mapping.md)
+- [Advanced usage ](https://github.com/clementtalleu/php-redis-om/blob/main/docs/advanced_usage.md)

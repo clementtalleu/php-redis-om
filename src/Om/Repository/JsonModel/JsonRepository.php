@@ -11,7 +11,7 @@ final class JsonRepository extends AbstractObjectRepository
 {
     public ?string $format = RedisFormat::JSON->value;
 
-    public function find(string $identifier): ?object
+    public function find($identifier): ?object
     {
         $data = $this->redisClient->jsonget("$this->prefix:$identifier");
         if (!$data) {

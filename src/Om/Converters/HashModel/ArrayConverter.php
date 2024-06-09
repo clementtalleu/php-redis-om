@@ -11,7 +11,7 @@ final class ArrayConverter extends AbstractArrayConverter
     /**
      * @param array $data
      */
-    public function convert($data, ?array $propertiesMapped = [], ?array $hashData = [], ?string $parentProperty = null): array
+    public function convert($data, ?array $hashData = [], ?string $parentProperty = null, ?string $parentPropertyType = null): array
     {
         foreach ($data as $key => $value) {
             $valueType = is_object($value) ? get_class($value) : gettype($value);
@@ -21,9 +21,10 @@ final class ArrayConverter extends AbstractArrayConverter
                 continue;
             }
 
-            if ($converter instanceof HashObjectConverter || $converter instanceof ArrayConverter) {
+            if ($converter instanceof HashObjectConverter || $converter instanceof ArrayConverter || $converter instanceof StandardClassConverter) {
                 $propertyKey = $parentProperty ? sprintf("%s.%s", $parentProperty, $key) : $key;
-                $hashData = $converter->convert(data: $value, hashData:  $hashData, parentProperty: $propertyKey);
+                $hashData[sprintf("%s.%s.#type", $parentProperty, $key)] = $valueType;
+                $hashData = $converter->convert(data: $value, hashData:  $hashData, parentProperty: $propertyKey, parentPropertyType: $valueType);
                 continue;
             }
 
