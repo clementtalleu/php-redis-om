@@ -17,6 +17,7 @@ services:
     tty: true
     environment:
       REDIS_HOST: redis
+      XDEBUG_MODE: 'coverage'
 
 volumes:
   redis_data:

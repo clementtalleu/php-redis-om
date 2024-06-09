@@ -54,11 +54,15 @@ jobs:
       - name: Run phpstan
         run: vendor/bin/phpstan analyse src --level=5
       - name: Run tests
-        run: vendor/bin/phpunit --coverage-clover coverage.xml .
+        run: XDEBUG_MODE=coverage vendor/bin/phpunit
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_ORG_TOKEN }}
+        with:
+          token: ${{ secrets.CODE_COV_TOKEN }}
+          files: ./coverage.xml
+          verbose: true
+#        env:
+#          CODECOV_TOKEN: ${{ secrets.CODECOV_ORG_TOKEN }}
       - name: composer audit
         run: composer audit
       - name: composer validate
