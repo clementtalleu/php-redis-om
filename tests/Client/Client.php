@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace Talleu\RedisOm\Tests\Client;
 
 use Talleu\RedisOm\Client\RedisClient;
+use Talleu\RedisOm\Client\RedisClientInterface;
 
-class Client extends RedisClient
+class Client
 {
+    public ?RedisClientInterface $redisClient = null;
+
     public function __construct()
     {
-        parent::__construct();
-        $this->createPersistentConnection($_SERVER['REDIS_HOST']);
+        $this->redisClient = new RedisClient();
+        $this->redisClient->createPersistentConnection($_SERVER['REDIS_HOST']);
     }
 }
