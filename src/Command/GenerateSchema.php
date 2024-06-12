@@ -25,13 +25,13 @@ final class GenerateSchema
 
         foreach ($phpFiles as $phpFile) {
 
-            $namespace = static::getNamespace($phpFile);
-            $class = static::getClass($phpFile);
-            $fqcn = $namespace.'\\'.$class;
+            $namespace = self::getNamespace($phpFile);
+            $class = self::getClass($phpFile);
+            $fqcn = "$namespace\\$class";
 
             try {
                 $reflectionClass = new \ReflectionClass($fqcn);
-            } catch (\ReflectionException $e) {
+            } catch (\ReflectionException) {
                 continue;
             }
 
