@@ -71,7 +71,7 @@ final class RedisObjectManager implements RedisObjectManagerInterface
     public function detach(object $object): void
     {
         $identifier = $this->keyGenerator->getIdentifier(new \ReflectionClass($object));
-        $key = sprintf("%s:%s", $this->getEntityMapper($object)->prefix ?: get_class($object), $object->{$identifier->getName()});
+        $key = sprintf('%s:%s', $this->getEntityMapper($object)->prefix ?: get_class($object), $object->{$identifier->getName()});
 
         foreach ($this->objectsToFlush as $redisKey => $objectToFlush) {
             if ($key === $redisKey) {

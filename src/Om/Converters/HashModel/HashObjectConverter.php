@@ -43,7 +43,7 @@ final class HashObjectConverter extends AbstractObjectConverter
             $convertedValue = $converter->convert($value);
 
             if ($parentProperty) {
-                $hashData[sprintf("%s.%s", $parentProperty, $property->getName())] = $convertedValue;
+                $hashData["$parentProperty.{$property->getName()}"] = $convertedValue;
                 if ($parentPropertyType !== null) {
                     $hashData[sprintf("%s.#type", $parentProperty)] = $parentPropertyType;
                 }

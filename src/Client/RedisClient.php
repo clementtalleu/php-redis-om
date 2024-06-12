@@ -166,7 +166,7 @@ final class RedisClient implements RedisClientInterface
         $arguments = [RedisCommands::SEARCH->value, static::convertPrefix($prefixKey)];
 
         foreach ($criterias as $property => $value) {
-            $arguments[] = sprintf("@%s:%s", $property, $value);
+            $arguments[] = "@$property:$value";
         }
 
         $rawResult = call_user_func_array([$this->redis, 'rawCommand'], $arguments);
