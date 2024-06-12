@@ -151,7 +151,7 @@ final class RedisObjectManager implements RedisObjectManagerInterface
     protected function registerPersister(Entity $redisEntity, object $object): PersisterInterface
     {
         if (($persister = $redisEntity->persister) === null) {
-            throw new RedisOmInvalidArgumentException(sprintf("No persister found for %s object.", get_class($object)));
+            throw new RedisOmInvalidArgumentException(sprintf('No persister found for %s object.', get_class($object)));
         }
 
         $persisterClass = get_class($persister);

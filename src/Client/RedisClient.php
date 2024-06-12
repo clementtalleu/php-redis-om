@@ -213,7 +213,7 @@ final class RedisClient implements RedisClientInterface
         } else {
             $criteria = '';
             foreach ($search as $property => $value) {
-                $criteria .= sprintf('@%s:%s ', $property, $value);
+                $criteria .= "@$property:$value ";
             }
 
             $arguments[] = $criteria;
