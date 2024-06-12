@@ -71,7 +71,7 @@ final class RedisObjectManager implements RedisObjectManagerInterface
     public function detach(object $object): void
     {
         $identifier = $this->keyGenerator->getIdentifier(new \ReflectionClass($object));
-        $key = sprintf("%s:%s", $this->getEntityMapper($object)->prefix ?: get_class($object), $object->{$identifier->getName()});
+        $key = sprintf('%s:%s', $this->getEntityMapper($object)->prefix ?: get_class($object), $object->{$identifier->getName()});
 
         foreach ($this->objectsToFlush as $redisKey => $objectToFlush) {
             if ($key === $redisKey) {
@@ -151,7 +151,7 @@ final class RedisObjectManager implements RedisObjectManagerInterface
     protected function registerPersister(Entity $redisEntity, object $object): PersisterInterface
     {
         if (($persister = $redisEntity->persister) === null) {
-            throw new RedisOmInvalidArgumentException(sprintf("No persister found for %s object.", get_class($object)));
+            throw new RedisOmInvalidArgumentException(sprintf('No persister found for %s object.', get_class($object)));
         }
 
         $persisterClass = get_class($persister);

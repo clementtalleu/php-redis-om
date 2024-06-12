@@ -26,13 +26,13 @@ abstract class AbstractObjectConverter implements ConverterInterface
             $value = $data->{$property->getName()};
         } elseif ($propertyAttribute->getter) {
             if (!method_exists($data, $propertyAttribute->getter)) {
-                throw new BadPropertyConfigurationException(sprintf("The getter you provide %s() does not exist in class %s", $propertyAttribute->getter, get_class($data)));
+                throw new BadPropertyConfigurationException(sprintf('The getter you provide %s() does not exist in class %s', $propertyAttribute->getter, get_class($data)));
             }
             $value = $data->{$propertyAttribute->getter}();
-        } elseif (method_exists($data, sprintf("get%s", ucfirst($property->getName())))) {
-            $value = $data->{sprintf("get%s", ucfirst($property->getName()))}();
+        } elseif (method_exists($data, sprintf('get%s', ucfirst($property->getName())))) {
+            $value = $data->{sprintf('get%s', ucfirst($property->getName()))}();
         } else {
-            throw new BadPropertyConfigurationException(sprintf("The property %s is not accessible, you should change the visibility to public or implements a get%s() method", $property->getName(), ucfirst($property->getName())));
+            throw new BadPropertyConfigurationException(sprintf('The property %s is not accessible, you should change the visibility to public or implements a get%s() method', $property->getName(), ucfirst($property->getName())));
         }
 
         return $value;
@@ -51,13 +51,13 @@ abstract class AbstractObjectConverter implements ConverterInterface
 
         if ($propertyAttribute && $propertyAttribute->setter !== null) {
             if (!method_exists($object, $propertyAttribute->setter)) {
-                throw new BadPropertyConfigurationException(sprintf("The setter you provide %s() does not exist in class %s", $propertyAttribute->setter, get_class($object)));
+                throw new BadPropertyConfigurationException(sprintf('The setter you provide %s() does not exist in class %s', $propertyAttribute->setter, get_class($object)));
             }
             $object->{$propertyAttribute->setter}($revertedValue);
-        } elseif (method_exists($object, sprintf("set%s", ucfirst($key)))) {
-            $object->{sprintf("set%s", ucfirst($key))}($revertedValue);
+        } elseif (method_exists($object, sprintf('set%s', ucfirst($key)))) {
+            $object->{sprintf('set%s', ucfirst($key))}($revertedValue);
         } else {
-            throw new BadPropertyConfigurationException(sprintf("The property %s is not accessible, you should change the visibility to public or implements a set%s() method", $key, ucfirst($key)));
+            throw new BadPropertyConfigurationException(sprintf('The property %s is not accessible, you should change the visibility to public or implements a set%s() method', $key, ucfirst($key)));
         }
     }
 }
