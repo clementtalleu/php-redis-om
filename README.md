@@ -5,14 +5,14 @@
 [![GitHub](https://img.shields.io/github/license/clementtalleu/php-redis-om.svg)](https://github.com/averias/phpredis-json)
 [![codecov.io Code Coverage](https://img.shields.io/codecov/c/github/clementtalleu/php-redis-om.svg)](https://codecov.io/github/clementtalleu/php-redis-om?branch=main)
 
-# php-redis-om
+# php-redis-om 🗄️
 
 A PHP object mapper for [Redis](https://redis.io/).
 
 An Object Mapper for Redis, designed to providing an intuitive and familiar interface for PHP developers to interact
 with Redis.
 
-## Features
+## Features 🛠️
 
 - Doctrine-like methods and architecture
 - Easy integration with existing PHP applications
@@ -21,7 +21,7 @@ with Redis.
 - Automatic schema generation
 - Search and query capabilities
 
-## Requirements
+## Requirements ⚙️
 
 - PHP 8.2 or higher
 - Redis 4.0 or higher
@@ -30,7 +30,7 @@ with Redis.
 - Redis JSON module (optional)
 - Composer
 
-## Supported types
+## Supported types ✅
 
 - scalar (string, int, float, bool)
 - DateTimeImmutable
@@ -39,7 +39,7 @@ with Redis.
 - object and nested objects
 - stdClass
 
-## Installation
+## Installation 📝
 
 Install the library via Composer:
 
@@ -47,7 +47,7 @@ Install the library via Composer:
 composer require talleu/php-redis-om
 ```
 
-## Basic Usage
+## Basic Usage 🎯
 
 Add the RedisOm attribute to your class to map it to a Redis schema:
 
@@ -112,7 +112,7 @@ $users = $objectManager->getRepository(User::class)->findBy(['name' => 'John Doe
 ```
 
 
-## Advanced documentation
+## Advanced documentation 📚
 - [Installation](https://github.com/clementtalleu/php-redis-om/blob/main/docs/installation.md)
 - [Configuration](https://github.com/clementtalleu/php-redis-om/blob/main/docs/configuration.md)
 - [Docker integration](https://github.com/clementtalleu/php-redis-om/blob/main/docs/docker_integration.md)
