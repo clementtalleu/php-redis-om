@@ -9,7 +9,7 @@ use Talleu\RedisOm\Exception\RedisClientResponseException;
 use Talleu\RedisOm\Om\Mapping\Property;
 use Talleu\RedisOm\Om\RedisFormat;
 
-class RedisClient implements RedisClientInterface
+final class RedisClient implements RedisClientInterface
 {
     public function __construct(protected ?\Redis $redis = null)
     {
