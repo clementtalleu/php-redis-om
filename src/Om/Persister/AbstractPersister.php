@@ -28,7 +28,8 @@ abstract class AbstractPersister implements PersisterInterface
             persisterClass: get_class($objectMapper->persister),
             operation: PersisterOperations::OPERATION_PERSIST->value,
             redisKey: $key,
-            value: $objectMapper->converter->convert(data: $object)
+            converter: $objectMapper->converter,
+            value: $object,
         );
     }
 
@@ -44,7 +45,13 @@ abstract class AbstractPersister implements PersisterInterface
         );
     }
 
-    abstract public function doPersist(string $key, array|\stdClass $data): void;
+    /**
+     * @inheritdoc
+     */
+    abstract public function doPersist(array $objectsToPersist): void;
 
-    abstract public function doDelete(string $key): void;
+    /**
+     * @inheritdoc
+     */
+    abstract public function doDelete(array $objectsToRemove): void;
 }

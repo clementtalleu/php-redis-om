@@ -8,10 +8,19 @@ use Talleu\RedisOm\Om\Repository\RepositoryInterface;
 
 interface RedisObjectManagerInterface
 {
+    /**
+     * Request object persistence. The object will be persisted in the next flush.
+     */
     public function persist(object $object): void;
 
+    /**
+     * Request object deletion. The object will be deleted in the next flush.
+     */
     public function remove(object $object): void;
 
+    /**
+     * Get object by class name (FQCN) and id.
+     */
     public function find(string $className, $id): ?object;
 
     public function clear(): void;

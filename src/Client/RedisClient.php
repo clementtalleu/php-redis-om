@@ -90,6 +90,28 @@ final class RedisClient implements RedisClientInterface
         }
     }
 
+    /**
+     * Should provide a set of parameters systematically composed of a key / path / value for each JSON object to be persisted
+     * @param mixed ...$params
+     */
+    public function jsonMSet(...$params): void
+    {
+        if (count($params) % 3 !== 0) {
+            throw new \InvalidArgumentException("Should provide 3 parameters for each key, path and value");
+        }
+
+        $arguments = [RedisCommands::JSON_MSET->value];
+        for ($i = 0; $i < count($params); $i += 3) {
+            $arguments[] = static::convertPrefix($params[$i]);
+            $arguments[] = $params[$i + 1] ?? '$';
+            $arguments[] = $params[$i + 2] ?? '{}';
+        }
+
+        if (!call_user_func_array([$this->redis, 'rawCommand'], $arguments)) {
+            $this->handleError(__METHOD__, $this->redis->getLastError());
+        }
+    }
+
     public function jsonDel(string $key, ?string $path = '$'): void
     {
         if (!$this->redis->rawCommand(RedisCommands::JSON_DELETE->value, static::convertPrefix($key), $path)) {

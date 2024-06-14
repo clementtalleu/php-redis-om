@@ -17,9 +17,10 @@ interface PersisterInterface
     public function persist(Entity $objectMapper, $object): ObjectToPersist;
 
     /**
+     * @param ObjectToPersist[] $objectsToPersist
      * Persists the object to redis.
      */
-    public function doPersist(string $key, array|\stdClass $data): void;
+    public function doPersist(array $objectsToPersist): void;
 
     /**
      * Request object deletion.
@@ -27,7 +28,8 @@ interface PersisterInterface
     public function delete(Entity $objectMapper, $object): ObjectToPersist;
 
     /**
+     * @param ObjectToPersist[] $objectsToRemove
      * Deletes an object from redis.
      */
-    public function doDelete(string $key): void;
+    public function doDelete(array $objectsToRemove): void;
 }
