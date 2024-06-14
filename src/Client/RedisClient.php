@@ -16,6 +16,9 @@ final class RedisClient implements RedisClientInterface
         $this->redis = $redis ?? new \Redis(array_key_exists('REDIS_HOST', $_SERVER) ? ['host' => $_SERVER['REDIS_HOST']] : null);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function createPersistentConnection(?string $host = null, ?int $port = null, ?int $timeout = 0): void
     {
         $this->redis->pconnect(
@@ -25,6 +28,9 @@ final class RedisClient implements RedisClientInterface
         );
     }
 
+    /**
+     * @inheritdoc
+     */
     public function hMSet(string $key, array $data): void
     {
         if (!$this->redis->hMSet(RedisClient::convertPrefix($key), $data)) {
@@ -32,6 +38,9 @@ final class RedisClient implements RedisClientInterface
         }
     }
 
+    /**
+     * @inheritdoc
+     */
     public function hget(string $key, string $property): string
     {
         $result = $this->redis->hget(RedisClient::convertPrefix($key), $property);
@@ -43,6 +52,9 @@ final class RedisClient implements RedisClientInterface
         return $result;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function hGetAll(string $key): array
     {
         $result = $this->redis->hGetAll(RedisClient::convertPrefix($key));
@@ -54,6 +66,9 @@ final class RedisClient implements RedisClientInterface
         return $result;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function del(string $key): void
     {
         if (!$this->redis->del(RedisClient::convertPrefix($key))) {
@@ -61,6 +76,9 @@ final class RedisClient implements RedisClientInterface
         }
     }
 
+    /**
+     * @inheritdoc
+     */
     public function jsonGet(string $key): ?string
     {
         $result = $this->redis->rawCommand(RedisCommands::JSON_GET->value, static::convertPrefix($key));
@@ -72,6 +90,9 @@ final class RedisClient implements RedisClientInterface
         return $result;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function jsonGetProperty(string $key, string $property): ?string
     {
         $result = $this->redis->rawCommand(RedisCommands::JSON_GET->value, static::convertPrefix($key), "$.$property");
@@ -83,6 +104,9 @@ final class RedisClient implements RedisClientInterface
         return $result;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function jsonSet(string $key, ?string $path = '$', ?string $value = '{}'): void
     {
         if (!$this->redis->rawCommand(RedisCommands::JSON_SET->value, static::convertPrefix($key), $path, $value)) {
@@ -91,8 +115,7 @@ final class RedisClient implements RedisClientInterface
     }
 
     /**
-     * Should provide a set of parameters systematically composed of a key / path / value for each JSON object to be persisted
-     * @param mixed ...$params
+     * @inheritdoc
      */
     public function jsonMSet(...$params): void
     {
@@ -114,6 +137,9 @@ final class RedisClient implements RedisClientInterface
         }
     }
 
+    /**
+     * @inheritdoc
+     */
     public function jsonDel(string $key, ?string $path = '$'): void
     {
         if (!$this->redis->rawCommand(RedisCommands::JSON_DELETE->value, static::convertPrefix($key), $path)) {
@@ -122,7 +148,7 @@ final class RedisClient implements RedisClientInterface
     }
 
     /**
-     * @param \ReflectionProperty[] $properties
+     * @inheritdoc
      */
     public function createIndex(string $prefixKey, ?string $format = 'HASH', ?array $properties = []): void
     {
@@ -173,6 +199,9 @@ final class RedisClient implements RedisClientInterface
         }
     }
 
+    /**
+     * @inheritdoc
+     */
     public function dropIndex(string $prefixKey): bool
     {
         try {
@@ -185,6 +214,9 @@ final class RedisClient implements RedisClientInterface
         return true;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function count(string $prefixKey, array $criterias = []): int
     {
         $arguments = [RedisCommands::SEARCH->value, static::convertPrefix($prefixKey)];
@@ -202,6 +234,9 @@ final class RedisClient implements RedisClientInterface
         return (int) $rawResult[0];
     }
 
+    /**
+     * @inheritdoc
+     */
     public function scanKeys(string $prefixKey): array
     {
         $keys = [];
@@ -216,6 +251,9 @@ final class RedisClient implements RedisClientInterface
         return $keys;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function flushAll(): void
     {
         if (!$this->redis->flushAll()) {
@@ -223,11 +261,17 @@ final class RedisClient implements RedisClientInterface
         }
     }
 
+    /**
+     * @inheritdoc
+     */
     public function keys(string $pattern): array
     {
         return $this->redis->keys($pattern);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function search(string $prefixKey, array $search, array $orderBy, ?string $format = RedisFormat::HASH->value, ?int $numberOfResults = null): array
     {
         $arguments = [RedisCommands::SEARCH->value, self::convertPrefix($prefixKey)];
@@ -266,6 +310,9 @@ final class RedisClient implements RedisClientInterface
         return $this->extractRedisData($result, $format, $numberOfResults);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function searchLike(string $prefixKey, string $search, ?string $format = RedisFormat::HASH->value, ?int $numberOfResults = null): array
     {
         $arguments = [RedisCommands::SEARCH->value, static::convertPrefix($prefixKey)];

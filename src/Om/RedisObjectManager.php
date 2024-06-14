@@ -54,6 +54,9 @@ final class RedisObjectManager implements RedisObjectManagerInterface
         $this->objectsToFlush[$objectToRemove->persisterClass][$objectToRemove->operation][$objectToRemove->redisKey] = $objectToRemove;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function flush(): void
     {
         foreach ($this->objectsToFlush as $persisterClassName => $objectsByOperation) {
@@ -64,6 +67,9 @@ final class RedisObjectManager implements RedisObjectManagerInterface
         }
     }
 
+    /**
+     * @inheritdoc
+     */
     public function find(string $className, $id): ?object
     {
         $objectMapper = $this->getEntityMapper($className);
@@ -71,11 +77,17 @@ final class RedisObjectManager implements RedisObjectManagerInterface
         return $objectMapper->repository->find((string) $id);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function clear(): void
     {
         $this->objectsToFlush = [];
     }
 
+    /**
+     * @inheritdoc
+     */
     public function detach(object $object): void
     {
         $identifier = $this->keyGenerator->getIdentifier(new \ReflectionClass($object));
@@ -92,6 +104,9 @@ final class RedisObjectManager implements RedisObjectManagerInterface
         }
     }
 
+    /**
+     * @inheritdoc
+     */
     public function refresh(object $object): object
     {
         $objectMapper = $this->getEntityMapper($object);
@@ -100,6 +115,9 @@ final class RedisObjectManager implements RedisObjectManagerInterface
         return $objectMapper->repository->find($objectMapper->prefix.':'.$object->{$identifierProperty->getName()});
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getRepository(string $className): RepositoryInterface
     {
         $objectMapper = $this->getEntityMapper($className);
@@ -107,21 +125,33 @@ final class RedisObjectManager implements RedisObjectManagerInterface
         return $objectMapper->repository;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getClassMetadata(string $className): ClassMetadata
     {
         return (new MetadataFactory())->createClassMetadata($className);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getMetadataFactory()
     {
         return new MetadataFactory();
     }
 
+    /**
+     * @inheritdoc
+     */
     public function initializeObject(object $obj)
     {
         return new $obj();
     }
 
+    /**
+     * @inheritdoc
+     */
     public function contains(object $object): bool
     {
         $identifier = $this->keyGenerator->getIdentifier(new \ReflectionClass($object));

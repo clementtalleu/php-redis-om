@@ -13,6 +13,9 @@ final class HashRepository extends AbstractObjectRepository
 {
     public ?string $format = RedisFormat::HASH->value;
 
+    /**
+     * @inheritdoc
+     */
     public function find($identifier): ?object
     {
         $data = $this->redisClient->hGetAll("$this->prefix:$identifier");
@@ -23,6 +26,9 @@ final class HashRepository extends AbstractObjectRepository
         return $this->converter->revert($data, $this->className);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getPropertyValue($identifier, string $property): mixed
     {
         try {
