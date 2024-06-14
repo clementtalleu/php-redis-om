@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Om\Repository\JsonModel;
 
-use Talleu\RedisOm\Exception\BadPropertyConfigurationException;
 use Talleu\RedisOm\Exception\BadPropertyException;
 use Talleu\RedisOm\Om\Converters\JsonModel\ConverterFactory;
 use Talleu\RedisOm\Om\RedisFormat;
@@ -14,6 +13,9 @@ final class JsonRepository extends AbstractObjectRepository
 {
     public ?string $format = RedisFormat::JSON->value;
 
+    /**
+     * @inheritdoc
+     */
     public function find($identifier): ?object
     {
         $data = $this->redisClient->jsonget("$this->prefix:$identifier");
@@ -24,6 +26,9 @@ final class JsonRepository extends AbstractObjectRepository
         return $this->converter->revert(\json_decode($data, true), $this->className);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getPropertyValue($identifier, string $property): mixed
     {
         try {

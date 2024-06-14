@@ -19,9 +19,19 @@ abstract class AbstractObjectRepository implements RepositoryInterface
     {
     }
 
+    /**
+     * @inheritdoc
+     */
     abstract public function find($identifier): ?object;
+
+    /**
+     * @inheritdoc
+     */
     abstract public function getPropertyValue($identifier, string $property): mixed;
 
+    /**
+     * @inheritdoc
+     */
     public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): array
     {
         $data = $this->redisClient->search($this->prefix, $criteria, $orderBy ?? [], $this->format, $limit);
@@ -34,6 +44,9 @@ abstract class AbstractObjectRepository implements RepositoryInterface
         return $collection;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function findLike(string $search, ?int $limit = null): array
     {
         $data = $this->redisClient->searchLike($this->prefix, $search, $this->format, $limit);
@@ -46,11 +59,17 @@ abstract class AbstractObjectRepository implements RepositoryInterface
         return $collection;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function findAll(): array
     {
         return $this->findBy([]);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function findOneBy(array $criteria, ?array $orderBy = null): ?object
     {
         $data = $this->redisClient->search($this->prefix, $criteria, $orderBy ?? [], $this->format, 1);
@@ -62,16 +81,25 @@ abstract class AbstractObjectRepository implements RepositoryInterface
         return $this->converter->revert($data[0], $this->className);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function count(array $criteria = []): int
     {
         return $this->redisClient->count($this->prefix, $criteria);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function setRedisClient(RedisClientInterface $redisClient): void
     {
         $this->redisClient = $redisClient;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function setPrefix(string $prefix): void
     {
         $this->prefix = $prefix;
