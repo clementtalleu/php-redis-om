@@ -8,17 +8,24 @@ use Talleu\RedisOm\Om\Persister\AbstractPersister;
 
 final class HashPersister extends AbstractPersister
 {
-    public function doPersist(string $key, $data): void
+    /**
+     * @inheritdoc
+     */
+    public function doPersist(array $objectsToPersist): void
     {
-        if (!is_array($data)) {
-            throw new \InvalidArgumentException('Redis hMSet() method #2 argument must be an array.');
+        if ($objectsToPersist === []) {
+            return;
         }
 
-        $this->redis->hMSet($key, $data);
+        foreach ($objectsToPersist as $objectToPersist) {
+            $this->redis->hMSet($objectToPersist->redisKey, $objectToPersist->converter->convert($objectToPersist->value));
+        }
     }
 
-    public function doDelete(string $key): void
+    public function doDelete(array $objectsToRemove): void
     {
-        $this->redis->del($key);
+        foreach ($objectsToRemove as $objectToRemove) {
+            $this->redis->del($objectToRemove->redisKey);
+        }
     }
 }

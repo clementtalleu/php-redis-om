@@ -96,15 +96,17 @@ final class RedisClient implements RedisClientInterface
      */
     public function jsonMSet(...$params): void
     {
-        if (count($params) % 3 !== 0) {
-            throw new \InvalidArgumentException("Should provide 3 parameters for each key, path and value");
-        }
-
         $arguments = [RedisCommands::JSON_MSET->value];
-        for ($i = 0; $i < count($params); $i += 3) {
-            $arguments[] = static::convertPrefix($params[$i]);
-            $arguments[] = $params[$i + 1] ?? '$';
-            $arguments[] = $params[$i + 2] ?? '{}';
+        foreach ($params as $param) {
+            if (count($param) % 3 !== 0) {
+                throw new \InvalidArgumentException("Should provide 3 parameters for each key, path and value");
+            }
+
+            for ($i = 0; $i < count($param); $i += 3) {
+                $arguments[] = static::convertPrefix($param[$i]);
+                $arguments[] = $param[$i + 1] ?? '$';
+                $arguments[] = $param[$i + 2] ?? '{}';
+            }
         }
 
         if (!call_user_func_array([$this->redis, 'rawCommand'], $arguments)) {

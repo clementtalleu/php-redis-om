@@ -79,11 +79,15 @@ final class RedisObjectManager implements RedisObjectManagerInterface
     public function detach(object $object): void
     {
         $identifier = $this->keyGenerator->getIdentifier(new \ReflectionClass($object));
-        $key = sprintf('%s:%s', $this->getEntityMapper($object)->prefix ?: get_class($object), $object->{$identifier->getName()});
+        $objectMapper = $this->getEntityMapper($object);
+        $key = sprintf('%s:%s', $objectMapper->prefix ?: get_class($object), $object->{$identifier->getName()});
 
-        foreach ($this->objectsToFlush as $redisKey => $objectToFlush) {
-            if ($key === $redisKey) {
-                unset($this->objectsToFlush[$redisKey]);
+        $persisterClassName = get_class($objectMapper->persister);
+        foreach ($this->objectsToFlush[$persisterClassName] as $operation => $objectsToFlush) {
+            foreach ($objectsToFlush as $redisKey => $objectToFlush) {
+                if ($redisKey === $key) {
+                    unset($this->objectsToFlush[$persisterClassName][$operation][$key]);
+                }
             }
         }
     }
@@ -120,11 +124,15 @@ final class RedisObjectManager implements RedisObjectManagerInterface
 
     public function contains(object $object): bool
     {
+        $identifier = $this->keyGenerator->getIdentifier(new \ReflectionClass($object));
         $objectMapper = $this->getEntityMapper($object);
-        $identifierProperty = $this->keyGenerator->getIdentifier(new \ReflectionClass($object));
-        foreach ($this->objectsToFlush as $objectToFlush) {
-            if ($objectToFlush->redisKey === $objectMapper->prefix.':'.$object->{$identifierProperty->getName()}) {
-                return true;
+        $key = sprintf('%s:%s', $objectMapper->prefix ?: get_class($object), $object->{$identifier->getName()});
+        $persisterClassName = get_class($objectMapper->persister);
+        foreach ($this->objectsToFlush[$persisterClassName] as $operation => $objectsToFlush) {
+            foreach ($objectsToFlush as $redisKey => $objectToFlush) {
+                if ($redisKey === $key) {
+                    return true;
+                }
             }
         }
 

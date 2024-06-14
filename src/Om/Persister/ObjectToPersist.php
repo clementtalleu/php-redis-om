@@ -13,7 +13,7 @@ final class ObjectToPersist
         public string $operation,
         public string $redisKey,
         public ?ConverterInterface $converter = null,
-        public string|array|null $value = null
+        public object|array|null $value = null
     ) {
     }
 }

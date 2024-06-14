@@ -18,13 +18,16 @@ final class JsonPersister extends AbstractPersister
         }
 
         if (count($objectsToPersist) === 1) {
-            $this->redis->jsonSet(key: $objectsToPersist[1]->redisKey, value: \json_encode($objectsToPersist[1]->value));
+            $objectToPersist = reset($objectsToPersist);
+            $this->redis->jsonSet(key: $objectToPersist->redisKey, value: \json_encode($objectToPersist->converter->convert($objectToPersist->value)));
             return;
         }
 
         $redisData = [];
         foreach ($objectsToPersist as $objectToPersist) {
-            $redisData = [$objectToPersist->redisKey, null, \json_encode($objectToPersist->value)];
+            $redisData[] = $objectToPersist->redisKey;
+            $redisData[] = null;
+            $redisData[] = \json_encode($objectToPersist->converter->convert($objectToPersist->value));
         }
 
         $this->redis->jsonMSet($redisData);
