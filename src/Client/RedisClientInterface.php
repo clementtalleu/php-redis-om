@@ -16,6 +16,7 @@ interface RedisClientInterface
     public function jsonGet(string $key): ?string;
     public function jsonGetProperty(string $key, string $property): ?string;
     public function jsonSet(string $key, ?string $path = '$', ?string $value = '{}'): void;
+    public function jsonMSet(...$params): void;
     public function jsonDel(string $key, ?string $path = '$'): void;
     public function createIndex(string $prefixKey, ?string $format = 'HASH', ?array $properties = []): void;
     public function dropIndex(string $prefixKey): bool;

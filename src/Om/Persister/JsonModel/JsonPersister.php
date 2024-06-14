@@ -8,13 +8,38 @@ use Talleu\RedisOm\Om\Persister\AbstractPersister;
 
 final class JsonPersister extends AbstractPersister
 {
-    public function doPersist(string $key, array|\stdClass $data): void
+    /**
+     * @inheritdoc
+     */
+    public function doPersist(array $objectsToPersist): void
     {
-        $this->redis->jsonSet(key: $key, value: \json_encode($data));
+        if ($objectsToPersist === []) {
+            return;
+        }
+
+        if (count($objectsToPersist) === 1) {
+            $objectToPersist = reset($objectsToPersist);
+            $this->redis->jsonSet(key: $objectToPersist->redisKey, value: \json_encode($objectToPersist->converter->convert($objectToPersist->value)));
+            return;
+        }
+
+        $redisData = [];
+        foreach ($objectsToPersist as $objectToPersist) {
+            $redisData[] = $objectToPersist->redisKey;
+            $redisData[] = null;
+            $redisData[] = \json_encode($objectToPersist->converter->convert($objectToPersist->value));
+        }
+
+        $this->redis->jsonMSet($redisData);
     }
 
-    public function doDelete(string $key): void
+    /**
+     * @inheritdoc
+     */
+    public function doDelete(array $objectsToRemove): void
     {
-        $this->redis->jsonDel($key);
+        foreach ($objectsToRemove as $objectToRemove) {
+            $this->redis->jsonDel($objectToRemove->redisKey);
+        }
     }
 }

@@ -21,7 +21,7 @@ final class RedisObjectManager implements RedisObjectManagerInterface
     /** @var PersisterInterface[] */
     protected array $persisters = [];
 
-    /** @var array<string, ObjectToPersist> */
+    /** @var array<string, array<string, ObjectToPersist[]>> */
     protected array $objectsToFlush = [];
     protected ?KeyGenerator $keyGenerator = null;
 
@@ -30,29 +30,37 @@ final class RedisObjectManager implements RedisObjectManagerInterface
         $this->keyGenerator = new KeyGenerator();
     }
 
+    /**
+     * @inheritdoc
+     */
     public function persist(object $object): void
     {
         $objectMapper = $this->getEntityMapper($object);
         $persister = $this->registerPersister($objectMapper, $object);
 
         $objectToPersist = $persister->persist($objectMapper, $object);
-        $this->objectsToFlush[$objectToPersist->redisKey] = $objectToPersist;
+        $this->objectsToFlush[$objectToPersist->persisterClass][$objectToPersist->operation][$objectToPersist->redisKey] = $objectToPersist;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function remove(object $object): void
     {
         $objectMapper = $this->getEntityMapper($object);
         $persister = $this->registerPersister($objectMapper, $object);
 
         $objectToRemove = $persister->delete($objectMapper, $object);
-        $this->objectsToFlush[$objectToRemove->redisKey] = $persister->delete($objectMapper, $object);
+        $this->objectsToFlush[$objectToRemove->persisterClass][$objectToRemove->operation][$objectToRemove->redisKey] = $objectToRemove;
     }
 
     public function flush(): void
     {
-        foreach ($this->objectsToFlush as $key => $object) {
-            $this->persisters[$object->persisterClass]->{$object->operation}($key, $object->value);
-            unset($this->objectsToFlush[$key]);
+        foreach ($this->objectsToFlush as $persisterClassName => $objectsByOperation) {
+            foreach ($objectsByOperation as $operation => $objectToPersists) {
+                $this->persisters[$persisterClassName]->{$operation}($objectToPersists);
+                unset($this->objectsToFlush[$persisterClassName][$operation]);
+            }
         }
     }
 
@@ -71,11 +79,15 @@ final class RedisObjectManager implements RedisObjectManagerInterface
     public function detach(object $object): void
     {
         $identifier = $this->keyGenerator->getIdentifier(new \ReflectionClass($object));
-        $key = sprintf('%s:%s', $this->getEntityMapper($object)->prefix ?: get_class($object), $object->{$identifier->getName()});
+        $objectMapper = $this->getEntityMapper($object);
+        $key = sprintf('%s:%s', $objectMapper->prefix ?: get_class($object), $object->{$identifier->getName()});
 
-        foreach ($this->objectsToFlush as $redisKey => $objectToFlush) {
-            if ($key === $redisKey) {
-                unset($this->objectsToFlush[$redisKey]);
+        $persisterClassName = get_class($objectMapper->persister);
+        foreach ($this->objectsToFlush[$persisterClassName] as $operation => $objectsToFlush) {
+            foreach ($objectsToFlush as $redisKey => $objectToFlush) {
+                if ($redisKey === $key) {
+                    unset($this->objectsToFlush[$persisterClassName][$operation][$key]);
+                }
             }
         }
     }
@@ -112,11 +124,15 @@ final class RedisObjectManager implements RedisObjectManagerInterface
 
     public function contains(object $object): bool
     {
+        $identifier = $this->keyGenerator->getIdentifier(new \ReflectionClass($object));
         $objectMapper = $this->getEntityMapper($object);
-        $identifierProperty = $this->keyGenerator->getIdentifier(new \ReflectionClass($object));
-        foreach ($this->objectsToFlush as $objectToFlush) {
-            if ($objectToFlush->redisKey === $objectMapper->prefix.':'.$object->{$identifierProperty->getName()}) {
-                return true;
+        $key = sprintf('%s:%s', $objectMapper->prefix ?: get_class($object), $object->{$identifier->getName()});
+        $persisterClassName = get_class($objectMapper->persister);
+        foreach ($this->objectsToFlush[$persisterClassName] as $operation => $objectsToFlush) {
+            foreach ($objectsToFlush as $redisKey => $objectToFlush) {
+                if ($redisKey === $key) {
+                    return true;
+                }
             }
         }
 

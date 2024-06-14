@@ -146,4 +146,19 @@ class ObjectManagerTest extends RedisAbstractTestCase
         $this->assertCount(2, $keys);
         $this->assertNotContains("Talleu_RedisOm_Tests_Fixtures_Hash_DummyHash:2", $keys);
     }
+
+    public function testContains()
+    {
+        static::emptyRedis();
+        static::generateIndex();
+        $dummies = static::loadRedisFixtures(flush: false);
+        $objectManager = new RedisObjectManager();
+        foreach ($dummies as $dummy) {
+            $objectManager->persist($dummy);
+        }
+
+        $this->assertTrue($objectManager->contains($dummies[0]));
+        $this->assertTrue($objectManager->contains($dummies[1]));
+        $this->assertTrue($objectManager->contains($dummies[2]));
+    }
 }
