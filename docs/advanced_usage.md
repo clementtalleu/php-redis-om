@@ -62,6 +62,15 @@ $userRepository->getPropertyValue(identifier: 3, property: 'name');
 // ⚠️ Warning: this method cannot retrieve array or nested objects when HASH format
 ```
 
+You can also request objects or collection by nested objects properties
+```php
+// Will retrieve 1 user from the category called 'CUSTOMER'
+$userRepository->findOneBy(['category_name' => 'CUSTOMER']); 
+
+// Will retrieve all users from the category 3
+$userRepository->findBy(['category_id' => 3]); 
+```
+
 ## Repository
 
 You can create your own repository to query your objects in Redis. Then inject it in the
