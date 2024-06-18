@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace  Talleu\RedisOm\Command;
 
+use Talleu\RedisOm\Client\RedisCommands;
 use Talleu\RedisOm\Om\Mapping\Entity;
+use Talleu\RedisOm\Om\Mapping\Property;
 use Talleu\RedisOm\Om\RedisFormat;
 
 final class GenerateSchema
@@ -40,12 +42,60 @@ final class GenerateSchema
                 continue;
             }
 
-            $properties = $reflectionClass->getProperties();
-
             /** @var Entity $entity */
             $entity = $attributes[0]->newInstance();
             $entity->redisClient->dropIndex($entity->prefix ?? $fqcn);
-            $entity->redisClient->createIndex($entity->prefix ?? $fqcn, $entity->format ?? RedisFormat::HASH->value, $properties);
+            $format = $entity->format ?? RedisFormat::HASH->value;
+
+            $propertiesToIndex = [];
+            $properties = $reflectionClass->getProperties();
+            foreach ($properties as $reflectionProperty) {
+                if (($propertyAttribute = $reflectionProperty->getAttributes(Property::class)) === []) {
+                    continue;
+                }
+
+                /** @var Property $property */
+                $property = $propertyAttribute[0]->newInstance();
+                /** @var \ReflectionNamedType|null $propertyReflectionType */
+                $propertyReflectionType = $reflectionProperty->getType();
+                $propertyType = $propertyReflectionType->getName();
+                $propertyName = $property->name ?? $reflectionProperty->getName();
+
+                if (!in_array($propertyType, ['int', 'string', 'float', 'bool']) && !class_exists($propertyType)) {
+                    continue;
+                }
+
+                if (class_exists($propertyType)) {
+                    $subReflectionClass = new \ReflectionClass($propertyType);
+                    $attributes = $subReflectionClass->getAttributes(Entity::class);
+                    if ($attributes === []) {
+                        continue;
+                    }
+
+                    $subProperties = $subReflectionClass->getProperties();
+                    foreach ($subProperties as $subReflectionProperty) {
+                        if (($subPropertyAttribute = $subReflectionProperty->getAttributes(Property::class)) === []) {
+                            continue;
+                        }
+
+                        /** @var Property $subProperty */
+                        $subProperty = $subPropertyAttribute[0]->newInstance();
+                        /** @var \ReflectionNamedType|null $subPropertyType */
+                        $subPropertyType = $subReflectionProperty->getType();
+
+                        $subPropertyName = $subProperty->name ?? $subReflectionProperty->getName();
+                        if (!in_array($subPropertyType?->getName(), ['int', 'string', 'float', 'bool'])) {
+                            continue;
+                        }
+
+                        $propertiesToIndex["$propertyName.$subPropertyName"] = $propertyName.'_'.$subPropertyName;
+                    }
+                } else {
+                    $propertiesToIndex[($property->name !== null ? $property->name : $reflectionProperty->name)] = $reflectionProperty->name;
+                }
+            }
+
+            $entity->redisClient->createIndex($entity->prefix ?? $fqcn, $format, $propertiesToIndex);
         }
     }
 

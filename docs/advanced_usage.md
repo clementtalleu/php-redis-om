@@ -21,6 +21,9 @@ $objectManager->remove($user);
 
 // Will refresh the object from the redis state
 $objectManager->refresh($user);
+
+// Check if the object is managed by the object manager
+$objectManager->contains($user); 
 ```
 
 You can also retrieve and query your objects with the ObjectManager or a given repository

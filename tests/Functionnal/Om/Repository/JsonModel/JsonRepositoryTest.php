@@ -6,6 +6,7 @@ namespace Talleu\RedisOm\Tests\Functionnal\Om\Repository\JsonModel;
 
 use Talleu\RedisOm\Exception\BadPropertyException;
 use Talleu\RedisOm\Om\RedisObjectManager;
+use Talleu\RedisOm\Tests\Fixtures\Hash\DummyHash;
 use Talleu\RedisOm\Tests\Fixtures\Json\DummyJson;
 use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
@@ -171,5 +172,95 @@ final class JsonRepositoryTest extends RedisAbstractTestCase
 
         $this->expectException(BadPropertyException::class);
         $repository->getPropertyValue(1, 'test');
+    }
+
+    public function testFindByNestedObjectJsonProperty()
+    {
+        static::emptyRedis();
+        static::generateIndex();
+        static::loadRedisFixtures(DummyJson::class);
+
+        $objectManager = new RedisObjectManager();
+        $repository = $objectManager->getRepository(DummyJson::class);
+
+        $collection = $repository->findBy(['bar_title' => 'Hello']);
+        foreach ($collection as $dummy) {
+            $this->assertInstanceOf(DummyJson::class, $dummy);
+            $this->assertEquals($dummy->bar->title, 'Hello');
+        }
+    }
+
+    public function testFindByNestedObjectJsonId()
+    {
+        static::emptyRedis();
+        static::generateIndex();
+        static::loadRedisFixtures(DummyJson::class);
+
+        $objectManager = new RedisObjectManager();
+        $repository = $objectManager->getRepository(DummyJson::class);
+
+        $collection = $repository->findBy(['bar_id' => 1]);
+        foreach ($collection as $dummy) {
+            $this->assertInstanceOf(DummyJson::class, $dummy);
+            $this->assertEquals($dummy->bar->id, 1);
+        }
+    }
+
+    public function testFindOneByNestedObjectJsonId()
+    {
+        static::emptyRedis();
+        static::generateIndex();
+        static::loadRedisFixtures(DummyJson::class);
+
+        $objectManager = new RedisObjectManager();
+        $repository = $objectManager->getRepository(DummyJson::class);
+
+        $object = $repository->findOneBy(['bar_id' => 1]);
+        $this->assertEquals($object->bar->id, 1);
+    }
+
+    public function testFindByNestedObjectProperty()
+    {
+        static::emptyRedis();
+        static::generateIndex();
+        static::loadRedisFixtures();
+
+        $objectManager = new RedisObjectManager();
+        $repository = $objectManager->getRepository(DummyHash::class);
+
+        $collection = $repository->findBy(['bar_title' => 'Hello']);
+        foreach ($collection as $dummy) {
+            $this->assertInstanceOf(DummyHash::class, $dummy);
+            $this->assertEquals($dummy->bar->title, 'Hello');
+        }
+    }
+
+    public function testFindByNestedObjecId()
+    {
+        static::emptyRedis();
+        static::generateIndex();
+        static::loadRedisFixtures();
+
+        $objectManager = new RedisObjectManager();
+        $repository = $objectManager->getRepository(DummyHash::class);
+
+        $collection = $repository->findBy(['bar_id' => 2]);
+        foreach ($collection as $dummy) {
+            $this->assertInstanceOf(DummyHash::class, $dummy);
+            $this->assertEquals($dummy->bar->id, 2);
+        }
+    }
+
+    public function testFindOneByNestedObjectId()
+    {
+        static::emptyRedis();
+        static::generateIndex();
+        static::loadRedisFixtures();
+
+        $objectManager = new RedisObjectManager();
+        $repository = $objectManager->getRepository(DummyHash::class);
+
+        $object = $repository->findOneBy(['bar_id' => 2]);
+        $this->assertEquals($object->bar->id, 2);
     }
 }

@@ -4,6 +4,7 @@ namespace Talleu\RedisOm\Tests\Fixtures;
 
 use Talleu\RedisOm\Om\Mapping as RedisOm;
 
+#[RedisOm\Entity]
 class Bar
 {
     #[RedisOm\Property]
