@@ -21,6 +21,9 @@ $objectManager->remove($user);
 
 // Will refresh the object from the redis state
 $objectManager->refresh($user);
+
+// Check if the object is managed by the object manager
+$objectManager->contains($user); 
 ```
 
 You can also retrieve and query your objects with the ObjectManager or a given repository
@@ -57,6 +60,15 @@ $userRepository->count(['name' => 'John']);
 // Will retrieve only the property "name" of the object for the id 3.
 $userRepository->getPropertyValue(identifier: 3, property: 'name'); 
 // ⚠️ Warning: this method cannot retrieve array or nested objects when HASH format
+```
+
+You can also request objects or collection by nested objects properties
+```php
+// Will retrieve 1 user from the category called 'CUSTOMER'
+$userRepository->findOneBy(['category_name' => 'CUSTOMER']); 
+
+// Will retrieve all users from the category 3
+$userRepository->findBy(['category_id' => 3]); 
 ```
 
 ## Repository

@@ -6,6 +6,7 @@ namespace Talleu\RedisOm\Client;
 
 use Talleu\RedisOm\Exception\BadPropertyConfigurationException;
 use Talleu\RedisOm\Exception\RedisClientResponseException;
+use Talleu\RedisOm\Om\Mapping\Entity;
 use Talleu\RedisOm\Om\Mapping\Property;
 use Talleu\RedisOm\Om\RedisFormat;
 
@@ -169,23 +170,10 @@ final class RedisClient implements RedisClientInterface
 
         $arguments[] = 'SCHEMA';
 
-        foreach ($properties as $reflectionProperty) {
-            if (($propertyAttribute = $reflectionProperty->getAttributes(Property::class)) === []) {
-                continue;
-            }
-
-            /** @var Property $property */
-            $property = $propertyAttribute[0]->newInstance();
-
-            /** @var \ReflectionNamedType|null $propertyType */
-            $propertyType = $reflectionProperty->getType();
-            if (!in_array($propertyType?->getName(), ['int', 'string', 'float', 'bool'])) {
-                continue;
-            }
-
-            $arguments[] = ($format === RedisFormat::JSON->value ? '$.' : '') . ($property->name !== null ? $property->name : $reflectionProperty->name);
+        foreach ($properties as $name => $as) {
+            $arguments[] = ($format === RedisFormat::JSON->value ? '$.' : '') . $name;
             $arguments[] = 'AS';
-            $arguments[] = $property->name ?? $reflectionProperty->name;
+            $arguments[] = $as;
             $arguments[] = Property::TEXT_TYPE;
             $arguments[] = 'SORTABLE';
         }
