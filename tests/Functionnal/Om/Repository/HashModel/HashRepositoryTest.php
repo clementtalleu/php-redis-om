@@ -7,7 +7,6 @@ namespace Talleu\RedisOm\Tests\Functionnal\Om\Repository\HashModel;
 use Talleu\RedisOm\Exception\BadPropertyException;
 use Talleu\RedisOm\Om\RedisObjectManager;
 use Talleu\RedisOm\Tests\Fixtures\Hash\DummyHash;
-use Talleu\RedisOm\Tests\Fixtures\Json\DummyJson;
 use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
 final class HashRepositoryTest extends RedisAbstractTestCase
@@ -174,5 +173,50 @@ final class HashRepositoryTest extends RedisAbstractTestCase
 
         $this->expectException(BadPropertyException::class);
         $repository->getPropertyValue(1, 'test');
+    }
+
+    public function testFindByNestedObjectProperty()
+    {
+        static::emptyRedis();
+        static::generateIndex();
+        static::loadRedisFixtures();
+
+        $objectManager = new RedisObjectManager();
+        $repository = $objectManager->getRepository(DummyHash::class);
+
+        $collection = $repository->findBy(['bar_title' => 'Hello']);
+        foreach ($collection as $dummy) {
+            $this->assertInstanceOf(DummyHash::class, $dummy);
+            $this->assertEquals($dummy->bar->title, 'Hello');
+        }
+    }
+
+    public function testFindByNestedObjecId()
+    {
+        static::emptyRedis();
+        static::generateIndex();
+        static::loadRedisFixtures();
+
+        $objectManager = new RedisObjectManager();
+        $repository = $objectManager->getRepository(DummyHash::class);
+
+        $collection = $repository->findBy(['bar_id' => 2]);
+        foreach ($collection as $dummy) {
+            $this->assertInstanceOf(DummyHash::class, $dummy);
+            $this->assertEquals($dummy->bar->id, 2);
+        }
+    }
+
+    public function testFindOneByNestedObjectId()
+    {
+        static::emptyRedis();
+        static::generateIndex();
+        static::loadRedisFixtures();
+
+        $objectManager = new RedisObjectManager();
+        $repository = $objectManager->getRepository(DummyHash::class);
+
+        $object = $repository->findOneBy(['bar_id' => 2]);
+        $this->assertEquals($object->bar->id, 2);
     }
 }

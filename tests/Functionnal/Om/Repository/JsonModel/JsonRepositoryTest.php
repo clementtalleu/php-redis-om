@@ -218,49 +218,4 @@ final class JsonRepositoryTest extends RedisAbstractTestCase
         $object = $repository->findOneBy(['bar_id' => 1]);
         $this->assertEquals($object->bar->id, 1);
     }
-
-    public function testFindByNestedObjectProperty()
-    {
-        static::emptyRedis();
-        static::generateIndex();
-        static::loadRedisFixtures();
-
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyHash::class);
-
-        $collection = $repository->findBy(['bar_title' => 'Hello']);
-        foreach ($collection as $dummy) {
-            $this->assertInstanceOf(DummyHash::class, $dummy);
-            $this->assertEquals($dummy->bar->title, 'Hello');
-        }
-    }
-
-    public function testFindByNestedObjecId()
-    {
-        static::emptyRedis();
-        static::generateIndex();
-        static::loadRedisFixtures();
-
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyHash::class);
-
-        $collection = $repository->findBy(['bar_id' => 2]);
-        foreach ($collection as $dummy) {
-            $this->assertInstanceOf(DummyHash::class, $dummy);
-            $this->assertEquals($dummy->bar->id, 2);
-        }
-    }
-
-    public function testFindOneByNestedObjectId()
-    {
-        static::emptyRedis();
-        static::generateIndex();
-        static::loadRedisFixtures();
-
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyHash::class);
-
-        $object = $repository->findOneBy(['bar_id' => 2]);
-        $this->assertEquals($object->bar->id, 2);
-    }
 }
