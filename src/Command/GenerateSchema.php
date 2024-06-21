@@ -57,6 +57,10 @@ final class GenerateSchema
                 }
 
                 if ($reflectionProperty->getAttributes(Id::class) !== []) {
+                    if ($idExist) {
+                        throw new BadIdentifierConfigurationException("Multiple identifiers found for $fqcn, only one is allowed");
+                    }
+
                     $idExist = true;
                 }
 
