@@ -8,6 +8,7 @@ use Talleu\RedisOm\Om\Mapping as RedisOm;
 class Bar
 {
     #[RedisOm\Property]
+    #[RedisOm\Id]
     public ?int $id = null;
     #[RedisOm\Property]
     public ?string $title = null;

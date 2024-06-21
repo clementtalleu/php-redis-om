@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace  Talleu\RedisOm\Command;
 
-use Talleu\RedisOm\Client\RedisCommands;
+use Talleu\RedisOm\Exception\BadIdentifierConfigurationException;
 use Talleu\RedisOm\Om\Mapping\Entity;
+use Talleu\RedisOm\Om\Mapping\Id;
 use Talleu\RedisOm\Om\Mapping\Property;
 use Talleu\RedisOm\Om\RedisFormat;
 
@@ -47,11 +48,20 @@ final class GenerateSchema
             $entity->redisClient->dropIndex($entity->prefix ?? $fqcn);
             $format = $entity->format ?? RedisFormat::HASH->value;
 
+            $idExist = false;
             $propertiesToIndex = [];
             $properties = $reflectionClass->getProperties();
             foreach ($properties as $reflectionProperty) {
                 if (($propertyAttribute = $reflectionProperty->getAttributes(Property::class)) === []) {
                     continue;
+                }
+
+                if ($reflectionProperty->getAttributes(Id::class) !== []) {
+                    if ($idExist) {
+                        throw new BadIdentifierConfigurationException("Multiple identifiers found for $fqcn, only one is allowed");
+                    }
+
+                    $idExist = true;
                 }
 
                 /** @var Property $property */
@@ -93,6 +103,10 @@ final class GenerateSchema
                 } else {
                     $propertiesToIndex[($property->name !== null ? $property->name : $reflectionProperty->name)] = $reflectionProperty->name;
                 }
+            }
+
+            if (!$idExist) {
+                throw new BadIdentifierConfigurationException("No identifier found for $fqcn, or identifier is not mapped by RedisOm");
             }
 
             $entity->redisClient->createIndex($entity->prefix ?? $fqcn, $format, $propertiesToIndex);
