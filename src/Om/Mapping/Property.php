@@ -10,6 +10,7 @@ use Attribute;
 final class Property
 {
     public const TEXT_TYPE = 'TEXT';
+    public const TAG_TYPE = 'TAG';
     public const NUMERIC_TYPE = 'NUMERIC';
 
     public function __construct(

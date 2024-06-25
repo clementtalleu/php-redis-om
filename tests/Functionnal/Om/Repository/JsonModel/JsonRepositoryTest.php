@@ -46,6 +46,19 @@ final class JsonRepositoryTest extends RedisAbstractTestCase
         }
     }
 
+    public function testFindByTypo()
+    {
+        static::emptyRedis();
+        static::generateIndex();
+        static::loadRedisFixtures(DummyJson::class);
+
+        $objectManager = new RedisObjectManager();
+        $repository = $objectManager->getRepository(DummyJson::class);
+
+        $collection = $repository->findBy(['name' => 'Lolivier']);
+        $this->assertEmpty($collection);
+    }
+
     public function testFindByOrder()
     {
         static::emptyRedis();
