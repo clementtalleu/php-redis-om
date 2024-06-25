@@ -45,6 +45,19 @@ final class HashRepositoryTest extends RedisAbstractTestCase
         }
     }
 
+    public function testFindByTypo()
+    {
+        static::emptyRedis();
+        static::generateIndex();
+        static::loadRedisFixtures();
+
+        $objectManager = new RedisObjectManager();
+        $repository = $objectManager->getRepository(DummyHash::class);
+
+        $collection = $repository->findBy(['name' => 'Lolivier']);
+        $this->assertEmpty($collection);
+    }
+
     public function testFindByOrder()
     {
         static::emptyRedis();

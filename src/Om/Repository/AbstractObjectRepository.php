@@ -34,6 +34,7 @@ abstract class AbstractObjectRepository implements RepositoryInterface
      */
     public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): array
     {
+        $this->escapeSpecialCharsInCriterias($criteria);
         $data = $this->redisClient->search($this->prefix, $criteria, $orderBy ?? [], $this->format, $limit);
 
         $collection = [];
@@ -72,6 +73,7 @@ abstract class AbstractObjectRepository implements RepositoryInterface
      */
     public function findOneBy(array $criteria, ?array $orderBy = null): ?object
     {
+        $this->escapeSpecialCharsInCriterias($criteria);
         $data = $this->redisClient->search($this->prefix, $criteria, $orderBy ?? [], $this->format, 1);
 
         if ($data === []) {
@@ -118,5 +120,16 @@ abstract class AbstractObjectRepository implements RepositoryInterface
     public function setFormat(?string $format = null): void
     {
         $this->format = $format ?? RedisFormat::HASH->value;
+    }
+
+    protected static function escapeSpecialCharsInCriterias(array|string &$criteria): void
+    {
+        foreach ($criteria as $property => $value) {
+            if (!is_string($value)) {
+                continue;
+            }
+
+            $criteria[$property] = str_replace([':'], ['\:'], $value);
+        }
     }
 }
