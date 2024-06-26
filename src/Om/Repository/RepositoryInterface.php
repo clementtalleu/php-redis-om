@@ -6,6 +6,7 @@ namespace Talleu\RedisOm\Om\Repository;
 
 use Talleu\RedisOm\Client\RedisClientInterface;
 use Talleu\RedisOm\Om\Converters\ConverterInterface;
+use Talleu\RedisOm\Om\QueryBuilder;
 
 interface RepositoryInterface
 {
@@ -73,4 +74,9 @@ interface RepositoryInterface
      * Count objects by a set of criteria.
      */
     public function count(array $criteria = []): int;
+
+    /**
+     * Create a new QueryBuilder instance.
+     */
+    public function createQueryBuilder(): QueryBuilder;
 }

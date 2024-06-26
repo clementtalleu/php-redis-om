@@ -96,3 +96,23 @@ You can create your own repository to query your objects in Redis. Then inject i
 
 Then in each custom repository you can add custom methods to query your objects in Redis.
 
+
+## QueryBuilder
+
+You can instantiate a QueryBuilder to create, write and run your own complex queries.
+All this while respecting [redis command line syntax](https://redis.io/docs/latest/commands/ft.search/). 
+
+For example :
+```php
+    $repository = $objectManager->getRepository(Foo::class);
+    
+    // Will retrieve all objects with the age 20 or 34
+    $queryBuilder = $repository->createQueryBuilder();
+    $queryBuilder->query('@age:{20 | 34}');
+    $results = $queryBuilder->execute();
+
+    // Will retrieve all objects starts with 'foo'
+    $queryBuilder = $repository->createQueryBuilder();
+    $queryBuilder->query('@age:{foo*}');
+    $results = $queryBuilder->execute();
+```

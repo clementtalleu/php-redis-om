@@ -8,6 +8,7 @@ use Talleu\RedisOm\Client\RedisClientInterface;
 use Talleu\RedisOm\Om\Converters\AbstractDateTimeConverter;
 use Talleu\RedisOm\Om\Converters\ConverterInterface;
 use Talleu\RedisOm\Om\Mapping\Property;
+use Talleu\RedisOm\Om\QueryBuilder;
 use Talleu\RedisOm\Om\RedisFormat;
 
 abstract class AbstractObjectRepository implements RepositoryInterface
@@ -69,7 +70,6 @@ abstract class AbstractObjectRepository implements RepositoryInterface
 
         return $collection;
     }
-
 
     /**
      * @inheritdoc
@@ -137,6 +137,20 @@ abstract class AbstractObjectRepository implements RepositoryInterface
     public function count(array $criteria = []): int
     {
         return $this->redisClient->count($this->prefix, $criteria);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function createQueryBuilder(): QueryBuilder
+    {
+        return new QueryBuilder(
+            redisClient:  $this->redisClient,
+            converter: $this->converter,
+            className: $this->className,
+            redisKey: $this->prefix,
+            format: $this->format
+        );
     }
 
     /**
