@@ -7,6 +7,7 @@ namespace Talleu\RedisOm\Om\Repository;
 use Talleu\RedisOm\Client\RedisClientInterface;
 use Talleu\RedisOm\Om\Converters\AbstractDateTimeConverter;
 use Talleu\RedisOm\Om\Converters\ConverterInterface;
+use Talleu\RedisOm\Om\Mapping\Property;
 use Talleu\RedisOm\Om\RedisFormat;
 
 abstract class AbstractObjectRepository implements RepositoryInterface
@@ -50,6 +51,29 @@ abstract class AbstractObjectRepository implements RepositoryInterface
     /**
      * @inheritdoc
      */
+    public function findByLike(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): array
+    {
+        $this->convertDates($criteria);
+        $this->escapeSpecialCharsInCriterias($criteria);
+        foreach ($criteria as $property => $value) {
+            $criteria[$property.'_text'] = "*$value*";
+            unset($criteria[$property]);
+        }
+
+        $data = $this->redisClient->search(prefixKey: $this->prefix, search: $criteria, orderBy: $orderBy ?? [], format:  $this->format, numberOfResults: $limit, searchType: Property::TEXT_TYPE);
+
+        $collection = [];
+        foreach ($data as $item) {
+            $collection[] = $this->converter->revert($item, $this->className);
+        }
+
+        return $collection;
+    }
+
+
+    /**
+     * @inheritdoc
+     */
     public function findLike(string $search, ?int $limit = null): array
     {
         $data = $this->redisClient->searchLike($this->prefix, $search, $this->format, $limit);
@@ -78,6 +102,27 @@ abstract class AbstractObjectRepository implements RepositoryInterface
         $this->convertDates($criteria);
         $this->escapeSpecialCharsInCriterias($criteria);
         $data = $this->redisClient->search($this->prefix, $criteria, $orderBy ?? [], $this->format, 1);
+
+        if ($data === []) {
+            return null;
+        }
+
+        return $this->converter->revert($data[0], $this->className);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function findOneByLike(array $criteria, ?array $orderBy = null): ?object
+    {
+        $this->convertDates($criteria);
+        $this->escapeSpecialCharsInCriterias($criteria);
+        foreach ($criteria as $property => $value) {
+            $criteria[$property.'_text'] = "*$value*";
+            unset($criteria[$property]);
+        }
+
+        $data = $this->redisClient->search(prefixKey: $this->prefix, search: $criteria, orderBy: $orderBy ?? [], format:  $this->format, numberOfResults: 1, searchType: Property::TEXT_TYPE);
 
         if ($data === []) {
             return null;
