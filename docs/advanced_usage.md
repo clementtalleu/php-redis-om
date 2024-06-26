@@ -77,8 +77,7 @@ $userRepository->findOneBy(['category_name' => 'CUSTOMER']);
 $userRepository->findBy(['category_id' => 3]); 
 ```
 
-#### Request by date
-⚠️ Warning, this kind of request is only available with JSON format mapping
+#### Request by date (DateTimeInterface or string)
 ```php
 
 // Will retrieve users from datetime 
