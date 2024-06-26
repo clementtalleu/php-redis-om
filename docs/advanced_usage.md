@@ -62,13 +62,26 @@ $userRepository->getPropertyValue(identifier: 3, property: 'name');
 // ⚠️ Warning: this method cannot retrieve array or nested objects when HASH format
 ```
 
-You can also request objects or collection by nested objects properties
+#### You can also request objects or collection by nested objects properties
 ```php
 // Will retrieve 1 user from the category called 'CUSTOMER'
 $userRepository->findOneBy(['category_name' => 'CUSTOMER']); 
 
 // Will retrieve all users from the category 3
 $userRepository->findBy(['category_id' => 3]); 
+```
+
+#### Request by date
+⚠️ Warning, this kind of request is only available with JSON format mapping
+```php
+
+// Will retrieve users from datetime 
+$userRepository->findOneBy(['createdAt' => new DateTime('2021-01-01 00:00:00')]); 
+$userRepository->findBy(['createdAt' => new DateTime('2021-01-01 00:00:00')]); 
+ 
+// Will retrieve users by datetime as string
+$userRepository->findOneBy(['createdAt' => '2021-01-01 00:00:00']); 
+$userRepository->findBy(['createdAt' => '2021-01-01 00:00:00']); 
 ```
 
 ## Repository
