@@ -277,7 +277,7 @@ final class RedisClient implements RedisClientInterface
                 if ($searchType === Property::TAG_TYPE) {
                     $criteria .= sprintf('@%s:{%s}', $property, $value);
                 } else {
-                    $criteria .= sprintf('@%s: %s', $property, $value);
+                    $criteria .= sprintf('@%s:%s', $property, $value);
                 }
             }
             $arguments[] = $criteria;
