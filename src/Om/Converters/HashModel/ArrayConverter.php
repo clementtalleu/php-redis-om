@@ -30,6 +30,10 @@ final class ArrayConverter extends AbstractArrayConverter
 
             $convertedValue = $converter->convert($value);
 
+            if ($converter instanceof DateTimeConverter || $converter instanceof DateTimeImmutableConverter) {
+                $hashData[($parentProperty ? "$parentProperty." : '').$key.'#timestamp'] = strtotime($convertedValue);
+            }
+
             if ($parentProperty) {
                 $hashData["$parentProperty.$key"] = $convertedValue;
 
@@ -54,9 +58,12 @@ final class ArrayConverter extends AbstractArrayConverter
             if (is_array($value) && array_key_exists('#type', $value)) {
                 $valueType = $value['#type'];
                 unset($value['#type']);
+            } elseif (str_contains((string) $key, '#timestamp')) {
+                continue;
             } else {
                 $valueType = gettype($value);
             }
+
             $reverter = ConverterFactory::getReverter($valueType, $value);
             if (!$reverter) {
                 continue;

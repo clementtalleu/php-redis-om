@@ -42,6 +42,10 @@ final class HashObjectConverter extends AbstractObjectConverter
 
             $convertedValue = $converter->convert($value);
 
+            if ($converter instanceof DateTimeConverter || $converter instanceof DateTimeImmutableConverter) {
+                $hashData[($parentProperty ? "$parentProperty." : '').$property->getName().'#timestamp'] = strtotime($convertedValue);
+            }
+
             if ($parentProperty) {
                 $hashData["$parentProperty.{$property->getName()}"] = $convertedValue;
                 if ($parentPropertyType !== null) {

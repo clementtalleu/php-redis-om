@@ -78,7 +78,7 @@ final class GenerateSchema
 
                 if (in_array($propertyType, AbstractDateTimeConverter::DATETYPES_NAMES)) {
                     if ($format === RedisFormat::HASH->value) {
-                        $propertiesToIndex[($property->name !== null ? $property->name : $reflectionProperty->name)] = $reflectionProperty->name;
+                        $propertiesToIndex[($property->name !== null ? $property->name : $reflectionProperty->name).'#timestamp'] = $reflectionProperty->name;
                     } else {
                         $propertiesToIndex["$propertyName.timestamp"] = $propertyName;
                     }
