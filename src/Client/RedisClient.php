@@ -265,7 +265,7 @@ final class RedisClient implements RedisClientInterface
     /**
      * @inheritdoc
      */
-    public function search(string $prefixKey, array $search, array $orderBy, ?string $format = RedisFormat::HASH->value, ?int $numberOfResults = null): array
+    public function search(string $prefixKey, array $search, array $orderBy, ?string $format = RedisFormat::HASH->value, ?int $numberOfResults = null, ?string $searchType = Property::TAG_TYPE): array
     {
         $arguments = [RedisCommands::SEARCH->value, self::convertPrefix($prefixKey)];
 
@@ -274,7 +274,11 @@ final class RedisClient implements RedisClientInterface
         } else {
             $criteria = '';
             foreach ($search as $property => $value) {
-                $criteria .= sprintf('@%s:{%s}', $property, $value);
+                if ($searchType === Property::TAG_TYPE) {
+                    $criteria .= sprintf('@%s:{%s}', $property, $value);
+                } else {
+                    $criteria .= sprintf('@%s: %s', $property, $value);
+                }
             }
             $arguments[] = $criteria;
         }

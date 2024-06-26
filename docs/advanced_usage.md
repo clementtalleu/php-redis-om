@@ -54,6 +54,12 @@ $userRepository->findBy(['name' => 'John'], ['age' => 'ASC'], 5);
 // Will retrieve all users with a field containing 'John', whatever the field. Second parameter is the limit of results (optional)
 $userRepository->findLike('John', 5); 
 
+// Will retrieve 1 user with the name contains "jo" : 'John Doe', 'Johnny', 'Dalton joe'
+$userRepository->findOneByLike(['name' => 'jo']); 
+
+// Will retrieve all users with the name contains "do" : 'John Doe', 'just do it', 'dodo la saumure'...
+$userRepository->findByLike(['name' => 'do']); 
+
 // Will retrieve an integer representing the number of users with the name 'John'
 $userRepository->count(['name' => 'John']); 
 

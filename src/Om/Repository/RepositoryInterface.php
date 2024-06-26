@@ -27,6 +27,13 @@ interface RepositoryInterface
     public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): array;
 
     /**
+     * Find objects whose properties contain a given value (Case insensitive and does not need to be strictly equals)
+     * @param array $criteria as ['property' => 'val'] should return objects where property contains val/value/orval...
+     * @param array|null $orderBy as ['property' => 'ASC|DESC']
+     */
+    public function findByLike(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): array;
+
+    /**
      * Find objects by a full text search.
      */
     public function findLike(string $search, ?int $limit = null): array;
@@ -40,6 +47,13 @@ interface RepositoryInterface
      * Find one object by a set of criteria.
      */
     public function findOneBy(array $criteria, ?array $orderBy = null): ?object;
+
+    /**
+     * Find an object whose properties contain a given value (Case insensitive and does not need to be strictly equals)
+     * @param array $criteria as ['property' => 'val'] should return objects where property contains val/value/orval...
+     * @param array|null $orderBy as ['property' => 'ASC|DESC']
+     */
+    public function findOneByLike(array $criteria, ?array $orderBy = null): ?object;
 
     /**
      * Set a given redis client to the repository.

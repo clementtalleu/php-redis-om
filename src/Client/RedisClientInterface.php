@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Client;
 
+use Talleu\RedisOm\Om\Mapping\Property;
 use Talleu\RedisOm\Om\RedisFormat;
 
 interface RedisClientInterface
@@ -77,7 +78,7 @@ interface RedisClientInterface
     /**
      * Search objects by given prefix key and criterias.
      */
-    public function search(string $prefixKey, array $search, array $orderBy, ?string $format = RedisFormat::HASH->value, ?int $numberOfResults = null): array;
+    public function search(string $prefixKey, array $search, array $orderBy, ?string $format = RedisFormat::HASH->value, ?int $numberOfResults = null, ?string $searchType = Property::TAG_TYPE): array;
 
     /**
      * Search objects by given prefix key and full text.
