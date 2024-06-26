@@ -81,6 +81,11 @@ interface RedisClientInterface
     public function search(string $prefixKey, array $search, array $orderBy, ?string $format = RedisFormat::HASH->value, ?int $numberOfResults = null, ?string $searchType = Property::TAG_TYPE): array;
 
     /**
+     * Search objects by given prefix and a complete custom query command.
+     */
+    public function customSearch(string $prefixKey, string $query, string $format): array;
+
+    /**
      * Search objects by given prefix key and full text.
      */
     public function searchLike(string $prefixKey, string $search, ?string $format = RedisFormat::HASH->value, ?int $numberOfResults = null): array;

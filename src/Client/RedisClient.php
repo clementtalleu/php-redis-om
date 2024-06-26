@@ -309,6 +309,33 @@ final class RedisClient implements RedisClientInterface
     /**
      * @inheritdoc
      */
+    public function customSearch(string $prefixKey, string $query, string $format): array
+    {
+        $arguments = [RedisCommands::SEARCH->value, self::convertPrefix($prefixKey), $query];
+
+        // dump($arguments);
+        // die;
+
+        try {
+            $result = call_user_func_array([$this->redis, 'rawCommand'], $arguments);
+        } catch (\RedisException $e) {
+            $this->handleError(RedisCommands::SEARCH->value, $e->getMessage(), $e);
+        }
+
+        if ($result === false) {
+            $this->handleError(RedisCommands::SEARCH->value, $this->redis->getLastError());
+        }
+
+        if ($result[0] === 0) {
+            return [];
+        }
+
+        return $this->extractRedisData($result, $format);
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function searchLike(string $prefixKey, string $search, ?string $format = RedisFormat::HASH->value, ?int $numberOfResults = null): array
     {
         $arguments = [RedisCommands::SEARCH->value, static::convertPrefix($prefixKey)];
