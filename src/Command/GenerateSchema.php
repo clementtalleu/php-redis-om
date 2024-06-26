@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace  Talleu\RedisOm\Command;
 
 use Talleu\RedisOm\Exception\BadIdentifierConfigurationException;
+use Talleu\RedisOm\Om\Converters\AbstractDateTimeConverter;
 use Talleu\RedisOm\Om\Mapping\Entity;
 use Talleu\RedisOm\Om\Mapping\Id;
 use Talleu\RedisOm\Om\Mapping\Property;
@@ -75,7 +76,13 @@ final class GenerateSchema
                     continue;
                 }
 
-                if (class_exists($propertyType)) {
+                if (in_array($propertyType, AbstractDateTimeConverter::DATETYPES_NAMES)) {
+                    if ($format === RedisFormat::HASH->value) {
+                        $propertiesToIndex[($property->name !== null ? $property->name : $reflectionProperty->name)] = $reflectionProperty->name;
+                    } else {
+                        $propertiesToIndex["$propertyName.timestamp"] = $propertyName;
+                    }
+                } elseif (class_exists($propertyType)) {
                     $subReflectionClass = new \ReflectionClass($propertyType);
                     $attributes = $subReflectionClass->getAttributes(Entity::class);
                     if ($attributes === []) {

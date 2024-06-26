@@ -14,6 +14,7 @@ final class DateTimeConverter extends AbstractDateTimeConverter
     public function convert($data): array
     {
         $dateArray = (array) $data;
+        $dateArray['timestamp'] = (string) strtotime($dateArray['date']);
         $dateArray['#type'] = 'DateTime';
 
         return $dateArray;

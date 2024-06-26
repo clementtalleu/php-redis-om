@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Talleu\RedisOm\Om\Repository;
 
 use Talleu\RedisOm\Client\RedisClientInterface;
+use Talleu\RedisOm\Om\Converters\AbstractDateTimeConverter;
 use Talleu\RedisOm\Om\Converters\ConverterInterface;
 use Talleu\RedisOm\Om\RedisFormat;
 
@@ -34,6 +35,7 @@ abstract class AbstractObjectRepository implements RepositoryInterface
      */
     public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): array
     {
+        $this->convertDates($criteria);
         $this->escapeSpecialCharsInCriterias($criteria);
         $data = $this->redisClient->search($this->prefix, $criteria, $orderBy ?? [], $this->format, $limit);
 
@@ -73,6 +75,7 @@ abstract class AbstractObjectRepository implements RepositoryInterface
      */
     public function findOneBy(array $criteria, ?array $orderBy = null): ?object
     {
+        $this->convertDates($criteria);
         $this->escapeSpecialCharsInCriterias($criteria);
         $data = $this->redisClient->search($this->prefix, $criteria, $orderBy ?? [], $this->format, 1);
 
@@ -122,7 +125,7 @@ abstract class AbstractObjectRepository implements RepositoryInterface
         $this->format = $format ?? RedisFormat::HASH->value;
     }
 
-    protected static function escapeSpecialCharsInCriterias(array|string &$criteria): void
+    protected function escapeSpecialCharsInCriterias(array|string &$criteria): void
     {
         foreach ($criteria as $property => $value) {
             if (!is_string($value)) {
@@ -130,6 +133,27 @@ abstract class AbstractObjectRepository implements RepositoryInterface
             }
 
             $criteria[$property] = str_replace([':'], ['\:'], $value);
+        }
+    }
+
+    protected function convertDates(array &$criteria): void
+    {
+        foreach ($criteria as $property => $value) {
+            if (!property_exists($this->className, $property)) {
+                continue;
+            }
+
+            $reflectionProperty = new \ReflectionProperty($this->className, $property);
+            /** @var \ReflectionNamedType $reflectionType */
+            $reflectionType = $reflectionProperty->getType();
+            if (in_array($reflectionType->getName(), AbstractDateTimeConverter::DATETYPES_NAMES)) {
+
+                if (!$value instanceof \DateTimeInterface) {
+                    $value = new \DateTime($value);
+                }
+
+                $criteria[$property] = strtotime($value->format(AbstractDateTimeConverter::FORMAT));
+            }
         }
     }
 }
