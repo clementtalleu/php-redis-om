@@ -15,6 +15,7 @@ final class DateTimeImmutableConverter extends AbstractDateTimeImmutableConverte
     {
         $dateArray = (array) $data;
         $dateArray['#type'] = 'DateTimeImmutable';
+        $dateArray['timestamp'] = (string) strtotime($dateArray['date']);
 
         return $dateArray;
     }
