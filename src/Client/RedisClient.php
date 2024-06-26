@@ -313,9 +313,6 @@ final class RedisClient implements RedisClientInterface
     {
         $arguments = [RedisCommands::SEARCH->value, self::convertPrefix($prefixKey), $query];
 
-        // dump($arguments);
-        // die;
-
         try {
             $result = call_user_func_array([$this->redis, 'rawCommand'], $arguments);
         } catch (\RedisException $e) {
