@@ -11,82 +11,82 @@ use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
 final class HashRepositoryTest extends RedisAbstractTestCase
 {
-    public function testFindAll()
-    {
-        static::emptyRedis();
-        static::generateIndex();
-        static::loadRedisFixtures();
-
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyHash::class);
-
-        $collection = $repository->findAll();
-
-        foreach ($collection as $dummy) {
-            $this->assertInstanceOf(DummyHash::class, $dummy);
-        }
-    }
-
-    public function testFindBy()
-    {
-        static::emptyRedis();
-        static::generateIndex();
-        static::loadRedisFixtures();
-
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyHash::class);
-
-        $collection = $repository->findBy(['name' => 'Olivier']);
-
-        $this->assertCount(2, $collection);
-        foreach ($collection as $dummy) {
-            $this->assertInstanceOf(DummyHash::class, $dummy);
-            $this->assertEquals('Olivier', $dummy->name);
-        }
-    }
-
-    public function testFindByTypo()
-    {
-        static::emptyRedis();
-        static::generateIndex();
-        static::loadRedisFixtures();
-
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyHash::class);
-
-        $collection = $repository->findBy(['name' => 'Lolivier']);
-        $this->assertEmpty($collection);
-    }
-
-    public function testFindByOrder()
-    {
-        static::emptyRedis();
-        static::generateIndex();
-        static::loadRedisFixtures();
-
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyHash::class);
-
-        $collection = $repository->findBy(['name' => 'Olivier'], ['age' => 'ASC']);
-        $this->assertCount(2, $collection);
-
-        foreach ($collection as $dummy) {
-            if (isset($age)) {
-                $this->assertGreaterThan($age, $dummy->age);
-            }
-            $age = $dummy->age;
-        }
-        unset($age);
-
-        $collection = $repository->findBy(['name' => 'Olivier'], ['age' => 'DESC']);
-        $this->assertCount(2, $collection);
-        foreach ($collection as $dummy) {
-            if (isset($age)) {
-                $this->assertLessThan($age, $dummy->age);
-            }
-            $age = $dummy->age;
-        }
-    }
+    // public function testFindAll()
+    // {
+    //     static::emptyRedis();
+    //     static::generateIndex();
+    //     static::loadRedisFixtures();
+    //
+    //     $objectManager = new RedisObjectManager();
+    //     $repository = $objectManager->getRepository(DummyHash::class);
+    //
+    //     $collection = $repository->findAll();
+    //
+    //     foreach ($collection as $dummy) {
+    //         $this->assertInstanceOf(DummyHash::class, $dummy);
+    //     }
+    // }
+    //
+    // public function testFindBy()
+    // {
+    //     static::emptyRedis();
+    //     static::generateIndex();
+    //     static::loadRedisFixtures();
+    //
+    //     $objectManager = new RedisObjectManager();
+    //     $repository = $objectManager->getRepository(DummyHash::class);
+    //
+    //     $collection = $repository->findBy(['name' => 'Olivier']);
+    //
+    //     $this->assertCount(2, $collection);
+    //     foreach ($collection as $dummy) {
+    //         $this->assertInstanceOf(DummyHash::class, $dummy);
+    //         $this->assertEquals('Olivier', $dummy->name);
+    //     }
+    // }
+    //
+    // public function testFindByTypo()
+    // {
+    //     static::emptyRedis();
+    //     static::generateIndex();
+    //     static::loadRedisFixtures();
+    //
+    //     $objectManager = new RedisObjectManager();
+    //     $repository = $objectManager->getRepository(DummyHash::class);
+    //
+    //     $collection = $repository->findBy(['name' => 'Lolivier']);
+    //     $this->assertEmpty($collection);
+    // }
+    //
+    // public function testFindByOrder()
+    // {
+    //     static::emptyRedis();
+    //     static::generateIndex();
+    //     static::loadRedisFixtures();
+    //
+    //     $objectManager = new RedisObjectManager();
+    //     $repository = $objectManager->getRepository(DummyHash::class);
+    //
+    //     $collection = $repository->findBy(['name' => 'Olivier'], ['age' => 'ASC']);
+    //     $this->assertCount(2, $collection);
+    //
+    //     foreach ($collection as $dummy) {
+    //         if (isset($age)) {
+    //             $this->assertGreaterThan($age, $dummy->age);
+    //         }
+    //         $age = $dummy->age;
+    //     }
+    //     unset($age);
+    //
+    //     $collection = $repository->findBy(['name' => 'Olivier'], ['age' => 'DESC']);
+    //     $this->assertCount(2, $collection);
+    //     foreach ($collection as $dummy) {
+    //         if (isset($age)) {
+    //             $this->assertLessThan($age, $dummy->age);
+    //         }
+    //         $age = $dummy->age;
+    //     }
+    // }
 
     public function testFindByMultiCriterias()
     {

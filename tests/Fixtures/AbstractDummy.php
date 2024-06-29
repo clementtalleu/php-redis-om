@@ -9,25 +9,25 @@ use Talleu\RedisOm\Om\Mapping as RedisOm;
 abstract class AbstractDummy
 {
     #[RedisOm\Id]
-    #[RedisOm\Property]
+    #[RedisOm\Property(index: true)]
     public ?int $id = null;
 
-    #[RedisOm\Property]
+    #[RedisOm\Property(index: true)]
     public string $name = 'test';
 
-    #[RedisOm\Property]
+    #[RedisOm\Property(index: true)]
     public ?\DateTime $createdAt = null;
 
-    #[RedisOm\Property]
+    #[RedisOm\Property(index: true)]
     public ?\DateTimeImmutable $createdAtImmutable = null;
 
-    #[RedisOm\Property]
+    #[RedisOm\Property(index: true)]
     public ?int $age = null;
 
     #[RedisOm\Property]
     public ?float $price = null;
 
-    #[RedisOm\Property]
+    #[RedisOm\Property(index: true)]
     public ?Bar $bar = null;
 
     #[RedisOm\Property]
