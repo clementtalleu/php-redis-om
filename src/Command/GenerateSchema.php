@@ -98,12 +98,18 @@ final class GenerateSchema
                 }
 
                 if (in_array($propertyType, AbstractDateTimeConverter::DATETYPES_NAMES)) {
+                    // if ($format === RedisFormat::HASH->value) {
+                    //     $propertiesToIndex[($property->name !== null ? $property->name : $reflectionProperty->name).'#timestamp'] = $reflectionProperty->name;
+                    // } else {
+                    //     $propertiesToIndex["$propertyName.timestamp"] = $propertyName;
+                    // }
+
                     if ($format === RedisFormat::HASH->value) {
-                        $propertiesToIndex[] = new PropertyToIndex($propertyName, $propertyName.'#timestamp', Property::INDEX_TAG);
-                        $propertiesToIndex[] = new PropertyToIndex($propertyName, $propertyName.'#timestamp_text', Property::INDEX_TEXT);
+                        $propertiesToIndex[] = new PropertyToIndex("$propertyName#timestamp", $propertyName, Property::INDEX_TAG);
+                        $propertiesToIndex[] = new PropertyToIndex("$propertyName#timestamp", $propertyName.'_text', Property::INDEX_TEXT);
                     } else {
-                        $propertiesToIndex[] = new PropertyToIndex('$.'. $propertyName, "$propertyName.timestamp", Property::INDEX_TAG);
-                        $propertiesToIndex[] = new PropertyToIndex('$.'. $propertyName, "$propertyName.timestamp_text", Property::INDEX_TEXT);
+                        $propertiesToIndex[] = new PropertyToIndex('$.'. "$propertyName.timestamp", $propertyName, Property::INDEX_TAG);
+                        $propertiesToIndex[] = new PropertyToIndex('$.'. "$propertyName.timestamp", $propertyName."_text", Property::INDEX_TEXT);
                     }
                 } elseif ($propertyType === 'int' || $propertyType === 'float') {
                     $propertiesToIndex[] = new PropertyToIndex(($format === RedisFormat::JSON->value ? '$.' : ''). $propertyName, $propertyName, Property::INDEX_TAG);
@@ -147,8 +153,6 @@ final class GenerateSchema
             if (!$idExist) {
                 throw new BadIdentifierConfigurationException("No identifier found for $fqcn, or identifier is not mapped by RedisOm");
             }
-
-            dump($propertiesToIndex);
 
             $entity->redisClient->createIndex($entity->prefix ?? $fqcn, $format, $propertiesToIndex);
         }
