@@ -9,7 +9,7 @@ class ScalarConverter implements ConverterInterface
     /**
      * @param scalar $data
      */
-    public function convert($data): string
+    public function convert($data)
     {
         return (string) $data;
     }
@@ -18,8 +18,6 @@ class ScalarConverter implements ConverterInterface
     {
         if ($type === 'int') {
             return (int) $data;
-        } elseif ($type === 'bool') {
-            return (bool) $data;
         } elseif ($type === 'float') {
             return (float) $data;
         }
@@ -29,11 +27,11 @@ class ScalarConverter implements ConverterInterface
 
     public function supportsConversion(string $type, mixed $data): bool
     {
-        return in_array($type, ['int', 'string', 'double', 'boolean', 'integer', 'float', 'bool', 'null']);
+        return in_array($type, ['int', 'string', 'double', 'integer', 'float', 'null']);
     }
 
     public function supportsReversion(string $type, mixed $value): bool
     {
-        return in_array($type, ['int', 'string', 'float', 'bool']);
+        return in_array($type, ['int', 'string', 'float']);
     }
 }
