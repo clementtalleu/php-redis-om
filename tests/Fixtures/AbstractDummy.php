@@ -33,7 +33,7 @@ abstract class AbstractDummy
     #[RedisOm\Property]
     public ?array $infos = [];
 
-    #[RedisOm\Property]
+    #[RedisOm\Property(index: true)]
     public ?bool $enabled = null;
 
     #[RedisOm\Property]

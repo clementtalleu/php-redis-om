@@ -280,6 +280,7 @@ final class RedisClient implements RedisClientInterface
                     $criteria .= sprintf('@%s:%s', $property, $value);
                 }
             }
+
             $arguments[] = $criteria;
         }
 

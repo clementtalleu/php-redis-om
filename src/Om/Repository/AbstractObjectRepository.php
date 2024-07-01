@@ -38,7 +38,7 @@ abstract class AbstractObjectRepository implements RepositoryInterface
     public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): array
     {
         $this->convertDates($criteria);
-        $this->escapeSpecialCharsInCriterias($criteria);
+        $this->convertSpecial($criteria);
         $data = $this->redisClient->search($this->prefix, $criteria, $orderBy ?? [], $this->format, $limit);
 
         $collection = [];
@@ -55,7 +55,7 @@ abstract class AbstractObjectRepository implements RepositoryInterface
     public function findByLike(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): array
     {
         $this->convertDates($criteria);
-        $this->escapeSpecialCharsInCriterias($criteria);
+        $this->convertSpecial($criteria);
         foreach ($criteria as $property => $value) {
             $criteria[$property.'_text'] = "*$value*";
             unset($criteria[$property]);
@@ -100,7 +100,7 @@ abstract class AbstractObjectRepository implements RepositoryInterface
     public function findOneBy(array $criteria, ?array $orderBy = null): ?object
     {
         $this->convertDates($criteria);
-        $this->escapeSpecialCharsInCriterias($criteria);
+        $this->convertSpecial($criteria);
         $data = $this->redisClient->search($this->prefix, $criteria, $orderBy ?? [], $this->format, 1);
 
         if ($data === []) {
@@ -116,7 +116,7 @@ abstract class AbstractObjectRepository implements RepositoryInterface
     public function findOneByLike(array $criteria, ?array $orderBy = null): ?object
     {
         $this->convertDates($criteria);
-        $this->escapeSpecialCharsInCriterias($criteria);
+        $this->convertSpecial($criteria);
         foreach ($criteria as $property => $value) {
             $criteria[$property.'_text'] = "*$value*";
             unset($criteria[$property]);
@@ -184,9 +184,15 @@ abstract class AbstractObjectRepository implements RepositoryInterface
         $this->format = $format ?? RedisFormat::HASH->value;
     }
 
-    protected function escapeSpecialCharsInCriterias(array|string &$criteria): void
+    protected function convertSpecial(array|string &$criteria): void
     {
         foreach ($criteria as $property => $value) {
+
+            if (is_bool($value)) {
+                $criteria[$property] = $value ? 'true' : 'false';
+                continue;
+            }
+
             if (!is_string($value)) {
                 continue;
             }
