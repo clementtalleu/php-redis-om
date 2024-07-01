@@ -112,8 +112,14 @@ final class GenerateSchema
                         $propertiesToIndex[] = new PropertyToIndex('$.'. "$propertyName.timestamp", $propertyName."_text", Property::INDEX_TEXT);
                     }
                 } elseif ($propertyType === 'int' || $propertyType === 'float') {
-                    $propertiesToIndex[] = new PropertyToIndex(($format === RedisFormat::JSON->value ? '$.' : ''). $propertyName, $propertyName, Property::INDEX_TAG);
-                    $propertiesToIndex[] = new PropertyToIndex(($format === RedisFormat::JSON->value ? '$.' : ''). $propertyName, $propertyName.'_numeric', Property::INDEX_NUMERIC);
+                    if ($format === RedisFormat::HASH->value) {
+                        $propertiesToIndex[] = new PropertyToIndex($propertyName, $propertyName, Property::INDEX_TEXT);
+                        // $propertiesToIndex[] = new PropertyToIndex($propertyName, $propertyName.'_numeric', Property::INDEX_NUMERIC);
+                    } else {
+                        $propertiesToIndex[] = new PropertyToIndex('$.'.$propertyName, $propertyName, Property::INDEX_TEXT);
+                        // $propertiesToIndex[] = new PropertyToIndex('$.'.$propertyName, $propertyName."_numeric", Property::INDEX_NUMERIC);
+                    }
+
                 } elseif (class_exists($propertyType)) {
                     $subReflectionClass = new \ReflectionClass($propertyType);
                     $attributes = $subReflectionClass->getAttributes(Entity::class);

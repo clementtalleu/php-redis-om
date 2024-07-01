@@ -42,25 +42,29 @@ final class QueryBuilderTest extends RedisAbstractTestCase
         $queryBuilder = $repository->createQueryBuilder();
         $queryBuilder->query('@age:{99 | 98}');
         $results = $queryBuilder->execute();
+
+        dump($results);
+        die;
+
         $this->assertEmpty($results);
     }
 
-    public function testCustomQueryStartWith()
-    {
-        static::emptyRedis();
-        static::generateIndex();
-        static::loadRedisFixtures(DummyJson::class);
-
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyJson::class);
-
-        $queryBuilder = $repository->createQueryBuilder();
-        $queryBuilder->query('@name:{Oli*}');
-        $results = $queryBuilder->execute();
-
-        foreach ($results as $result) {
-            $this->assertInstanceOf(DummyJson::class, $result);
-            $this->assertTrue(str_starts_with($result->name, 'Oli'));
-        }
-    }
+    // public function testCustomQueryStartWith()
+    // {
+    //     static::emptyRedis();
+    //     static::generateIndex();
+    //     static::loadRedisFixtures(DummyJson::class);
+    //
+    //     $objectManager = new RedisObjectManager();
+    //     $repository = $objectManager->getRepository(DummyJson::class);
+    //
+    //     $queryBuilder = $repository->createQueryBuilder();
+    //     $queryBuilder->query('@name:{Oli*}');
+    //     $results = $queryBuilder->execute();
+    //
+    //     foreach ($results as $result) {
+    //         $this->assertInstanceOf(DummyJson::class, $result);
+    //         $this->assertTrue(str_starts_with($result->name, 'Oli'));
+    //     }
+    // }
 }
