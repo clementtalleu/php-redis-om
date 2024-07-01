@@ -7,9 +7,9 @@ namespace Talleu\RedisOm\Om\Converters;
 class BooleanConverter implements ConverterInterface
 {
     /**
-     * @param scalar $data
+     * @param boolean|null $data
      */
-    public function convert($data)
+    public function convert($data): ?string
     {
         if ($data === false) {
             return 'false';
@@ -20,7 +20,7 @@ class BooleanConverter implements ConverterInterface
         }
     }
 
-    public function revert($data, string $type)
+    public function revert($data, string $type): ?bool
     {
         if ($data === 'false') {
             return false;
