@@ -3,7 +3,7 @@
 
 ## Mapping object
 
-Customize the mapping configuration by adding parameters to you RedisOm\Entity attribute.
+Customize the mapping configuration by adding parameters to your `#[RedisOm\Entity]` attribute.
 
 ```php
 <?php 
@@ -81,6 +81,10 @@ vendor/bin/redisMigration <YOUR DIRECTORY PATH>
 
 
 ## Mapping properties
+
+Add the `#[RedisOm\Property]` attribute to persist the property in Redis.
+Inject an index parameter to make the property queryable.
+
 ```php
 <?php 
 
@@ -95,21 +99,30 @@ class User
     public int $id;
 
     #[RedisOm\Property(
-        name: 'user_name',
+        index: true,
         getter: 'obtainName',
         setter: 'withName',
     )]
     public string $name;
+
+    #[RedisOm\Property(
+        index: ['age_numeric' => Property::INDEX_NUMERIC, 'age_text' => Property::INDEX_TEXT],
+    )]
+    public int $age;
+    
+    #[RedisOm\Property]
+    public ?string $description;
 }
 ```
 
 Each of these parameters are optional and can be omitted. Here is a description of each parameter:
 
-- name:
-    - The name of the key in Redis. If not set, the property name will be used.
-    - Example: `user_name`
-    - Default: `null`
-    - Type: `string`
+- index:
+    - The index in Redis. If not set, the property is false by default and could not be queryable.
+    - Example: `true` Will create default index (TAG + TEXT)
+    - Example: `['age' => Property::INDEX_NUMERIC]`
+    - Default: `false`
+    - Type: `boolean | array`
 - getter:
     - The name of the getter method to use to get the value of the property **if the property is not public**. If not set, a default getter as : `getName()` will be used.
     - Example: `obtainName`
@@ -120,6 +133,8 @@ Each of these parameters are optional and can be omitted. Here is a description 
     - Example: `withName`
     - Default: `null`
     - Type: `string`
+
+The #[RedisOm\Id] attribute is by default indexed and could be requested.
 
 ## Update the schema
 After each modification of your classes, you have to update the schema in Redis. You can do it by running the following command:

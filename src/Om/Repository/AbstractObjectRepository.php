@@ -61,7 +61,7 @@ abstract class AbstractObjectRepository implements RepositoryInterface
             unset($criteria[$property]);
         }
 
-        $data = $this->redisClient->search(prefixKey: $this->prefix, search: $criteria, orderBy: $orderBy ?? [], format:  $this->format, numberOfResults: $limit, searchType: Property::TEXT_TYPE);
+        $data = $this->redisClient->search(prefixKey: $this->prefix, search: $criteria, orderBy: $orderBy ?? [], format:  $this->format, numberOfResults: $limit, searchType: Property::INDEX_TEXT);
 
         $collection = [];
         foreach ($data as $item) {
@@ -122,7 +122,7 @@ abstract class AbstractObjectRepository implements RepositoryInterface
             unset($criteria[$property]);
         }
 
-        $data = $this->redisClient->search(prefixKey: $this->prefix, search: $criteria, orderBy: $orderBy ?? [], format:  $this->format, numberOfResults: 1, searchType: Property::TEXT_TYPE);
+        $data = $this->redisClient->search(prefixKey: $this->prefix, search: $criteria, orderBy: $orderBy ?? [], format:  $this->format, numberOfResults: 1, searchType: Property::INDEX_TEXT);
 
         if ($data === []) {
             return null;

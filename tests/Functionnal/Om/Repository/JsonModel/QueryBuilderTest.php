@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Tests\Functionnal\Om\Repository\JsonModel;
 
-use Talleu\RedisOm\Exception\BadPropertyException;
 use Talleu\RedisOm\Om\RedisObjectManager;
 use Talleu\RedisOm\Tests\Fixtures\Json\DummyJson;
 use Talleu\RedisOm\Tests\RedisAbstractTestCase;
@@ -21,7 +20,7 @@ final class QueryBuilderTest extends RedisAbstractTestCase
         $repository = $objectManager->getRepository(DummyJson::class);
 
         $queryBuilder = $repository->createQueryBuilder();
-        $queryBuilder->query('@age:{20 | 34}');
+        $queryBuilder->query('@age:{20|34}');
         $results = $queryBuilder->execute();
 
         foreach ($results as $result) {
@@ -42,6 +41,7 @@ final class QueryBuilderTest extends RedisAbstractTestCase
         $queryBuilder = $repository->createQueryBuilder();
         $queryBuilder->query('@age:{99 | 98}');
         $results = $queryBuilder->execute();
+
         $this->assertEmpty($results);
     }
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Client;
 
+use Talleu\RedisOm\Command\PropertyToIndex;
 use Talleu\RedisOm\Om\Mapping\Property;
 use Talleu\RedisOm\Om\RedisFormat;
 
@@ -62,6 +63,7 @@ interface RedisClientInterface
 
     /**
      * Create index for objects by properties.
+     * @param PropertyToIndex[] $properties
      */
     public function createIndex(string $prefixKey, ?string $format = 'HASH', ?array $properties = []): void;
 
@@ -78,7 +80,7 @@ interface RedisClientInterface
     /**
      * Search objects by given prefix key and criterias.
      */
-    public function search(string $prefixKey, array $search, array $orderBy, ?string $format = RedisFormat::HASH->value, ?int $numberOfResults = null, ?string $searchType = Property::TAG_TYPE): array;
+    public function search(string $prefixKey, array $search, array $orderBy, ?string $format = RedisFormat::HASH->value, ?int $numberOfResults = null, ?string $searchType = Property::INDEX_TAG): array;
 
     /**
      * Search objects by given prefix and a complete custom query command.

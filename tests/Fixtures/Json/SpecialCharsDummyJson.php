@@ -11,6 +11,6 @@ use Talleu\RedisOm\Tests\Fixtures\AbstractDummy;
 #[RedisOm\Entity(format: RedisFormat::JSON->value)]
 class SpecialCharsDummyJson extends AbstractDummy
 {
-    #[RedisOm\Property]
+    #[RedisOm\Property(index: true)]
     public string $specialChars = 'ok:';
 }

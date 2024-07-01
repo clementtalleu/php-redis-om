@@ -10,7 +10,7 @@ class Bar
     #[RedisOm\Property]
     #[RedisOm\Id]
     public ?int $id = null;
-    #[RedisOm\Property]
+    #[RedisOm\Property(index: true)]
     public ?string $title = null;
     #[RedisOm\Property]
     public ?array $types = null;

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Client;
 
+use Talleu\RedisOm\Command\PropertyToIndex;
 use Talleu\RedisOm\Exception\BadPropertyConfigurationException;
 use Talleu\RedisOm\Exception\RedisClientResponseException;
 use Talleu\RedisOm\Om\Mapping\Property;
@@ -152,6 +153,10 @@ final class RedisClient implements RedisClientInterface
      */
     public function createIndex(string $prefixKey, ?string $format = 'HASH', ?array $properties = []): void
     {
+        if ($properties === []) {
+            return;
+        }
+
         $prefixKey = self::convertPrefix($prefixKey);
 
         $arguments = [
@@ -169,17 +174,12 @@ final class RedisClient implements RedisClientInterface
 
         $arguments[] = 'SCHEMA';
 
-        foreach ($properties as $name => $as) {
-            $arguments[] = ($format === RedisFormat::JSON->value ? '$.' : '') . $name;
+        /** @var PropertyToIndex $propertyToIndex */
+        foreach ($properties as $propertyToIndex) {
+            $arguments[] = $propertyToIndex->name;
             $arguments[] = 'AS';
-            $arguments[] = $as;
-            $arguments[] = Property::TAG_TYPE;
-            $arguments[] = 'SORTABLE';
-
-            $arguments[] = ($format === RedisFormat::JSON->value ? '$.' : '') . $name;
-            $arguments[] = 'AS';
-            $arguments[] = $as.'_text';
-            $arguments[] = Property::TEXT_TYPE;
+            $arguments[] = $propertyToIndex->indexName;
+            $arguments[] = $propertyToIndex->indexType;
             $arguments[] = 'SORTABLE';
         }
 
@@ -265,7 +265,7 @@ final class RedisClient implements RedisClientInterface
     /**
      * @inheritdoc
      */
-    public function search(string $prefixKey, array $search, array $orderBy, ?string $format = RedisFormat::HASH->value, ?int $numberOfResults = null, ?string $searchType = Property::TAG_TYPE): array
+    public function search(string $prefixKey, array $search, array $orderBy, ?string $format = RedisFormat::HASH->value, ?int $numberOfResults = null, ?string $searchType = Property::INDEX_TAG): array
     {
         $arguments = [RedisCommands::SEARCH->value, self::convertPrefix($prefixKey)];
 
@@ -274,7 +274,7 @@ final class RedisClient implements RedisClientInterface
         } else {
             $criteria = '';
             foreach ($search as $property => $value) {
-                if ($searchType === Property::TAG_TYPE) {
+                if ($searchType === Property::INDEX_TAG) {
                     $criteria .= sprintf('@%s:{%s}', $property, $value);
                 } else {
                     $criteria .= sprintf('@%s:%s', $property, $value);
