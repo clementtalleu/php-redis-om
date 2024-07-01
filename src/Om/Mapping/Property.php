@@ -39,12 +39,10 @@ final class Property
      * @param string|null $setter
      */
     public function __construct(
-        public ?string                $name = null,
         public null|bool|array|string $index = false,
         public ?string                $getter = null,
         public ?string                $setter = null,
-    )
-    {
+    ) {
         if (is_bool($index)) {
             return;
         }

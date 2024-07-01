@@ -10,6 +10,6 @@ use Talleu\RedisOm\Tests\Fixtures\AbstractDummy;
 #[RedisOm\Entity]
 class SpecialCharsDummyHash extends AbstractDummy
 {
-    #[RedisOm\Property]
+    #[RedisOm\Property(index: true)]
     public string $specialChars = 'ok:';
 }

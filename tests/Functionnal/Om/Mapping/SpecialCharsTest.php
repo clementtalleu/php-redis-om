@@ -15,11 +15,12 @@ class SpecialCharsTest extends RedisAbstractTestCase
     {
         static::emptyRedis();
         static::generateIndex();
+        /** @var SpecialCharsDummyHash[] $dummies */
         $dummies = static::loadRedisFixtures(SpecialCharsDummyHash::class);
 
         $repository = (new RedisObjectManager())->getRepository(SpecialCharsDummyHash::class);
         $object = $repository->findOneBy(['specialChars' => 'ok:']);
-        $this->assertEquals($dummies[1], $object);
+        $this->assertEquals($dummies[0], $object);
     }
 
     public function testSpecialCharsFindOneByJson()
@@ -30,7 +31,7 @@ class SpecialCharsTest extends RedisAbstractTestCase
 
         $repository = (new RedisObjectManager())->getRepository(SpecialCharsDummyJson::class);
         $object = $repository->findOneBy(['specialChars' => 'ok:']);
-        $this->assertEquals($dummies[1], $object);
+        $this->assertEquals($dummies[0], $object);
     }
 
     public function testSpecialCharsFindOneByBadSearch()
@@ -85,9 +86,9 @@ class SpecialCharsTest extends RedisAbstractTestCase
 
         $repository = (new RedisObjectManager())->getRepository(SpecialCharsDummyHash::class);
         $collection = $repository->findBy(['specialChars' => 'ok:']);
-        $this->assertEquals($dummies[1], $collection[0]);
-        $this->assertEquals($dummies[2], $collection[1]);
-        $this->assertEquals($dummies[0], $collection[2]);
+        $this->assertEquals($dummies[0], $collection[0]);
+        $this->assertEquals($dummies[1], $collection[1]);
+        $this->assertEquals($dummies[2], $collection[2]);
     }
 
     public function testSpecialCharsFindByJson()
@@ -95,12 +96,12 @@ class SpecialCharsTest extends RedisAbstractTestCase
         static::emptyRedis();
         static::generateIndex();
         $dummies = static::loadRedisFixtures(SpecialCharsDummyJson::class);
-
         $repository = (new RedisObjectManager())->getRepository(SpecialCharsDummyJson::class);
         $collection = $repository->findBy(['specialChars' => 'ok:']);
-        $this->assertEquals($dummies[1], $collection[0]);
-        $this->assertEquals($dummies[2], $collection[1]);
-        $this->assertEquals($dummies[0], $collection[2]);
+
+        $this->assertEquals($dummies[0], $collection[0]);
+        $this->assertEquals($dummies[1], $collection[1]);
+        $this->assertEquals($dummies[2], $collection[2]);
     }
 
     public function testOtherSpecialCharsFindOneBy()

@@ -76,7 +76,7 @@ final class GenerateSchema
                 /** @var \ReflectionNamedType|null $propertyReflectionType */
                 $propertyReflectionType = $reflectionProperty->getType();
                 $propertyType = $propertyReflectionType->getName();
-                $propertyName = $property->name ?? $reflectionProperty->getName();
+                $propertyName = $reflectionProperty->getName();
 
                 // Index disabled
                 if (empty($property->index)) {
@@ -98,12 +98,6 @@ final class GenerateSchema
                 }
 
                 if (in_array($propertyType, AbstractDateTimeConverter::DATETYPES_NAMES)) {
-                    // if ($format === RedisFormat::HASH->value) {
-                    //     $propertiesToIndex[($property->name !== null ? $property->name : $reflectionProperty->name).'#timestamp'] = $reflectionProperty->name;
-                    // } else {
-                    //     $propertiesToIndex["$propertyName.timestamp"] = $propertyName;
-                    // }
-
                     if ($format === RedisFormat::HASH->value) {
                         $propertiesToIndex[] = new PropertyToIndex("$propertyName#timestamp", $propertyName, Property::INDEX_TAG);
                         $propertiesToIndex[] = new PropertyToIndex("$propertyName#timestamp", $propertyName.'_text', Property::INDEX_TEXT);
@@ -113,13 +107,10 @@ final class GenerateSchema
                     }
                 } elseif ($propertyType === 'int' || $propertyType === 'float') {
                     if ($format === RedisFormat::HASH->value) {
-                        $propertiesToIndex[] = new PropertyToIndex($propertyName, $propertyName, Property::INDEX_TEXT);
-                        // $propertiesToIndex[] = new PropertyToIndex($propertyName, $propertyName.'_numeric', Property::INDEX_NUMERIC);
+                        $propertiesToIndex[] = new PropertyToIndex($propertyName, $propertyName, Property::INDEX_TAG);
                     } else {
-                        $propertiesToIndex[] = new PropertyToIndex('$.'.$propertyName, $propertyName, Property::INDEX_TEXT);
-                        // $propertiesToIndex[] = new PropertyToIndex('$.'.$propertyName, $propertyName."_numeric", Property::INDEX_NUMERIC);
+                        $propertiesToIndex[] = new PropertyToIndex('$.'.$propertyName, $propertyName, Property::INDEX_TAG);
                     }
-
                 } elseif (class_exists($propertyType)) {
                     $subReflectionClass = new \ReflectionClass($propertyType);
                     $attributes = $subReflectionClass->getAttributes(Entity::class);
@@ -141,14 +132,13 @@ final class GenerateSchema
 
                         /** @var \ReflectionNamedType|null $subPropertyType */
                         $subPropertyType = $subReflectionProperty->getType();
-
-                        $subPropertyName = $subProperty->name ?? $subReflectionProperty->getName();
+                        $subPropertyName = $subReflectionProperty->getName();
                         if (!in_array($subPropertyType?->getName(), ['int', 'string', 'float', 'bool'])) {
                             continue;
                         }
 
                         $propertiesToIndex[] = new PropertyToIndex(($format === RedisFormat::JSON->value ? '$.' : '')."$propertyName.$subPropertyName", $propertyName.'_'.$subPropertyName.'_text', Property::INDEX_TEXT);
-                        $propertiesToIndex[] = new PropertyToIndex(($format === RedisFormat::JSON->value ? '$.' : ''). "$propertyName.$subPropertyName",  $propertyName.'_'.$subPropertyName, Property::INDEX_TAG);
+                        $propertiesToIndex[] = new PropertyToIndex(($format === RedisFormat::JSON->value ? '$.' : ''). "$propertyName.$subPropertyName", $propertyName.'_'.$subPropertyName, Property::INDEX_TAG);
                     }
                 } else {
                     $propertiesToIndex[] = new PropertyToIndex(($format === RedisFormat::JSON->value ? '$.' : '').$propertyName, $propertyName, Property::INDEX_TAG);
@@ -196,5 +186,6 @@ final class GenerateSchema
 class PropertyToIndex
 {
     public function __construct(public string $name, public string $indexName, public string $indexType)
-    {}
+    {
+    }
 }
