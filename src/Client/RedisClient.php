@@ -176,24 +176,11 @@ final class RedisClient implements RedisClientInterface
 
         /** @var PropertyToIndex $propertyToIndex */
         foreach ($properties as $propertyToIndex) {
-
             $arguments[] = $propertyToIndex->name;
             $arguments[] = 'AS';
             $arguments[] = $propertyToIndex->indexName;
             $arguments[] = $propertyToIndex->indexType;
             $arguments[] = 'SORTABLE';
-
-            // $arguments[] = ($format === RedisFormat::JSON->value ? '$.' : '') . $name;
-            // $arguments[] = 'AS';
-            // $arguments[] = $as;
-            // $arguments[] = Property::INDEX_TAG;
-            // $arguments[] = 'SORTABLE';
-            //
-            // $arguments[] = ($format === RedisFormat::JSON->value ? '$.' : '') . $name;
-            // $arguments[] = 'AS';
-            // $arguments[] = $as.'_text';
-            // $arguments[] = Property::INDEX_TEXT;
-            // $arguments[] = 'SORTABLE';
         }
 
         if (end($arguments) === 'SCHEMA') {

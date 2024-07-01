@@ -3,7 +3,7 @@
 
 ## Mapping object
 
-Customize the mapping configuration by adding parameters to you `RedisOm\Entity attribute.
+Customize the mapping configuration by adding parameters to your `#[RedisOm\Entity]` attribute.
 
 ```php
 <?php 
