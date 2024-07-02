@@ -9,8 +9,8 @@ use Talleu\RedisOm\Om\RedisFormat;
 use Talleu\RedisOm\Tests\Fixtures\AbstractDummy;
 
 #[RedisOm\Entity(format: RedisFormat::JSON->value)]
-class DummyJsonWithNullProperties extends AbstractDummy
+class DummyJsonWithSpaceChars extends AbstractDummy
 {
     #[RedisOm\Property(index: true)]
-    public ?string $unknown = null;
+    public ?string $spaceChars = 'null';
 }
