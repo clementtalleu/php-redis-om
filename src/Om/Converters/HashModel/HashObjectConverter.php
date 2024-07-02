@@ -19,7 +19,7 @@ final class HashObjectConverter extends AbstractObjectConverter
 
             /** @var Property|null $propertyAttribute */
             $propertyAttribute = $property->getAttributes(Property::class) !== [] ? $property->getAttributes(Property::class)[0]->newInstance() : null;
-            if ($propertyAttribute === null) {
+            if (is_null($propertyAttribute)) {
                 continue;
             }
 

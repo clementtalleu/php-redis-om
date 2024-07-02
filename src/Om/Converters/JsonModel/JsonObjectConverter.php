@@ -55,6 +55,7 @@ final class JsonObjectConverter extends AbstractObjectConverter
     public function revert($data, string $type): mixed
     {
         $object = new $type();
+
         foreach ($data as $key => $value) {
 
             if (!property_exists($object, $key)) {
@@ -87,6 +88,6 @@ final class JsonObjectConverter extends AbstractObjectConverter
 
     public function supportsReversion(string $type, mixed $value): bool
     {
-        return $value !== null && class_exists($type) && $type !== 'stdClass' && !in_array($type, AbstractDateTimeConverter::DATETYPES_NAMES);
+        return $value !== null && $value !== 'null' && class_exists($type) && $type !== 'stdClass' && !in_array($type, AbstractDateTimeConverter::DATETYPES_NAMES);
     }
 }

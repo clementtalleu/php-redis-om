@@ -188,6 +188,11 @@ abstract class AbstractObjectRepository implements RepositoryInterface
     {
         foreach ($criteria as $property => $value) {
 
+            if (is_null($value)) {
+                $criteria[$property] = 'null';
+                continue;
+            }
+
             if (is_bool($value)) {
                 $criteria[$property] = $value ? 'true' : 'false';
                 continue;

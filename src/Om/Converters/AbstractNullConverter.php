@@ -18,7 +18,7 @@ abstract class AbstractNullConverter implements ConverterInterface
 
     public function supportsConversion(string $type, mixed $data): bool
     {
-        return $type === 'NULL' || $data === null;
+        return $type === 'NULL' || is_null($data);
     }
 
     public function supportsReversion(string $type, mixed $value): bool

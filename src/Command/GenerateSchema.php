@@ -69,7 +69,7 @@ final class GenerateSchema
                 $property = $propertyAttribute[0]->newInstance();
 
                 /** This property is not indexed neither an ID */
-                if ($property->index === null && $reflectionProperty->getAttributes(Id::class) === []) {
+                if (is_null($property->index) && $reflectionProperty->getAttributes(Id::class) === []) {
                     continue;
                 }
 
