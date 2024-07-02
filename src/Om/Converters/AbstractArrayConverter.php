@@ -20,6 +20,6 @@ abstract class AbstractArrayConverter implements ConverterInterface
 
     public function supportsReversion(string $type, mixed $value): bool
     {
-        return ($type === 'array' || $type === 'iterable') && $value !== null;
+        return ($type === 'array' || $type === 'iterable') && $value !== null && $value !== 'null';
     }
 }

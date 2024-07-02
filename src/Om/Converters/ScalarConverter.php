@@ -27,11 +27,11 @@ class ScalarConverter implements ConverterInterface
 
     public function supportsConversion(string $type, mixed $data): bool
     {
-        return in_array($type, ['int', 'string', 'double', 'integer', 'float', 'null']);
+        return in_array($type, ['int', 'string', 'double', 'integer', 'float', 'null']) && $data !== null;
     }
 
     public function supportsReversion(string $type, mixed $value): bool
     {
-        return in_array($type, ['int', 'string', 'float']);
+        return in_array($type, ['int', 'string', 'float']) && $value !== null && $value !== 'null';
     }
 }

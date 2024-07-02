@@ -11,8 +11,8 @@ final class NullConverter extends AbstractNullConverter
     /**
      * @param null $data
      */
-    public function convert($data): null
+    public function convert($data): string
     {
-        return null;
+        return 'null';
     }
 }
