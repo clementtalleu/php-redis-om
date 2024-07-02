@@ -203,6 +203,7 @@ abstract class AbstractObjectRepository implements RepositoryInterface
             }
 
             $criteria[$property] = str_replace([':'], ['\:'], $value);
+            $criteria[$property] = str_replace([' '], ['\ '], $criteria[$property]);
         }
     }
 
