@@ -9,14 +9,14 @@
 
 A PHP object mapper for [Redis](https://redis.io/).
 
-An Object Mapper for Redis, designed to providing an intuitive and familiar interface for PHP developers to interact
+An Object Mapper for Redis®, designed to providing an intuitive and familiar interface for PHP developers to interact
 with Redis.
 
 ## Features 🛠️
 
 - Doctrine-like methods and architecture
 - Easy integration with existing PHP applications
-- High performance and scalability with Redis
+- High performance and scalability with Redis®
 - Support for Redis JSON module
 - Automatic schema generation
 - Search and query capabilities
