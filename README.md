@@ -98,7 +98,7 @@ $objectManager->flush();
 🥳 Congratulations, your PHP object is now registered in Redis !
 
 
-You can now retrieve your user wherever you like using the ObjectManager:
+You can now retrieve your user wherever you like using the repository provided by the Object Manager (or the object manager directly) :
 
 ```php
 // Retrieve the object from redis 
