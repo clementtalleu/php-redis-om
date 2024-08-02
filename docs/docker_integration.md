@@ -27,3 +27,11 @@ docker compose up -d
 ```console
 docker compose exec php vendor/bin/phpunit tests
 ```
+
+To have a complete redis architecture locally, you can also run this container
+
+```
+docker run -d --name redis-stack -p 6379:6379 -p 8001:8001 -e REDIS_ARGS="--requirepass mypassword" redis/redis-stack:latest
+```
+
+
