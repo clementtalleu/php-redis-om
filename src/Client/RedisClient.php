@@ -151,7 +151,7 @@ final class RedisClient implements RedisClientInterface
     /**
      * @inheritdoc
      */
-    public function createIndex(string $prefixKey, ?string $format = 'HASH', ?array $properties = []): void
+    public function createIndex(string $prefixKey, ?string $format = RedisFormat::HASH->value, ?array $properties = []): void
     {
         if ($properties === []) {
             return;
