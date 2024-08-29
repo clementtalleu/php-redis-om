@@ -1,9 +1,8 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Talleu\RedisOm\Client;
 
+use Predis\Client as PRedis;
 use Talleu\RedisOm\Client\Helper\Converter;
 use Talleu\RedisOm\Command\PropertyToIndex;
 use Talleu\RedisOm\Exception\BadPropertyConfigurationException;
@@ -11,33 +10,53 @@ use Talleu\RedisOm\Exception\RedisClientResponseException;
 use Talleu\RedisOm\Om\Mapping\Property;
 use Talleu\RedisOm\Om\RedisFormat;
 
-final class RedisClient implements RedisClientInterface
+class PRedisClient implements RedisClientInterface
 {
-    public function __construct(protected ?\Redis $redis = null)
-    {
-        $this->redis = $redis ?? new \Redis(array_key_exists('REDIS_HOST', $_SERVER) ? ['host' => $_SERVER['REDIS_HOST']] : null);
-    }
 
-    /**
-     * @inheritdoc
-     */
-    public function createPersistentConnection(?string $host = null, ?int $port = null, ?int $timeout = 0): void
+    public function __construct(protected ?PRedis $redis = null)
     {
-        $this->redis->pconnect(
-            $host ?? $this->redis->getHost(),
-            $port ?? $this->redis->getPort(),
-            $timeout ?? $this->redis->getTimeout(),
+        $this->redis = $redis ?? new PRedis([
+                'host' => array_key_exists('REDIS_HOST', $_SERVER) ? ['host' => $_SERVER['REDIS_HOST']] : null,
+            ]
         );
     }
 
+    public function createPersistentConnection(?string $host = null, ?int $port = null, ?int $timeout = 0): void
+    {
+        $parameters = $this->redis->getConnection()->getParameters()->toArray();
+
+        $this->redis = new PRedis([
+            'scheme' => 'tcp',
+            'host' => $host ?? $parameters['host'],
+            'port' => $port ?? $parameters['port'],
+            'persistent' => true,
+            'timeout' => $timeout,
+        ]);;
+    }
+
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function hMSet(string $key, array $data): void
     {
-        if (!$this->redis->hMSet(Converter::prefix($key), $data)) {
+        if (!$this->redis->hmset(Converter::prefix($key), $data)) {
             $this->handleError(__METHOD__, $this->redis->getLastError());
         }
+    }
+
+
+    /**
+     * @inheritdoc
+     */
+    public function hGetAll(string $key): array
+    {
+        $result = $this->redis->hgetall(Converter::prefix($key));
+
+        if ($result === false) {
+            $this->handleError(__METHOD__, $this->redis->getLastError());
+        }
+
+        return $result;
     }
 
     /**
@@ -48,20 +67,6 @@ final class RedisClient implements RedisClientInterface
         $result = $this->redis->hget(Converter::prefix($key), $property);
 
         if (!$result) {
-            $this->handleError(__METHOD__, $this->redis->getLastError());
-        }
-
-        return $result;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function hGetAll(string $key): array
-    {
-        $result = $this->redis->hGetAll(Converter::prefix($key));
-
-        if ($result === false) {
             $this->handleError(__METHOD__, $this->redis->getLastError());
         }
 
@@ -225,7 +230,7 @@ final class RedisClient implements RedisClientInterface
             $this->handleError(__METHOD__, $this->redis->getLastError());
         }
 
-        return (int) $rawResult[0];
+        return (int)$rawResult[0];
     }
 
     /**
@@ -266,7 +271,7 @@ final class RedisClient implements RedisClientInterface
     /**
      * @inheritdoc
      */
-    public function search(string $prefixKey, array $search, array $orderBy, ?string $format = RedisFormat::HASH->value, ?int $numberOfResults = null, int $offset = 0, ?string $searchType = Property::INDEX_TAG): array
+    public function search(string $prefixKey, array $search, array $orderBy, ?string $format = RedisFormat::HASH->value, ?int $numberOfResults = null, ?string $searchType = Property::INDEX_TAG): array
     {
         $arguments = [RedisCommands::SEARCH->value, self::convertPrefix($prefixKey)];
 
@@ -289,11 +294,6 @@ final class RedisClient implements RedisClientInterface
             $arguments[] = 'SORTBY';
             $arguments[] = $property;
             $arguments[] = $direction;
-        }
-        if ($numberOfResults !== null) {
-            $arguments[] = 'LIMIT';
-            $arguments[] = $offset;
-            $arguments[] = $numberOfResults;
         }
 
         try {
@@ -361,6 +361,11 @@ final class RedisClient implements RedisClientInterface
         }
 
         return $this->extractRedisData($result, $format, $numberOfResults);
+    }
+
+    public static function convertPrefix(string $key): string
+    {
+        return str_replace('\\', '_', $key);
     }
 
     private function handleError(string $command, ?string $errorMessage = 'Unknown error', ?\Throwable $previous = null): never

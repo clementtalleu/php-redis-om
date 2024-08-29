@@ -11,11 +11,12 @@ use Talleu\RedisOm\Om\Mapping\Entity;
 
 abstract class AbstractPersister implements PersisterInterface
 {
-    protected RedisClientInterface $redis;
 
-    public function __construct(private ?KeyGenerator $keyGenerator = null)
+
+    public function __construct(private ?KeyGenerator $keyGenerator = null,
+                                protected ?RedisClientInterface $redis = null)
     {
-        $this->redis = (new RedisClient());
+        $this->redis = $redis ?? (new RedisClient());
 
         $this->keyGenerator = $keyGenerator ?? new KeyGenerator();
     }

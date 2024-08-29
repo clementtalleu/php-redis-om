@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Tests\Functionnal\Om;
 
+use Talleu\RedisOm\Client\Helper\Converter;
 use Talleu\RedisOm\Client\RedisClient;
 use Talleu\RedisOm\Om\RedisFormat;
 use Talleu\RedisOm\Om\RedisObjectManager;
@@ -22,7 +23,7 @@ class ObjectManagerTest extends RedisAbstractTestCase
         static::loadRedisFixtures();
 
         $keys = $this->createClient()->keys('*');
-        $classNameConverted = RedisClient::convertPrefix(DummyHash::class);
+        $classNameConverted = Converter::prefix(DummyHash::class);
         $this->assertTrue(in_array($classNameConverted.':1', $keys));
         $this->assertTrue(in_array($classNameConverted.':2', $keys));
         $this->assertTrue(in_array($classNameConverted.':3', $keys));
@@ -35,7 +36,7 @@ class ObjectManagerTest extends RedisAbstractTestCase
         static::loadRedisFixtures(DummyJson::class);
 
         $keys = $this->createClient()->keys('*');
-        $classNameConverted = RedisClient::convertPrefix(DummyJson::class);
+        $classNameConverted = Converter::prefix(DummyJson::class);
         $this->assertTrue(in_array($classNameConverted.':1', $keys));
         $this->assertTrue(in_array($classNameConverted.':2', $keys));
         $this->assertTrue(in_array($classNameConverted.':3', $keys));
