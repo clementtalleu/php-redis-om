@@ -11,6 +11,14 @@ use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
 class SpecialCharsTest extends RedisAbstractTestCase
 {
+
+    private RedisObjectManager $objectManager;
+    protected function setUp(): void
+    {
+        $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createClient());
+        parent::setUp();
+    }
+
     public function testSpecialCharsFindOneBy()
     {
         static::emptyRedis();
@@ -18,7 +26,7 @@ class SpecialCharsTest extends RedisAbstractTestCase
         /** @var SpecialCharsDummyHash[] $dummies */
         $dummies = static::loadRedisFixtures(SpecialCharsDummyHash::class);
 
-        $repository = (new RedisObjectManager())->getRepository(SpecialCharsDummyHash::class);
+        $repository = $this->objectManager->getRepository(SpecialCharsDummyHash::class);
         $object = $repository->findOneBy(['specialChars' => 'ok:']);
         $this->assertEquals($dummies[0], $object);
     }
@@ -29,7 +37,7 @@ class SpecialCharsTest extends RedisAbstractTestCase
         static::generateIndex();
         $dummies = static::loadRedisFixtures(SpecialCharsDummyJson::class);
 
-        $repository = (new RedisObjectManager())->getRepository(SpecialCharsDummyJson::class);
+        $repository = $this->objectManager->getRepository(SpecialCharsDummyJson::class);
         $object = $repository->findOneBy(['specialChars' => 'ok:']);
         $this->assertEquals($dummies[0], $object);
     }
@@ -40,7 +48,7 @@ class SpecialCharsTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures(SpecialCharsDummyHash::class);
 
-        $repository = (new RedisObjectManager())->getRepository(SpecialCharsDummyHash::class);
+        $repository = $this->objectManager->getRepository(SpecialCharsDummyHash::class);
         $object = $repository->findOneBy(['specialChars' => 'ok::']);
         $this->assertNull($object);
     }
@@ -51,7 +59,7 @@ class SpecialCharsTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures(SpecialCharsDummyJson::class);
 
-        $repository = (new RedisObjectManager())->getRepository(SpecialCharsDummyJson::class);
+        $repository = $this->objectManager->getRepository(SpecialCharsDummyJson::class);
         $object = $repository->findOneBy(['specialChars' => 'ok::']);
         $this->assertNull($object);
     }
@@ -62,7 +70,7 @@ class SpecialCharsTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures(SpecialCharsDummyHash::class);
 
-        $repository = (new RedisObjectManager())->getRepository(SpecialCharsDummyHash::class);
+        $repository = $this->objectManager->getRepository(SpecialCharsDummyHash::class);
         $collection = $repository->findBy(['specialChars' => 'ok::']);
         $this->assertEmpty($collection);
     }
@@ -73,7 +81,7 @@ class SpecialCharsTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures(SpecialCharsDummyJson::class);
 
-        $repository = (new RedisObjectManager())->getRepository(SpecialCharsDummyJson::class);
+        $repository = $this->objectManager->getRepository(SpecialCharsDummyJson::class);
         $collection = $repository->findBy(['specialChars' => 'ok::']);
         $this->assertEmpty($collection);
     }
@@ -84,8 +92,9 @@ class SpecialCharsTest extends RedisAbstractTestCase
         static::generateIndex();
         $dummies = static::loadRedisFixtures(SpecialCharsDummyHash::class);
 
-        $repository = (new RedisObjectManager())->getRepository(SpecialCharsDummyHash::class);
+        $repository = $this->objectManager->getRepository(SpecialCharsDummyHash::class);
         $collection = $repository->findBy(['specialChars' => 'ok:']);
+
         $this->assertEquals($dummies[0], $collection[0]);
         $this->assertEquals($dummies[1], $collection[1]);
         $this->assertEquals($dummies[2], $collection[2]);
@@ -96,7 +105,7 @@ class SpecialCharsTest extends RedisAbstractTestCase
         static::emptyRedis();
         static::generateIndex();
         $dummies = static::loadRedisFixtures(SpecialCharsDummyJson::class);
-        $repository = (new RedisObjectManager())->getRepository(SpecialCharsDummyJson::class);
+        $repository = $this->objectManager->getRepository(SpecialCharsDummyJson::class);
         $collection = $repository->findBy(['specialChars' => 'ok:']);
 
         $this->assertEquals($dummies[0], $collection[0]);
@@ -110,7 +119,7 @@ class SpecialCharsTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures(SpecialCharsDummyHash::class);
 
-        $repository = (new RedisObjectManager())->getRepository(SpecialCharsDummyHash::class);
+        $repository = $this->objectManager->getRepository(SpecialCharsDummyHash::class);
         $object = $repository->findOneBy(['specialChars' => 'o//\\']);
         $this->assertNull($object);
     }
@@ -121,7 +130,7 @@ class SpecialCharsTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures(SpecialCharsDummyJson::class);
 
-        $repository = (new RedisObjectManager())->getRepository(SpecialCharsDummyJson::class);
+        $repository = $this->objectManager->getRepository(SpecialCharsDummyJson::class);
         $object = $repository->findOneBy(['specialChars' => 'o//\\']);
         $this->assertNull($object);
     }

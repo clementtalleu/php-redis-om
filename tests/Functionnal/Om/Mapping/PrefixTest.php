@@ -11,6 +11,14 @@ use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
 class PrefixTest extends RedisAbstractTestCase
 {
+
+    private RedisObjectManager $objectManager;
+    protected function setUp(): void
+    {
+        $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createClient());
+        parent::setUp();
+    }
+
     public function testPrefix()
     {
         static::emptyRedis();
@@ -18,15 +26,15 @@ class PrefixTest extends RedisAbstractTestCase
         static::loadRedisFixtures(PrefixDummyHash::class);
 
 
-        $objectManager = new RedisObjectManager();
+
         $keys = $this->createClient()->keys('*');
         foreach ($keys as $key) {
             $this->assertStringContainsString('dummy:', $key);
         }
 
-        $this->assertInstanceOf(PrefixDummyHash::class, $objectManager->find(PrefixDummyHash::class, 1));
-        $this->assertInstanceOf(PrefixDummyHash::class, $objectManager->find(PrefixDummyHash::class, 2));
-        $this->assertInstanceOf(PrefixDummyHash::class, $objectManager->find(PrefixDummyHash::class, 3));
+        $this->assertInstanceOf(PrefixDummyHash::class, $this->objectManager->find(PrefixDummyHash::class, 1));
+        $this->assertInstanceOf(PrefixDummyHash::class, $this->objectManager->find(PrefixDummyHash::class, 2));
+        $this->assertInstanceOf(PrefixDummyHash::class, $this->objectManager->find(PrefixDummyHash::class, 3));
     }
 
     public function testPrefixJson()
@@ -36,14 +44,13 @@ class PrefixTest extends RedisAbstractTestCase
         static::loadRedisFixtures(PrefixDummyJson::class);
 
 
-        $objectManager = new RedisObjectManager();
         $keys = $this->createClient()->keys('*');
         foreach ($keys as $key) {
             $this->assertStringContainsString('dummy:', $key);
         }
 
-        $this->assertInstanceOf(PrefixDummyJson::class, $objectManager->find(PrefixDummyJson::class, 1));
-        $this->assertInstanceOf(PrefixDummyJson::class, $objectManager->find(PrefixDummyJson::class, 2));
-        $this->assertInstanceOf(PrefixDummyJson::class, $objectManager->find(PrefixDummyJson::class, 3));
+        $this->assertInstanceOf(PrefixDummyJson::class, $this->objectManager->find(PrefixDummyJson::class, 1));
+        $this->assertInstanceOf(PrefixDummyJson::class, $this->objectManager->find(PrefixDummyJson::class, 2));
+        $this->assertInstanceOf(PrefixDummyJson::class, $this->objectManager->find(PrefixDummyJson::class, 3));
     }
 }

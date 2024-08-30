@@ -10,14 +10,20 @@ use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
 final class HashBooleanRepositoryTest extends RedisAbstractTestCase
 {
+    private RedisObjectManager $objectManager;
+    protected function setUp(): void
+    {
+        $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createClient());
+        parent::setUp();
+    }
+
     public function testFindByEnabled()
     {
         static::emptyRedis();
         static::generateIndex();
         static::loadRedisFixtures();
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyHash::class);
+        $repository = $this->objectManager->getRepository(DummyHash::class);
 
         $collection = $repository->findBy(['enabled' => true]);
         foreach ($collection as $dummy) {
@@ -32,8 +38,7 @@ final class HashBooleanRepositoryTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures();
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyHash::class);
+        $repository = $this->objectManager->getRepository(DummyHash::class);
 
         $objet = $repository->findOneBy(['enabled' => true]);
         $this->assertTrue($objet->enabled);
@@ -45,8 +50,7 @@ final class HashBooleanRepositoryTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures();
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyHash::class);
+        $repository = $this->objectManager->getRepository(DummyHash::class);
 
         $collection = $repository->findBy(['enabled' => false]);
         foreach ($collection as $dummy) {
@@ -61,8 +65,7 @@ final class HashBooleanRepositoryTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures();
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyHash::class);
+        $repository = $this->objectManager->getRepository(DummyHash::class);
 
         $objet = $repository->findOneBy(['enabled' => false]);
         $this->assertFalse($objet->enabled);

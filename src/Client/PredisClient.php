@@ -311,7 +311,7 @@ final class PredisClient implements RedisClientInterface
             return [];
         }
 
-        return $this->extractRedisData($result, $format, $numberOfResults);
+        return $this->extractRedisData((array)$result, $format, $numberOfResults);
     }
 
     /**
@@ -358,6 +358,11 @@ final class PredisClient implements RedisClientInterface
         }
 
         if ($result[0] === 0) {
+            return [];
+        }
+
+        if (!is_array($result)) {
+            $this->handleError(RedisCommands::SEARCH->value, 'Unexpected result type from Redis: ' . gettype($result));
             return [];
         }
 

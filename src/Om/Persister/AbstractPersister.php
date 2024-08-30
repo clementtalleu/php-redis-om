@@ -25,7 +25,7 @@ abstract class AbstractPersister implements PersisterInterface
         $key = $this->keyGenerator->generateKey($objectMapper, $object);
 
         return new ObjectToPersist(
-            persisterClass: get_class($objectMapper->persister),
+            persisterClass: get_class($this),
             operation: PersisterOperations::OPERATION_PERSIST->value,
             redisKey: $key,
             converter: $objectMapper->converter,
@@ -37,9 +37,8 @@ abstract class AbstractPersister implements PersisterInterface
     {
         $identifier = $this->keyGenerator->getIdentifier(new \ReflectionClass($object));
         $key = sprintf('%s:%s', $objectMapper->prefix ?: get_class($object), $object->{$identifier->getName()});
-
         return new ObjectToPersist(
-            persisterClass: get_class($objectMapper->persister),
+            persisterClass: get_class($this),
             operation: PersisterOperations::OPERATION_DELETE->value,
             redisKey: $key,
         );

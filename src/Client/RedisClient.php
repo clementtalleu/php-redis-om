@@ -152,7 +152,7 @@ final class RedisClient implements RedisClientInterface
     /**
      * @inheritdoc
      */
-    public function createIndex(string $prefixKey, ?string $format = RedisFormat::HASH->value, ?array $properties = []): void
+    public function createIndex(string $prefixKey, string $format = RedisFormat::HASH->value, ?array $properties = []): void
     {
         if ($properties === []) {
             return;
@@ -187,6 +187,7 @@ final class RedisClient implements RedisClientInterface
         if (end($arguments) === 'SCHEMA') {
             throw new BadPropertyConfigurationException(sprintf('Your class %s does not have any typed property', $prefixKey));
         }
+
 
         if (!call_user_func_array([$this->redis, 'rawCommand'], $arguments)) {
             $this->handleError(__METHOD__, $this->redis->getLastError());
@@ -225,7 +226,7 @@ final class RedisClient implements RedisClientInterface
             $this->handleError(__METHOD__, $this->redis->getLastError());
         }
 
-        return (int) $rawResult[0];
+        return (int)$rawResult[0];
     }
 
     /**

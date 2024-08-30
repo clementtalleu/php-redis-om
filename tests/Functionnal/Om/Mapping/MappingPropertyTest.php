@@ -11,18 +11,26 @@ use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
 class MappingPropertyTest extends RedisAbstractTestCase
 {
+
+    private RedisObjectManager $objectManager;
+    protected function setUp(): void
+    {
+        $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createClient());
+        parent::setUp();
+    }
+
     public function testPropertyNotMappedJson()
     {
         static::emptyRedis();
         static::generateIndex();
 
         $dummyJson = DummyJsonWithoutAge::create(id: 33, price: 10.5, age: null, name: 'Clément');
-        $objectManager = new RedisObjectManager();
-        $objectManager->persist($dummyJson);
-        $objectManager->flush();
+
+        $this->objectManager->persist($dummyJson);
+        $this->objectManager->flush();
 
         /** @var DummyJsonWithoutAge $object */
-        $object = $objectManager->find(DummyJsonWithoutAge::class, 33);
+        $object = $this->objectManager->find(DummyJsonWithoutAge::class, 33);
         $this->assertInstanceOf(DummyJsonWithoutAge::class, $object);
         $this->assertNull($object->age);
         $this->assertEquals('Clément', $object->name);
@@ -34,12 +42,12 @@ class MappingPropertyTest extends RedisAbstractTestCase
         static::generateIndex();
 
         $dummyJson = DummyHashWithoutAge::create(id: 33, price: 10.5, age: null, name: 'Clément');
-        $objectManager = new RedisObjectManager();
-        $objectManager->persist($dummyJson);
-        $objectManager->flush();
+
+        $this->objectManager->persist($dummyJson);
+        $this->objectManager->flush();
 
         /** @var DummyHashWithoutAge $object */
-        $object = $objectManager->find(DummyHashWithoutAge::class, 33);
+        $object = $this->objectManager->find(DummyHashWithoutAge::class, 33);
         $this->assertInstanceOf(DummyHashWithoutAge::class, $object);
         $this->assertNull($object->age);
         $this->assertEquals('Clément', $object->name);

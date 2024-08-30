@@ -14,6 +14,14 @@ use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
 class ObjectConsistencyTest extends RedisAbstractTestCase
 {
+
+    private RedisObjectManager $objectManager;
+    protected function setUp(): void
+    {
+        $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createClient());
+        parent::setUp();
+    }
+
     public function testBookHash(): void
     {
         self::emptyRedis();
@@ -27,11 +35,11 @@ class ObjectConsistencyTest extends RedisAbstractTestCase
             $this->createTag('period', ['XIX', 'XX']),
         ];
 
-        $objectManager = new RedisObjectManager();
-        $objectManager->persist($book);
-        $objectManager->flush();
 
-        $retrieveBook = $objectManager->getRepository(BookHash::class)->find('678CUIO');
+        $this->objectManager->persist($book);
+        $this->objectManager->flush();
+
+        $retrieveBook = $this->objectManager->getRepository(BookHash::class)->find('678CUIO');
         $this->assertEquals($retrieveBook, $book);
     }
 
@@ -49,11 +57,11 @@ class ObjectConsistencyTest extends RedisAbstractTestCase
         ];
 
 
-        $objectManager = new RedisObjectManager();
-        $objectManager->persist($book);
-        $objectManager->flush();
 
-        $retrieveBook = $objectManager->getRepository(BookJson::class)->find('678CUIO');
+        $this->objectManager->persist($book);
+        $this->objectManager->flush();
+
+        $retrieveBook = $this->objectManager->getRepository(BookJson::class)->find('678CUIO');
         $this->assertEquals($retrieveBook, $book);
     }
 

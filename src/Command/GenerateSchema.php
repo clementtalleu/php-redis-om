@@ -4,17 +4,23 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Command;
 
+use Talleu\RedisOm\Client\PredisClient;
+use Talleu\RedisOm\Client\RedisClient;
 use Talleu\RedisOm\Exception\BadIdentifierConfigurationException;
 use Talleu\RedisOm\Om\Converters\AbstractDateTimeConverter;
 use Talleu\RedisOm\Om\Mapping\Entity;
 use Talleu\RedisOm\Om\Mapping\Id;
 use Talleu\RedisOm\Om\Mapping\Property;
 use Talleu\RedisOm\Om\RedisFormat;
+use Talleu\RedisOm\Om\RedisObjectManager;
 
 final class GenerateSchema
 {
     public static function generateSchema(string $dir): void
     {
+        $redisOm = new RedisObjectManager(
+            getenv('REDIS_CLIENT') === 'predis' ? new PredisClient() : new RedisClient(),
+        );
         $rii = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir));
         $phpFiles = [];
 
@@ -46,7 +52,7 @@ final class GenerateSchema
 
             /** @var Entity $entity */
             $entity = $attributes[0]->newInstance();
-            $entity->redisClient->dropIndex($entity->prefix ?? $fqcn);
+            $redisOm->dropIndex($entity, $fqcn);
             $format = $entity->format ?? RedisFormat::HASH->value;
 
             $idExist = false;
@@ -100,16 +106,16 @@ final class GenerateSchema
                 if (in_array($propertyType, AbstractDateTimeConverter::DATETYPES_NAMES)) {
                     if ($format === RedisFormat::HASH->value) {
                         $propertiesToIndex[] = new PropertyToIndex("$propertyName#timestamp", $propertyName, Property::INDEX_TAG);
-                        $propertiesToIndex[] = new PropertyToIndex("$propertyName#timestamp", $propertyName.'_text', Property::INDEX_TEXT);
+                        $propertiesToIndex[] = new PropertyToIndex("$propertyName#timestamp", $propertyName . '_text', Property::INDEX_TEXT);
                     } else {
-                        $propertiesToIndex[] = new PropertyToIndex('$.'. "$propertyName.timestamp", $propertyName, Property::INDEX_TAG);
-                        $propertiesToIndex[] = new PropertyToIndex('$.'. "$propertyName.timestamp", $propertyName."_text", Property::INDEX_TEXT);
+                        $propertiesToIndex[] = new PropertyToIndex('$.' . "$propertyName.timestamp", $propertyName, Property::INDEX_TAG);
+                        $propertiesToIndex[] = new PropertyToIndex('$.' . "$propertyName.timestamp", $propertyName . "_text", Property::INDEX_TEXT);
                     }
                 } elseif ($propertyType === 'int' || $propertyType === 'float') {
                     if ($format === RedisFormat::HASH->value) {
                         $propertiesToIndex[] = new PropertyToIndex($propertyName, $propertyName, Property::INDEX_TAG);
                     } else {
-                        $propertiesToIndex[] = new PropertyToIndex('$.'.$propertyName, $propertyName, Property::INDEX_TAG);
+                        $propertiesToIndex[] = new PropertyToIndex('$.' . $propertyName, $propertyName, Property::INDEX_TAG);
                     }
                 } elseif (class_exists($propertyType)) {
                     $subReflectionClass = new \ReflectionClass($propertyType);
@@ -137,20 +143,19 @@ final class GenerateSchema
                             continue;
                         }
 
-                        $propertiesToIndex[] = new PropertyToIndex(($format === RedisFormat::JSON->value ? '$.' : '')."$propertyName.$subPropertyName", $propertyName.'_'.$subPropertyName.'_text', Property::INDEX_TEXT);
-                        $propertiesToIndex[] = new PropertyToIndex(($format === RedisFormat::JSON->value ? '$.' : ''). "$propertyName.$subPropertyName", $propertyName.'_'.$subPropertyName, Property::INDEX_TAG);
+                        $propertiesToIndex[] = new PropertyToIndex(($format === RedisFormat::JSON->value ? '$.' : '') . "$propertyName.$subPropertyName", $propertyName . '_' . $subPropertyName . '_text', Property::INDEX_TEXT);
+                        $propertiesToIndex[] = new PropertyToIndex(($format === RedisFormat::JSON->value ? '$.' : '') . "$propertyName.$subPropertyName", $propertyName . '_' . $subPropertyName, Property::INDEX_TAG);
                     }
                 } else {
-                    $propertiesToIndex[] = new PropertyToIndex(($format === RedisFormat::JSON->value ? '$.' : '').$propertyName, $propertyName, Property::INDEX_TAG);
-                    $propertiesToIndex[] = new PropertyToIndex(($format === RedisFormat::JSON->value ? '$.' : '').$propertyName, $propertyName.'_text', Property::INDEX_TEXT);
+                    $propertiesToIndex[] = new PropertyToIndex(($format === RedisFormat::JSON->value ? '$.' : '') . $propertyName, $propertyName, Property::INDEX_TAG);
+                    $propertiesToIndex[] = new PropertyToIndex(($format === RedisFormat::JSON->value ? '$.' : '') . $propertyName, $propertyName . '_text', Property::INDEX_TEXT);
                 }
             }
 
             if (!$idExist) {
                 throw new BadIdentifierConfigurationException("No identifier found for $fqcn, or identifier is not mapped by RedisOm");
             }
-
-            $entity->redisClient->createIndex($entity->prefix ?? $fqcn, $format, $propertiesToIndex);
+            $redisOm->createIndex($entity, $fqcn, $propertiesToIndex);
         }
     }
 

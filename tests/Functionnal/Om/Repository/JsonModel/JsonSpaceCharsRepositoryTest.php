@@ -10,14 +10,20 @@ use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
 final class JsonSpaceCharsRepositoryTest extends RedisAbstractTestCase
 {
+    private RedisObjectManager $objectManager;
+    protected function setUp(): void
+    {
+        $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createClient());
+        parent::setUp(); 
+    }
+
     public function testFindOneBySpace()
     {
         static::emptyRedis();
         static::generateIndex();
         static::loadRedisFixtures(DummyJsonWithSpaceChars::class);
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyJsonWithSpaceChars::class);
+        $repository = $this->objectManager->getRepository(DummyJsonWithSpaceChars::class);
 
         // Update 1 object to set unknown to not null
         /** @var DummyJsonWithSpaceChars $object */
@@ -31,8 +37,7 @@ final class JsonSpaceCharsRepositoryTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures(DummyJsonWithSpaceChars::class);
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyJsonWithSpaceChars::class);
+        $repository = $this->objectManager->getRepository(DummyJsonWithSpaceChars::class);
 
         // Update 1 object to set unknown to not null
         /** @var DummyJsonWithSpaceChars[] $collection */

@@ -11,18 +11,26 @@ use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
 class PrivatePropertiesTest extends RedisAbstractTestCase
 {
+
+    private RedisObjectManager $objectManager;
+    protected function setUp(): void
+    {
+        $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createClient());
+        parent::setUp();
+    }
+
     public function testPropertyNotPublic()
     {
         static::emptyRedis();
         static::generateIndex();
 
         $dummy = DummyHashWithPrivateProperties::create(id: 12, name: 'Joad', age: 37);
-        $objectManager = new RedisObjectManager();
-        $objectManager->persist($dummy);
-        $objectManager->flush();
+
+        $this->objectManager->persist($dummy);
+        $this->objectManager->flush();
 
         /** @var DummyHashWithPrivateProperties|null $object */
-        $object = $objectManager->find(DummyHashWithPrivateProperties::class, 12);
+        $object = $this->objectManager->find(DummyHashWithPrivateProperties::class, 12);
         $this->assertInstanceOf(DummyHashWithPrivateProperties::class, $object);
         $this->assertEquals($object, $dummy);
     }
@@ -33,12 +41,12 @@ class PrivatePropertiesTest extends RedisAbstractTestCase
         static::generateIndex();
 
         $dummy = DummyJsonWithPrivateProperties::create(id: 12, name: 'Joad', age: 37);
-        $objectManager = new RedisObjectManager();
-        $objectManager->persist($dummy);
-        $objectManager->flush();
+
+        $this->objectManager->persist($dummy);
+        $this->objectManager->flush();
 
         /** @var DummyJsonWithPrivateProperties|null $object */
-        $object = $objectManager->find(DummyJsonWithPrivateProperties::class, 12);
+        $object = $this->objectManager->find(DummyJsonWithPrivateProperties::class, 12);
         $this->assertInstanceOf(DummyJsonWithPrivateProperties::class, $object);
         $this->assertEquals($object, $dummy);
     }

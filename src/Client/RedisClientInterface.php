@@ -65,7 +65,7 @@ interface RedisClientInterface
      * Create index for objects by properties.
      * @param PropertyToIndex[] $properties
      */
-    public function createIndex(string $prefixKey, ?string $format = 'HASH', ?array $properties = []): void;
+    public function createIndex(string $prefixKey, string $format = 'HASH', ?array $properties = []): void;
 
     /**
      * Remove all index for given prefix key.
