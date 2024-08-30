@@ -17,9 +17,7 @@ final class PredisClient implements RedisClientInterface
     public function __construct(protected ?Predis $redis = null)
     {
         $this->redis = $redis ?? new Predis(
-            [
-                'host' => array_key_exists('REDIS_HOST', $_SERVER) ? ['host' => $_SERVER['REDIS_HOST']] : null,
-            ]
+            array_key_exists('REDIS_HOST', $_SERVER) ? ['host' => $_SERVER['REDIS_HOST']] : null,
         );
     }
 
