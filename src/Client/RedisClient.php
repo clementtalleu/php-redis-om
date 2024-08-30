@@ -158,7 +158,7 @@ final class RedisClient implements RedisClientInterface
             return;
         }
 
-        $prefixKey = self::convertPrefix($prefixKey);
+        $prefixKey = Converter::prefix($prefixKey);
 
         $arguments = [
             RedisCommands::CREATE_INDEX->value,
@@ -199,7 +199,7 @@ final class RedisClient implements RedisClientInterface
     public function dropIndex(string $prefixKey): bool
     {
         try {
-            $key = self::convertPrefix($prefixKey);
+            $key = Converter::prefix($prefixKey);
             $this->redis->rawCommand(RedisCommands::DROP_INDEX->value, $key);
         } catch (\RedisException) {
             return false;
@@ -268,7 +268,7 @@ final class RedisClient implements RedisClientInterface
      */
     public function search(string $prefixKey, array $search, array $orderBy, ?string $format = RedisFormat::HASH->value, ?int $numberOfResults = null, int $offset = 0, ?string $searchType = Property::INDEX_TAG): array
     {
-        $arguments = [RedisCommands::SEARCH->value, self::convertPrefix($prefixKey)];
+        $arguments = [RedisCommands::SEARCH->value, Converter::prefix($prefixKey)];
 
         if ($search === []) {
             $arguments[] = '*';
@@ -318,7 +318,7 @@ final class RedisClient implements RedisClientInterface
      */
     public function customSearch(string $prefixKey, string $query, string $format): array
     {
-        $arguments = [RedisCommands::SEARCH->value, self::convertPrefix($prefixKey), $query];
+        $arguments = [RedisCommands::SEARCH->value, Converter::prefix($prefixKey), $query];
 
         try {
             $result = call_user_func_array([$this->redis, 'rawCommand'], $arguments);
