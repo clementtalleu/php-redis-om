@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Talleu\RedisOm\Client;
 
-use Predis\Client as PRedis;
+use Predis\Client as Predis;
 use Talleu\RedisOm\Client\Helper\Converter;
 use Talleu\RedisOm\Command\PropertyToIndex;
 use Talleu\RedisOm\Exception\BadPropertyConfigurationException;
@@ -10,12 +12,12 @@ use Talleu\RedisOm\Exception\RedisClientResponseException;
 use Talleu\RedisOm\Om\Mapping\Property;
 use Talleu\RedisOm\Om\RedisFormat;
 
-class PRedisClient implements RedisClientInterface
+final class PredisClient implements RedisClientInterface
 {
-
-    public function __construct(protected ?PRedis $redis = null)
+    public function __construct(protected ?Predis $redis = null)
     {
-        $this->redis = $redis ?? new PRedis([
+        $this->redis = $redis ?? new Predis(
+            [
                 'host' => array_key_exists('REDIS_HOST', $_SERVER) ? ['host' => $_SERVER['REDIS_HOST']] : null,
             ]
         );
@@ -25,13 +27,14 @@ class PRedisClient implements RedisClientInterface
     {
         $parameters = $this->redis->getConnection()->getParameters()->toArray();
 
-        $this->redis = new PRedis([
+        $this->redis = new Predis([
             'scheme' => 'tcp',
             'host' => $host ?? $parameters['host'],
             'port' => $port ?? $parameters['port'],
             'persistent' => true,
             'timeout' => $timeout,
-        ]);;
+        ]);
+        ;
     }
 
     /**

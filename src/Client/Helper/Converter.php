@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Talleu\RedisOm\Client\Helper;
 
-class Converter
+final class Converter
 {
     public static function prefix(string $key): string
     {
