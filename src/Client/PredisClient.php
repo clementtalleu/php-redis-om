@@ -89,7 +89,7 @@ final class PredisClient implements RedisClientInterface
      */
     public function jsonGet(string $key): ?string
     {
-        $result = $this->redis->rawCommand(RedisCommands::JSON_GET->value, Converter::prefix($key));
+        $result = $this->redis->executeRaw([RedisCommands::JSON_GET->value, Converter::prefix($key)]);
 
         if ($result === false) {
             return null;
@@ -103,7 +103,7 @@ final class PredisClient implements RedisClientInterface
      */
     public function jsonGetProperty(string $key, string $property): ?string
     {
-        $result = $this->redis->rawCommand(RedisCommands::JSON_GET->value, Converter::prefix($key), "$.$property");
+        $result = $this->redis->executeRaw([RedisCommands::JSON_GET->value, Converter::prefix($key), "$.$property"]);
 
         if ($result === false) {
             return null;
@@ -117,7 +117,7 @@ final class PredisClient implements RedisClientInterface
      */
     public function jsonSet(string $key, ?string $path = '$', ?string $value = '{}'): void
     {
-        if (!$this->redis->rawCommand(RedisCommands::JSON_SET->value, Converter::prefix($key), $path, $value)) {
+        if (!$this->redis->executeRaw([RedisCommands::JSON_SET->value, Converter::prefix($key), $path, $value])) {
             $this->handleError(__METHOD__, $this->redis->getLastError());
         }
     }
@@ -140,7 +140,7 @@ final class PredisClient implements RedisClientInterface
             }
         }
 
-        if (!call_user_func_array([$this->redis, 'rawCommand'], $arguments)) {
+        if (!call_user_func_array([$this->redis, 'executeRaw'], [$arguments])) {
             $this->handleError(__METHOD__, $this->redis->getLastError());
         }
     }
@@ -150,7 +150,7 @@ final class PredisClient implements RedisClientInterface
      */
     public function jsonDel(string $key, ?string $path = '$'): void
     {
-        if (!$this->redis->rawCommand(RedisCommands::JSON_DELETE->value, Converter::prefix($key), $path)) {
+        if (!$this->redis->executeRaw([RedisCommands::JSON_DELETE->value, Converter::prefix($key), $path])) {
             $this->handleError(__METHOD__, $this->redis->getLastError());
         }
     }
@@ -194,7 +194,7 @@ final class PredisClient implements RedisClientInterface
             throw new BadPropertyConfigurationException(sprintf('Your class %s does not have any typed property', $prefixKey));
         }
 
-        if (!call_user_func_array([$this->redis, 'rawCommand'], $arguments)) {
+        if (!call_user_func_array([$this->redis, 'executeRaw'], [$arguments])) {
             $this->handleError(__METHOD__, $this->redis->getLastError());
         }
     }
@@ -206,7 +206,7 @@ final class PredisClient implements RedisClientInterface
     {
         try {
             $key = self::convertPrefix($prefixKey);
-            $this->redis->rawCommand(RedisCommands::DROP_INDEX->value, $key);
+            $this->redis->executeRaw([RedisCommands::DROP_INDEX->value, $key]);
         } catch (\RedisException) {
             return false;
         }
@@ -225,7 +225,7 @@ final class PredisClient implements RedisClientInterface
             $arguments[] = "@$property:$value";
         }
 
-        $rawResult = call_user_func_array([$this->redis, 'rawCommand'], $arguments);
+        $rawResult = call_user_func_array([$this->redis, 'executeRaw'], $arguments);
 
         if (!$rawResult) {
             $this->handleError(__METHOD__, $this->redis->getLastError());
@@ -298,7 +298,7 @@ final class PredisClient implements RedisClientInterface
         }
 
         try {
-            $result = call_user_func_array([$this->redis, 'rawCommand'], $arguments);
+            $result = call_user_func_array([$this->redis, 'executeRaw'], [$arguments]);
         } catch (\RedisException $e) {
             $this->handleError(RedisCommands::SEARCH->value, $e->getMessage(), $e);
         }
@@ -322,7 +322,7 @@ final class PredisClient implements RedisClientInterface
         $arguments = [RedisCommands::SEARCH->value, self::convertPrefix($prefixKey), $query];
 
         try {
-            $result = call_user_func_array([$this->redis, 'rawCommand'], $arguments);
+            $result = call_user_func_array([$this->redis, 'executeRaw'], [$arguments]);
         } catch (\RedisException $e) {
             $this->handleError(RedisCommands::SEARCH->value, $e->getMessage(), $e);
         }
@@ -348,7 +348,7 @@ final class PredisClient implements RedisClientInterface
         $arguments[] = $search;
 
         try {
-            $result = call_user_func_array([$this->redis, 'rawCommand'], $arguments);
+            $result = call_user_func_array([$this->redis, 'executeRaw'], [$arguments]);
         } catch (\RedisException $e) {
             $this->handleError(RedisCommands::SEARCH->value, $e->getMessage(), $e);
         }
