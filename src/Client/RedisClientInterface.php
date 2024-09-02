@@ -80,7 +80,7 @@ interface RedisClientInterface
     /**
      * Search objects by given prefix key and criterias.
      */
-    public function search(string $prefixKey, array $search, array $orderBy, ?string $format = RedisFormat::HASH->value, ?int $numberOfResults = null, ?string $searchType = Property::INDEX_TAG): array;
+    public function search(string $prefixKey, array $search, array $orderBy, ?string $format = RedisFormat::HASH->value, ?int $numberOfResults = null, int $offset = 0, ?string $searchType = Property::INDEX_TAG): array;
 
     /**
      * Search objects by given prefix and a complete custom query command.

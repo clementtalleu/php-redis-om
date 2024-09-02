@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace  Talleu\RedisOm\Om\Persister;
+namespace Talleu\RedisOm\Om\Persister;
 
 use Talleu\RedisOm\Om\Converters\ConverterInterface;
 

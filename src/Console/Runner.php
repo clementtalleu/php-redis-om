@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace  Talleu\RedisOm\Console;
+namespace Talleu\RedisOm\Console;
 
 use Talleu\RedisOm\Command\GenerateSchema;
 
