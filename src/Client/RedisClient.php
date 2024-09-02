@@ -297,6 +297,12 @@ final class RedisClient implements RedisClientInterface
             $arguments[] = $numberOfResults;
         }
 
+        if ($numberOfResults !== null) {
+            $arguments[] = 'LIMIT';
+            $arguments[] = $offset;
+            $arguments[] = $numberOfResults;
+        }
+
         try {
             $result = call_user_func_array([$this->redis, 'rawCommand'], $arguments);
         } catch (\RedisException $e) {
