@@ -41,7 +41,16 @@ final class PredisClient implements RedisClientInterface
     public function hMSet(string $key, array $data): void
     {
         if (!$this->redis->hmset(Converter::prefix($key), $data)) {
-            $this->handleError(__METHOD__, $this->redis->getLastError());
+            $this->handleError(__METHOD__, $this->getLastError());
+        }
+    }
+
+    private function getLastError()
+    {
+        try {
+            $this->redis->executeRaw(['INVALID_COMMAND']);
+        } catch (\Exception $exception) {
+            return $exception->getMessage();
         }
     }
 
@@ -54,7 +63,7 @@ final class PredisClient implements RedisClientInterface
         $result = $this->redis->hgetall(Converter::prefix($key));
 
         if ($result === false) {
-            $this->handleError(__METHOD__, $this->redis->getLastError());
+            $this->handleError(__METHOD__, $this->getLastError());
         }
 
         return $result;
@@ -68,7 +77,7 @@ final class PredisClient implements RedisClientInterface
         $result = $this->redis->hget(Converter::prefix($key), $property);
 
         if (!$result) {
-            $this->handleError(__METHOD__, $this->redis->getLastError());
+            $this->handleError(__METHOD__, $this->getLastError());
         }
 
         return $result;
@@ -80,7 +89,7 @@ final class PredisClient implements RedisClientInterface
     public function del(string $key): void
     {
         if (!$this->redis->del(Converter::prefix($key))) {
-            $this->handleError(__METHOD__, $this->redis->getLastError());
+            $this->handleError(__METHOD__, $this->getLastError());
         }
     }
 
@@ -118,7 +127,7 @@ final class PredisClient implements RedisClientInterface
     public function jsonSet(string $key, ?string $path = '$', ?string $value = '{}'): void
     {
         if (!$this->redis->executeRaw([RedisCommands::JSON_SET->value, Converter::prefix($key), $path, $value])) {
-            $this->handleError(__METHOD__, $this->redis->getLastError());
+            $this->handleError(__METHOD__, $this->getLastError());
         }
     }
 
@@ -141,7 +150,7 @@ final class PredisClient implements RedisClientInterface
         }
 
         if (!call_user_func_array([$this->redis, 'executeRaw'], [$arguments])) {
-            $this->handleError(__METHOD__, $this->redis->getLastError());
+            $this->handleError(__METHOD__, $this->getLastError());
         }
     }
 
@@ -151,7 +160,7 @@ final class PredisClient implements RedisClientInterface
     public function jsonDel(string $key, ?string $path = '$'): void
     {
         if (!$this->redis->executeRaw([RedisCommands::JSON_DELETE->value, Converter::prefix($key), $path])) {
-            $this->handleError(__METHOD__, $this->redis->getLastError());
+            $this->handleError(__METHOD__, $this->getLastError());
         }
     }
 
@@ -195,7 +204,7 @@ final class PredisClient implements RedisClientInterface
         }
 
         if (!call_user_func_array([$this->redis, 'executeRaw'], [$arguments])) {
-            $this->handleError(__METHOD__, $this->redis->getLastError());
+            $this->handleError(__METHOD__, $this->getLastError());
         }
     }
 
@@ -228,7 +237,7 @@ final class PredisClient implements RedisClientInterface
         $rawResult = call_user_func_array([$this->redis, 'executeRaw'], $arguments);
 
         if (!$rawResult) {
-            $this->handleError(__METHOD__, $this->redis->getLastError());
+            $this->handleError(__METHOD__, $this->getLastError());
         }
 
         return (int)$rawResult[0];
@@ -242,7 +251,7 @@ final class PredisClient implements RedisClientInterface
         $keys = [];
         $iterator = null;
         while ($iterator !== 0) {
-            $scans = $this->redis->scan($iterator, sprintf('%s*', Converter::prefix($prefixKey)));
+            $scans = $this->redis->scan($iterator, [sprintf('%s*', Converter::prefix($prefixKey))]);
             foreach ($scans as $scan) {
                 $keys[] = $scan;
             }
@@ -256,8 +265,8 @@ final class PredisClient implements RedisClientInterface
      */
     public function flushAll(): void
     {
-        if (!$this->redis->flushAll()) {
-            $this->handleError(__METHOD__, $this->redis->getLastError());
+        if (!$this->redis->flushall()) {
+            $this->handleError(__METHOD__, $this->getLastError());
         }
     }
 
@@ -304,7 +313,7 @@ final class PredisClient implements RedisClientInterface
         }
 
         if ($result === false) {
-            $this->handleError(RedisCommands::SEARCH->value, $this->redis->getLastError());
+            $this->handleError(RedisCommands::SEARCH->value, $this->getLastError());
         }
 
         if ($result[0] === 0) {
@@ -328,7 +337,7 @@ final class PredisClient implements RedisClientInterface
         }
 
         if ($result === false) {
-            $this->handleError(RedisCommands::SEARCH->value, $this->redis->getLastError());
+            $this->handleError(RedisCommands::SEARCH->value, $this->getLastError());
         }
 
         if ($result[0] === 0) {
@@ -354,7 +363,7 @@ final class PredisClient implements RedisClientInterface
         }
 
         if ($result === false) {
-            $this->handleError(RedisCommands::SEARCH->value, $this->redis->getLastError());
+            $this->handleError(RedisCommands::SEARCH->value, $this->getLastError());
         }
 
         if ($result[0] === 0) {
