@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Talleu\RedisOm\Client;
 
 use Predis\Client as Predis;
+use Predis\Connection\StreamConnection;
 use Talleu\RedisOm\Client\Helper\Converter;
 use Talleu\RedisOm\Command\PropertyToIndex;
 use Talleu\RedisOm\Exception\BadPropertyConfigurationException;
@@ -23,7 +24,9 @@ final class PredisClient implements RedisClientInterface
 
     public function createPersistentConnection(?string $host = null, ?int $port = null, ?int $timeout = 0): void
     {
-        $parameters = $this->redis->getConnection()->getParameters()->toArray();
+        /** @var StreamConnection $connection */
+        $connection =  $this->redis->getConnection();
+        $parameters = $connection->getParameters()->toArray();
 
         $this->redis = new Predis([
             'scheme' => 'tcp',
@@ -60,13 +63,7 @@ final class PredisClient implements RedisClientInterface
      */
     public function hGetAll(string $key): array
     {
-        $result = $this->redis->hgetall(Converter::prefix($key));
-
-        if ($result === false) {
-            $this->handleError(__METHOD__, $this->getLastError());
-        }
-
-        return $result;
+        return $this->redis->hgetall(Converter::prefix($key));
     }
 
     /**
@@ -249,13 +246,16 @@ final class PredisClient implements RedisClientInterface
     public function scanKeys(string $prefixKey): array
     {
         $keys = [];
-        $iterator = null;
-        while ($iterator !== 0) {
+        $iterator = 0;
+        do {
             $scans = $this->redis->scan($iterator, [sprintf('%s*', Converter::prefix($prefixKey))]);
-            foreach ($scans as $scan) {
-                $keys[] = $scan;
+            if (!empty($scans)) {
+                foreach ($scans as $scan) {
+                    $keys[] = $scan;
+                }
             }
-        }
+            /** @phpstan-ignore-next-line */
+        } while ($iterator !== 0);
 
         return $keys;
     }
@@ -378,7 +378,6 @@ final class PredisClient implements RedisClientInterface
 
         if (!is_array($result)) {
             $this->handleError(RedisCommands::SEARCH->value, 'Unexpected result type from Redis: ' . gettype($result));
-            return [];
         }
 
         return $this->extractRedisData($result, $format, $numberOfResults);

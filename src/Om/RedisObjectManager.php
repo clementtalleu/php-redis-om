@@ -97,7 +97,7 @@ final class RedisObjectManager implements RedisObjectManagerInterface
         $objectMapper = $this->getEntityMapper($object);
         $key = sprintf('%s:%s', $objectMapper->prefix ?: get_class($object), $object->{$identifier->getName()});
 
-        $persisterClassName = get_class($this->registerPersister($object));
+        $persisterClassName = get_class($this->registerPersister($objectMapper));
         foreach ($this->objectsToFlush[$persisterClassName] as $operation => $objectsToFlush) {
             foreach ($objectsToFlush as $redisKey => $objectToFlush) {
                 if ($redisKey === $key) {
@@ -160,7 +160,7 @@ final class RedisObjectManager implements RedisObjectManagerInterface
         $identifier = $this->keyGenerator->getIdentifier(new \ReflectionClass($object));
         $objectMapper = $this->getEntityMapper($object);
         $key = sprintf('%s:%s', $objectMapper->prefix ?: get_class($object), $object->{$identifier->getName()});
-        $persisterClassName = get_class($this->registerPersister($object));
+        $persisterClassName = get_class($this->registerPersister($objectMapper));
         foreach ($this->objectsToFlush[$persisterClassName] as $operation => $objectsToFlush) {
             foreach ($objectsToFlush as $redisKey => $objectToFlush) {
                 if ($redisKey === $key) {
@@ -193,10 +193,9 @@ final class RedisObjectManager implements RedisObjectManagerInterface
         return $redisEntity;
     }
 
-    protected function registerPersister(object $object): PersisterInterface
+    protected function registerPersister(Entity $object): PersisterInterface
     {
         $persister = ($object->format === RedisFormat::JSON->value ? new JsonPersister(redis: $this->redisClient) : new HashPersister(redis: $this->redisClient));
-
 
         $persisterClass = $persister::class;
         if (!array_key_exists($persisterClass, $this->persisters)) {
