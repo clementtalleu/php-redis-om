@@ -265,7 +265,7 @@ final class RedisClient implements RedisClientInterface
     /**
      * @inheritdoc
      */
-    public function search(string $prefixKey, array $search, array $orderBy, ?string $format = RedisFormat::HASH->value, ?int $numberOfResults = null, ?string $searchType = Property::INDEX_TAG): array
+    public function search(string $prefixKey, array $search, array $orderBy, ?string $format = RedisFormat::HASH->value, ?int $numberOfResults = null, int $offset = 0, ?string $searchType = Property::INDEX_TAG): array
     {
         $arguments = [RedisCommands::SEARCH->value, self::convertPrefix($prefixKey)];
 
@@ -288,6 +288,11 @@ final class RedisClient implements RedisClientInterface
             $arguments[] = 'SORTBY';
             $arguments[] = $property;
             $arguments[] = $direction;
+        }
+        if ($numberOfResults !== null) {
+            $arguments[] = 'LIMIT';
+            $arguments[] = $offset;
+            $arguments[] = $numberOfResults;
         }
 
         try {

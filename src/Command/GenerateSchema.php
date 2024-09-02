@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace  Talleu\RedisOm\Command;
+namespace Talleu\RedisOm\Command;
 
 use Talleu\RedisOm\Exception\BadIdentifierConfigurationException;
 use Talleu\RedisOm\Om\Converters\AbstractDateTimeConverter;
