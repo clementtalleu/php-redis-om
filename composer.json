@@ -17,7 +17,7 @@
     "ext-json": "*"
   },
   "suggest": {
-    "ext-redis": "To use the native Redis extension (phpredis)",
+    "ext-redis": "To use the php extension for Redis (phpredis)",
     "predis/predis": "To use Predis as a Redis PHP client"
   },
   "require-dev": {
