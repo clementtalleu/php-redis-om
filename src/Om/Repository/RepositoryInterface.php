@@ -32,7 +32,7 @@ interface RepositoryInterface
      * @param array $criteria as ['property' => 'val'] should return objects where property contains val/value/orval...
      * @param array|null $orderBy as ['property' => 'ASC|DESC']
      */
-    public function findByLike(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): array;
+    public function findByLike(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = 0): array;
 
     /**
      * Find objects by a full text search.
