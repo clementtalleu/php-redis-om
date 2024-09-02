@@ -14,7 +14,8 @@
   },
   "require": {
     "php": ">=8.2",
-    "ext-json": "*"
+    "ext-json": "*",
+    "symfony/property-access": "^7.1"
   },
   "suggest": {
     "ext-redis": "To use the php extension for Redis (phpredis)",

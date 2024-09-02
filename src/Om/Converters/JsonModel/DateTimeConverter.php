@@ -13,8 +13,8 @@ final class DateTimeConverter extends AbstractDateTimeConverter
      */
     public function convert($data): array
     {
-        $dateArray = (array) $data;
-        $dateArray['timestamp'] = (string) strtotime($dateArray['date']);
+        $dateArray = (array)$data;
+        $dateArray['timestamp'] = (string)strtotime($dateArray['date']);
         $dateArray['#type'] = 'DateTime';
 
         return $dateArray;
@@ -22,6 +22,7 @@ final class DateTimeConverter extends AbstractDateTimeConverter
 
     public function revert($data, string $type): \DateTime
     {
+
         return new \DateTime($data['date'], array_key_exists('timezone', $data) ? new \DateTimeZone($data['timezone']) : null);
     }
 }

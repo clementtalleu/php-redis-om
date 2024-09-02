@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Om\Converters\HashModel;
 
-use Talleu\RedisOm\Om\Converters\AbstractObjectConverter;
 use Talleu\RedisOm\Om\Converters\AbstractDateTimeConverter;
+use Talleu\RedisOm\Om\Converters\AbstractObjectConverter;
+use Talleu\RedisOm\Om\Mapper\ClassMapper;
+use Talleu\RedisOm\Om\Mapper\ConstructorMapper;
+use Talleu\RedisOm\Om\Mapper\SetterMapper;
 use Talleu\RedisOm\Om\Mapping\Property;
 
 final class HashObjectConverter extends AbstractObjectConverter
@@ -36,14 +39,14 @@ final class HashObjectConverter extends AbstractObjectConverter
 
             if ($converter instanceof HashObjectConverter || $converter instanceof ArrayConverter || $converter instanceof StandardClassConverter) {
                 $propertyName = $parentProperty ? "$parentProperty.{$property->getName()}" : $property->getName();
-                $hashData = $converter->convert(data: $value, hashData:  $hashData, parentProperty: $propertyName, parentPropertyType: $valueType);
+                $hashData = $converter->convert(data: $value, hashData: $hashData, parentProperty: $propertyName, parentPropertyType: $valueType);
                 continue;
             }
 
             $convertedValue = $converter->convert($value);
 
             if ($converter instanceof DateTimeConverter || $converter instanceof DateTimeImmutableConverter) {
-                $hashData[($parentProperty ? "$parentProperty." : '').$property->getName().'#timestamp'] = strtotime($convertedValue);
+                $hashData[($parentProperty ? "$parentProperty." : '') . $property->getName() . '#timestamp'] = strtotime($convertedValue);
             }
 
             if ($parentProperty) {
@@ -61,17 +64,15 @@ final class HashObjectConverter extends AbstractObjectConverter
         return $hashData;
     }
 
-    /**
-     * @param array $data
-     */
+
     public function revert($data, string $type): mixed
     {
         $data = $this->redisArrayUnflatten($data);
-        $object = new $type();
 
+        $fieldsWithValue = [];
         foreach ($data as $key => $value) {
 
-            if (!property_exists($object, $key)) {
+            if (!property_exists($type, $key)) {
                 continue;
             }
 
@@ -92,10 +93,11 @@ final class HashObjectConverter extends AbstractObjectConverter
             }
 
             $revertedValue = $reverter->revert($value, $valueType);
-            $this->assignValue($object, $key, $revertedValue, $type, $reflectionProperty);
-        }
 
-        return $object;
+            $fieldsWithValue[$key] = $revertedValue;
+        }
+        return $this->assignValue($type, $fieldsWithValue);
+
     }
 
     private function redisArrayUnflatten(array $data)
