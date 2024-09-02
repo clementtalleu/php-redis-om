@@ -31,7 +31,7 @@ class RedisAbstractTestCase extends TestCase
 
     public static function loadRedisFixtures(?string $dummyClass = DummyHash::class, ?bool $flush = true): array
     {
-        $objectManager = new RedisObjectManager();
+        $objectManager = new RedisObjectManager(self::createClient());
         $dummies = FixturesGenerator::generateDummies($dummyClass);
         foreach ($dummies as $dummy) {
             $objectManager->persist($dummy);

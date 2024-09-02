@@ -11,14 +11,20 @@ use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
 final class HashRepositoryTest extends RedisAbstractTestCase
 {
+    private RedisObjectManager $objectManager;
+    protected function setUp(): void
+    {
+        $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createClient());
+        parent::setUp();
+    }
+
     public function testFindAll()
     {
         static::emptyRedis();
         static::generateIndex();
         static::loadRedisFixtures();
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyHash::class);
+        $repository = $this->objectManager->getRepository(DummyHash::class);
 
         $collection = $repository->findAll();
 
@@ -33,8 +39,7 @@ final class HashRepositoryTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures();
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyHash::class);
+        $repository = $this->objectManager->getRepository(DummyHash::class);
 
         $collection = $repository->findBy(['name' => 'Olivier']);
 
@@ -51,8 +56,7 @@ final class HashRepositoryTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures();
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyHash::class);
+        $repository = $this->objectManager->getRepository(DummyHash::class);
 
         $collection = $repository->findBy(['name' => 'Lolivier']);
         $this->assertEmpty($collection);
@@ -64,8 +68,7 @@ final class HashRepositoryTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures();
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyHash::class);
+        $repository = $this->objectManager->getRepository(DummyHash::class);
 
         $collection = $repository->findBy(['name' => 'Olivier'], ['age' => 'ASC']);
         $this->assertCount(2, $collection);
@@ -94,8 +97,7 @@ final class HashRepositoryTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures();
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyHash::class);
+        $repository = $this->objectManager->getRepository(DummyHash::class);
 
         $collection = $repository->findBy(['name' => 'Olivier', 'age' => 34]);
 
@@ -113,8 +115,7 @@ final class HashRepositoryTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures();
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyHash::class);
+        $repository = $this->objectManager->getRepository(DummyHash::class);
 
         $collection = $repository->findLike('olivier');
 
@@ -131,8 +132,7 @@ final class HashRepositoryTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures();
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyHash::class);
+        $repository = $this->objectManager->getRepository(DummyHash::class);
 
         $object = $repository->findOneBy(['age' => 34]);
         $this->assertInstanceOf(DummyHash::class, $object);
@@ -145,8 +145,7 @@ final class HashRepositoryTest extends RedisAbstractTestCase
         static::generateIndex();
         $collection = static::loadRedisFixtures();
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyHash::class);
+        $repository = $this->objectManager->getRepository(DummyHash::class);
 
         $value = $repository->getPropertyValue(1, 'createdAt');
         $value1 = $repository->getPropertyValue(2, 'createdAt');
@@ -168,8 +167,7 @@ final class HashRepositoryTest extends RedisAbstractTestCase
         static::generateIndex();
         $collection = static::loadRedisFixtures();
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyHash::class);
+        $repository = $this->objectManager->getRepository(DummyHash::class);
 
         $this->expectException(BadPropertyException::class);
         $repository->getPropertyValue(1, 'bar');
@@ -181,8 +179,7 @@ final class HashRepositoryTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures();
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyHash::class);
+        $repository = $this->objectManager->getRepository(DummyHash::class);
 
         $this->expectException(BadPropertyException::class);
         $repository->getPropertyValue(1, 'test');
@@ -194,8 +191,7 @@ final class HashRepositoryTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures();
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyHash::class);
+        $repository = $this->objectManager->getRepository(DummyHash::class);
 
         $collection = $repository->findBy(['bar_title' => 'Hello']);
         foreach ($collection as $dummy) {
@@ -210,8 +206,7 @@ final class HashRepositoryTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures();
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyHash::class);
+        $repository = $this->objectManager->getRepository(DummyHash::class);
 
         $collection = $repository->findBy(['bar_id' => 2]);
         foreach ($collection as $dummy) {
@@ -226,8 +221,7 @@ final class HashRepositoryTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures();
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyHash::class);
+        $repository = $this->objectManager->getRepository(DummyHash::class);
 
         $object = $repository->findOneBy(['bar_id' => 2]);
         $this->assertEquals($object->bar->id, 2);

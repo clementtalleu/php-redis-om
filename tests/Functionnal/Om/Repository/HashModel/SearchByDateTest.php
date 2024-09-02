@@ -10,14 +10,20 @@ use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
 final class SearchByDateTest extends RedisAbstractTestCase
 {
+    private RedisObjectManager $objectManager;
+    protected function setUp(): void
+    {
+        $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createClient());
+        parent::setUp();
+    }
+
     public function testFindOneBy()
     {
         static::emptyRedis();
         static::generateIndex();
         $collection = static::loadRedisFixtures();
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyHash::class);
+        $repository = $this->objectManager->getRepository(DummyHash::class);
 
         // An existing date
         $createdAt = new \DateTime('2022-01-01 00:00:00');
@@ -52,8 +58,7 @@ final class SearchByDateTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures();
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyHash::class);
+        $repository = $this->objectManager->getRepository(DummyHash::class);
 
         // An existing date
         $createdAt = new \DateTime('2022-01-01 00:00:00');
@@ -74,6 +79,7 @@ final class SearchByDateTest extends RedisAbstractTestCase
         // A date that does not exist
         $createdAt = new \DateTime('2000-05-01');
         $collection = $repository->findBy(['createdAt' => $createdAt]);
+
         $this->assertEmpty($collection);
     }
 
@@ -83,12 +89,12 @@ final class SearchByDateTest extends RedisAbstractTestCase
         static::generateIndex();
         $collection = static::loadRedisFixtures();
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyHash::class);
+        $repository = $this->objectManager->getRepository(DummyHash::class);
 
         // An existing date
         $createdAt = new \DateTime('2022-01-01 00:00:00');
         $object = $repository->findOneBy(['createdAt' => '2022-01-01 00:00:00']);
+
         $this->assertInstanceOf(DummyHash::class, $object);
         $this->assertEquals($object->createdAt, $createdAt);
         $this->assertEquals($object, $collection[0]);
@@ -111,8 +117,7 @@ final class SearchByDateTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures();
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyHash::class);
+        $repository = $this->objectManager->getRepository(DummyHash::class);
 
         // An existing date
         $createdAt = new \DateTime('2022-01-01 00:00:00');

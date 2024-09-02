@@ -18,6 +18,7 @@ class KeyGenerator
         $identifierProperty = $this->getIdentifier(new \ReflectionClass($object));
 
         $identifierValue = $object->{$identifierProperty->getName()};
+
         if (!$identifierValue) {
             $identifierValue = uniqid();
             /** @var \ReflectionNamedType|null $propertyType */

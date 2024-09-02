@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Tests\Functionnal\Om;
 
+use Talleu\RedisOm\Client\Helper\Converter;
 use Talleu\RedisOm\Client\RedisClient;
 use Talleu\RedisOm\Om\RedisFormat;
 use Talleu\RedisOm\Om\RedisObjectManager;
@@ -15,6 +16,14 @@ use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
 class ObjectManagerTest extends RedisAbstractTestCase
 {
+
+    private RedisObjectManager $objectManager;
+    protected function setUp(): void
+    {
+        $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createClient());
+        parent::setUp();
+    }
+
     public function testPersistAndFlushHash(): void
     {
         static::emptyRedis();
@@ -22,7 +31,7 @@ class ObjectManagerTest extends RedisAbstractTestCase
         static::loadRedisFixtures();
 
         $keys = $this->createClient()->keys('*');
-        $classNameConverted = RedisClient::convertPrefix(DummyHash::class);
+        $classNameConverted = Converter::prefix(DummyHash::class);
         $this->assertTrue(in_array($classNameConverted.':1', $keys));
         $this->assertTrue(in_array($classNameConverted.':2', $keys));
         $this->assertTrue(in_array($classNameConverted.':3', $keys));
@@ -35,7 +44,7 @@ class ObjectManagerTest extends RedisAbstractTestCase
         static::loadRedisFixtures(DummyJson::class);
 
         $keys = $this->createClient()->keys('*');
-        $classNameConverted = RedisClient::convertPrefix(DummyJson::class);
+        $classNameConverted = Converter::prefix(DummyJson::class);
         $this->assertTrue(in_array($classNameConverted.':1', $keys));
         $this->assertTrue(in_array($classNameConverted.':2', $keys));
         $this->assertTrue(in_array($classNameConverted.':3', $keys));
@@ -47,18 +56,18 @@ class ObjectManagerTest extends RedisAbstractTestCase
         static::generateIndex();
         $dummies = static::loadRedisFixtures(DummyJson::class);
 
-        $objectManager = new RedisObjectManager();
+
         /** @var DummyJson $object */
-        $object1 = $objectManager->find(DummyJson::class, 1);
+        $object1 = $this->objectManager->find(DummyJson::class, 1);
         $this->assertInstanceOf(DummyJson::class, $object1);
         $this->assertEquals($object1, $dummies[0]);
 
         /** @var DummyJson $object */
-        $object2 = $objectManager->find(DummyJson::class, 2);
+        $object2 = $this->objectManager->find(DummyJson::class, 2);
         $this->assertEquals($object2, $dummies[1]);
 
         /** @var DummyJson $object */
-        $object3 = $objectManager->find(DummyJson::class, 3);
+        $object3 = $this->objectManager->find(DummyJson::class, 3);
         $this->assertEquals($object3, $dummies[2]);
     }
 
@@ -68,18 +77,18 @@ class ObjectManagerTest extends RedisAbstractTestCase
         static::generateIndex();
         $dummies = static::loadRedisFixtures();
 
-        $objectManager = new RedisObjectManager();
 
-        $object1 = $objectManager->find(DummyHash::class, 1);
+
+        $object1 = $this->objectManager->find(DummyHash::class, 1);
         $this->assertInstanceOf(DummyHash::class, $object1);
         $this->assertEquals($object1, $dummies[0]);
 
         /** @var DummyJson $object */
-        $object2 = $objectManager->find(DummyHash::class, 2);
+        $object2 = $this->objectManager->find(DummyHash::class, 2);
         $this->assertEquals($object2, $dummies[1]);
 
         /** @var DummyJson $object */
-        $object3 = $objectManager->find(DummyHash::class, 3);
+        $object3 = $this->objectManager->find(DummyHash::class, 3);
         $this->assertEquals($object3, $dummies[2]);
     }
 
@@ -91,27 +100,27 @@ class ObjectManagerTest extends RedisAbstractTestCase
         /** @var DummyHash $object */
         $object = $dummies[0];
 
-        $objectManager = new RedisObjectManager();
-        $objectManager->persist($object);
-        $objectManager->flush();
 
-        $retrieveObject = $objectManager->find(DummyHash::class, $object->id);
+        $this->objectManager->persist($object);
+        $this->objectManager->flush();
+
+        $retrieveObject = $this->objectManager->find(DummyHash::class, $object->id);
         $this->assertInstanceOf(DummyHash::class, $retrieveObject);
 
         // Then remove the object
-        $objectManager->remove($object);
-        $objectManager->flush();
-        $retrieveObject = $objectManager->find(DummyHash::class, $object->id);
+        $this->objectManager->remove($object);
+        $this->objectManager->flush();
+        $retrieveObject = $this->objectManager->find(DummyHash::class, $object->id);
         $this->assertNull($retrieveObject);
     }
 
     public function testGetRepository()
     {
-        $objectManager = new RedisObjectManager();
-        $repo = $objectManager->getRepository(DummyHash::class);
+
+        $repo = $this->objectManager->getRepository(DummyHash::class);
         $this->assertInstanceOf(HashRepository::class, $repo);
 
-        $repo = $objectManager->getRepository(DummyJson::class);
+        $repo = $this->objectManager->getRepository(DummyJson::class);
         $this->assertInstanceOf(JsonRepository::class, $repo);
     }
 
@@ -120,12 +129,12 @@ class ObjectManagerTest extends RedisAbstractTestCase
         static::emptyRedis();
         static::generateIndex();
         $dummies = static::loadRedisFixtures(flush: false);
-        $objectManager = new RedisObjectManager();
+
         foreach ($dummies as $dummy) {
-            $objectManager->persist($dummy);
+            $this->objectManager->persist($dummy);
         }
 
-        $objectManager->clear();
+        $this->objectManager->clear();
         $keys = $this->createClient()->keys('*');
         $this->assertCount(0, $keys);
     }
@@ -135,13 +144,13 @@ class ObjectManagerTest extends RedisAbstractTestCase
         static::emptyRedis();
         static::generateIndex();
         $dummies = static::loadRedisFixtures(flush: false);
-        $objectManager = new RedisObjectManager();
+
         foreach ($dummies as $dummy) {
-            $objectManager->persist($dummy);
+            $this->objectManager->persist($dummy);
         }
 
-        $objectManager->detach($dummies[1]);
-        $objectManager->flush();
+        $this->objectManager->detach($dummies[1]);
+        $this->objectManager->flush();
         $keys = $this->createClient()->keys('*');
         $this->assertCount(2, $keys);
         $this->assertNotContains("Talleu_RedisOm_Tests_Fixtures_Hash_DummyHash:2", $keys);
@@ -152,13 +161,13 @@ class ObjectManagerTest extends RedisAbstractTestCase
         static::emptyRedis();
         static::generateIndex();
         $dummies = static::loadRedisFixtures(flush: false);
-        $objectManager = new RedisObjectManager();
+
         foreach ($dummies as $dummy) {
-            $objectManager->persist($dummy);
+            $this->objectManager->persist($dummy);
         }
 
-        $this->assertTrue($objectManager->contains($dummies[0]));
-        $this->assertTrue($objectManager->contains($dummies[1]));
-        $this->assertTrue($objectManager->contains($dummies[2]));
+        $this->assertTrue($this->objectManager->contains($dummies[0]));
+        $this->assertTrue($this->objectManager->contains($dummies[1]));
+        $this->assertTrue($this->objectManager->contains($dummies[2]));
     }
 }

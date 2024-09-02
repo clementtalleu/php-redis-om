@@ -10,14 +10,21 @@ use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
 final class QueryBuilderTest extends RedisAbstractTestCase
 {
+    private RedisObjectManager $objectManager;
+    protected function setUp(): void
+    {
+        $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createClient());
+        parent::setUp(); 
+    }
+
     public function testCustomQueryOr()
     {
         static::emptyRedis();
         static::generateIndex();
         static::loadRedisFixtures(DummyJson::class);
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyJson::class);
+
+        $repository = $this->objectManager->getRepository(DummyJson::class);
 
         $queryBuilder = $repository->createQueryBuilder();
         $queryBuilder->query('@age:{20|34}');
@@ -35,8 +42,8 @@ final class QueryBuilderTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures();
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyJson::class);
+
+        $repository = $this->objectManager->getRepository(DummyJson::class);
 
         $queryBuilder = $repository->createQueryBuilder();
         $queryBuilder->query('@age:{99 | 98}');
@@ -51,8 +58,8 @@ final class QueryBuilderTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures(DummyJson::class);
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyJson::class);
+
+        $repository = $this->objectManager->getRepository(DummyJson::class);
 
         $queryBuilder = $repository->createQueryBuilder();
         $queryBuilder->query('@name:{Oli*}');

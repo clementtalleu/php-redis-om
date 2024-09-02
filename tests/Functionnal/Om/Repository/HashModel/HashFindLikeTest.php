@@ -10,14 +10,21 @@ use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
 final class HashFindLikeTest extends RedisAbstractTestCase
 {
+
+    private RedisObjectManager $objectManager;
+    protected function setUp(): void
+    {
+        $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createClient());
+        parent::setUp();
+    }
+
     public function testFindByLike()
     {
         static::emptyRedis();
         static::generateIndex();
         static::loadRedisFixtures();
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyHash::class);
+        $repository = $this->objectManager->getRepository(DummyHash::class);
 
         $collection = $repository->findByLike(['name' => 'Oli']);
         foreach ($collection as $dummy) {
@@ -32,8 +39,7 @@ final class HashFindLikeTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures(DummyHash::class);
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyHash::class);
+        $repository = $this->objectManager->getRepository(DummyHash::class);
 
         $object = $repository->findOneByLike(['name' => 'Oli']);
         $this->assertTrue(str_contains($object->name, 'Oli'));
@@ -45,8 +51,7 @@ final class HashFindLikeTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures();
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyHash::class);
+        $repository = $this->objectManager->getRepository(DummyHash::class);
 
         $collection = $repository->findByLike(['name' => 'vier']);
         foreach ($collection as $dummy) {
@@ -61,8 +66,7 @@ final class HashFindLikeTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures();
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyHash::class);
+        $repository = $this->objectManager->getRepository(DummyHash::class);
 
         $object = $repository->findOneByLike(['name' => 'vier']);
         $this->assertTrue(str_contains($object->name, 'vier'));

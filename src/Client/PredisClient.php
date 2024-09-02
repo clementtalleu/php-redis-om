@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Client;
 
+use Predis\Client as Predis;
+use Predis\Connection\StreamConnection;
 use Talleu\RedisOm\Client\Helper\Converter;
 use Talleu\RedisOm\Command\PropertyToIndex;
 use Talleu\RedisOm\Exception\BadPropertyConfigurationException;
@@ -11,33 +13,57 @@ use Talleu\RedisOm\Exception\RedisClientResponseException;
 use Talleu\RedisOm\Om\Mapping\Property;
 use Talleu\RedisOm\Om\RedisFormat;
 
-final class RedisClient implements RedisClientInterface
+final class PredisClient implements RedisClientInterface
 {
-    public function __construct(protected ?\Redis $redis = null)
+    public function __construct(protected ?Predis $redis = null)
     {
-        $this->redis = $redis ?? new \Redis(array_key_exists('REDIS_HOST', $_SERVER) ? ['host' => $_SERVER['REDIS_HOST']] : null);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function createPersistentConnection(?string $host = null, ?int $port = null, ?int $timeout = 0): void
-    {
-        $this->redis->pconnect(
-            $host ?? $this->redis->getHost(),
-            $port ?? $this->redis->getPort(),
-            $timeout ?? $this->redis->getTimeout(),
+        $this->redis = $redis ?? new Predis(
+            array_key_exists('REDIS_HOST', $_SERVER) ? ['host' => $_SERVER['REDIS_HOST']] : null,
         );
     }
 
+    public function createPersistentConnection(?string $host = null, ?int $port = null, ?int $timeout = 0): void
+    {
+        /** @var StreamConnection $connection */
+        $connection =  $this->redis->getConnection();
+        $parameters = $connection->getParameters()->toArray();
+
+        $this->redis = new Predis([
+            'scheme' => 'tcp',
+            'host' => $host ?? $parameters['host'],
+            'port' => $port ?? $parameters['port'],
+            'persistent' => true,
+            'timeout' => $timeout,
+        ]);
+        ;
+    }
+
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function hMSet(string $key, array $data): void
     {
-        if (!$this->redis->hMSet(Converter::prefix($key), $data)) {
-            $this->handleError(__METHOD__, $this->redis->getLastError());
+        if (!$this->redis->hmset(Converter::prefix($key), $data)) {
+            $this->handleError(__METHOD__, $this->getLastError());
         }
+    }
+
+    private function getLastError()
+    {
+        try {
+            $this->redis->executeRaw(['INVALID_COMMAND']);
+        } catch (\Exception $exception) {
+            return $exception->getMessage();
+        }
+    }
+
+
+    /**
+     * @inheritdoc
+     */
+    public function hGetAll(string $key): array
+    {
+        return $this->redis->hgetall(Converter::prefix($key));
     }
 
     /**
@@ -48,21 +74,7 @@ final class RedisClient implements RedisClientInterface
         $result = $this->redis->hget(Converter::prefix($key), $property);
 
         if (!$result) {
-            $this->handleError(__METHOD__, $this->redis->getLastError());
-        }
-
-        return $result;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function hGetAll(string $key): array
-    {
-        $result = $this->redis->hGetAll(Converter::prefix($key));
-
-        if ($result === false) {
-            $this->handleError(__METHOD__, $this->redis->getLastError());
+            $this->handleError(__METHOD__, $this->getLastError());
         }
 
         return $result;
@@ -74,7 +86,7 @@ final class RedisClient implements RedisClientInterface
     public function del(string $key): void
     {
         if (!$this->redis->del(Converter::prefix($key))) {
-            $this->handleError(__METHOD__, $this->redis->getLastError());
+            $this->handleError(__METHOD__, $this->getLastError());
         }
     }
 
@@ -83,7 +95,7 @@ final class RedisClient implements RedisClientInterface
      */
     public function jsonGet(string $key): ?string
     {
-        $result = $this->redis->rawCommand(RedisCommands::JSON_GET->value, Converter::prefix($key));
+        $result = $this->redis->executeRaw([RedisCommands::JSON_GET->value, Converter::prefix($key)]);
 
         if ($result === false) {
             return null;
@@ -97,7 +109,7 @@ final class RedisClient implements RedisClientInterface
      */
     public function jsonGetProperty(string $key, string $property): ?string
     {
-        $result = $this->redis->rawCommand(RedisCommands::JSON_GET->value, Converter::prefix($key), "$.$property");
+        $result = $this->redis->executeRaw([RedisCommands::JSON_GET->value, Converter::prefix($key), "$.$property"]);
 
         if ($result === false) {
             return null;
@@ -111,8 +123,8 @@ final class RedisClient implements RedisClientInterface
      */
     public function jsonSet(string $key, ?string $path = '$', ?string $value = '{}'): void
     {
-        if (!$this->redis->rawCommand(RedisCommands::JSON_SET->value, Converter::prefix($key), $path, $value)) {
-            $this->handleError(__METHOD__, $this->redis->getLastError());
+        if (!$this->redis->executeRaw([RedisCommands::JSON_SET->value, Converter::prefix($key), $path, $value])) {
+            $this->handleError(__METHOD__, $this->getLastError());
         }
     }
 
@@ -134,8 +146,8 @@ final class RedisClient implements RedisClientInterface
             }
         }
 
-        if (!call_user_func_array([$this->redis, 'rawCommand'], $arguments)) {
-            $this->handleError(__METHOD__, $this->redis->getLastError());
+        if (!call_user_func_array([$this->redis, 'executeRaw'], [$arguments])) {
+            $this->handleError(__METHOD__, $this->getLastError());
         }
     }
 
@@ -144,21 +156,21 @@ final class RedisClient implements RedisClientInterface
      */
     public function jsonDel(string $key, ?string $path = '$'): void
     {
-        if (!$this->redis->rawCommand(RedisCommands::JSON_DELETE->value, Converter::prefix($key), $path)) {
-            $this->handleError(__METHOD__, $this->redis->getLastError());
+        if (!$this->redis->executeRaw([RedisCommands::JSON_DELETE->value, Converter::prefix($key), $path])) {
+            $this->handleError(__METHOD__, $this->getLastError());
         }
     }
 
     /**
      * @inheritdoc
      */
-    public function createIndex(string $prefixKey, string $format = RedisFormat::HASH->value, ?array $properties = []): void
+    public function createIndex(string $prefixKey, ?string $format = RedisFormat::HASH->value, ?array $properties = []): void
     {
         if ($properties === []) {
             return;
         }
 
-        $prefixKey = Converter::prefix($prefixKey);
+        $prefixKey = self::convertPrefix($prefixKey);
 
         $arguments = [
             RedisCommands::CREATE_INDEX->value,
@@ -188,9 +200,8 @@ final class RedisClient implements RedisClientInterface
             throw new BadPropertyConfigurationException(sprintf('Your class %s does not have any typed property', $prefixKey));
         }
 
-
-        if (!call_user_func_array([$this->redis, 'rawCommand'], $arguments)) {
-            $this->handleError(__METHOD__, $this->redis->getLastError());
+        if (!call_user_func_array([$this->redis, 'executeRaw'], [$arguments])) {
+            $this->handleError(__METHOD__, $this->getLastError());
         }
     }
 
@@ -200,8 +211,8 @@ final class RedisClient implements RedisClientInterface
     public function dropIndex(string $prefixKey): bool
     {
         try {
-            $key = Converter::prefix($prefixKey);
-            $this->redis->rawCommand(RedisCommands::DROP_INDEX->value, $key);
+            $key = self::convertPrefix($prefixKey);
+            $this->redis->executeRaw([RedisCommands::DROP_INDEX->value, $key]);
         } catch (\RedisException) {
             return false;
         }
@@ -220,10 +231,10 @@ final class RedisClient implements RedisClientInterface
             $arguments[] = "@$property:$value";
         }
 
-        $rawResult = call_user_func_array([$this->redis, 'rawCommand'], $arguments);
+        $rawResult = call_user_func_array([$this->redis, 'executeRaw'], $arguments);
 
         if (!$rawResult) {
-            $this->handleError(__METHOD__, $this->redis->getLastError());
+            $this->handleError(__METHOD__, $this->getLastError());
         }
 
         return (int)$rawResult[0];
@@ -235,13 +246,16 @@ final class RedisClient implements RedisClientInterface
     public function scanKeys(string $prefixKey): array
     {
         $keys = [];
-        $iterator = null;
-        while ($iterator !== 0) {
-            $scans = $this->redis->scan($iterator, sprintf('%s*', Converter::prefix($prefixKey)));
-            foreach ($scans as $scan) {
-                $keys[] = $scan;
+        $iterator = 0;
+        do {
+            $scans = $this->redis->scan($iterator, [sprintf('%s*', Converter::prefix($prefixKey))]);
+            if (!empty($scans)) {
+                foreach ($scans as $scan) {
+                    $keys[] = $scan;
+                }
             }
-        }
+            /** @phpstan-ignore-next-line */
+        } while ($iterator !== 0);
 
         return $keys;
     }
@@ -251,8 +265,8 @@ final class RedisClient implements RedisClientInterface
      */
     public function flushAll(): void
     {
-        if (!$this->redis->flushAll()) {
-            $this->handleError(__METHOD__, $this->redis->getLastError());
+        if (!$this->redis->flushall()) {
+            $this->handleError(__METHOD__, $this->getLastError());
         }
     }
 
@@ -269,7 +283,7 @@ final class RedisClient implements RedisClientInterface
      */
     public function search(string $prefixKey, array $search, array $orderBy, ?string $format = RedisFormat::HASH->value, ?int $numberOfResults = null, int $offset = 0, ?string $searchType = Property::INDEX_TAG): array
     {
-        $arguments = [RedisCommands::SEARCH->value, Converter::prefix($prefixKey)];
+        $arguments = [RedisCommands::SEARCH->value, self::convertPrefix($prefixKey)];
 
         if ($search === []) {
             $arguments[] = '*';
@@ -291,11 +305,6 @@ final class RedisClient implements RedisClientInterface
             $arguments[] = $property;
             $arguments[] = $direction;
         }
-        if ($numberOfResults !== null) {
-            $arguments[] = 'LIMIT';
-            $arguments[] = $offset;
-            $arguments[] = $numberOfResults;
-        }
 
         if ($numberOfResults !== null) {
             $arguments[] = 'LIMIT';
@@ -304,20 +313,20 @@ final class RedisClient implements RedisClientInterface
         }
 
         try {
-            $result = call_user_func_array([$this->redis, 'rawCommand'], $arguments);
+            $result = call_user_func_array([$this->redis, 'executeRaw'], [$arguments]);
         } catch (\RedisException $e) {
             $this->handleError(RedisCommands::SEARCH->value, $e->getMessage(), $e);
         }
 
         if ($result === false) {
-            $this->handleError(RedisCommands::SEARCH->value, $this->redis->getLastError());
+            $this->handleError(RedisCommands::SEARCH->value, $this->getLastError());
         }
 
         if ($result[0] === 0) {
             return [];
         }
 
-        return $this->extractRedisData($result, $format, $numberOfResults);
+        return $this->extractRedisData((array)$result, $format, $numberOfResults);
     }
 
     /**
@@ -325,16 +334,16 @@ final class RedisClient implements RedisClientInterface
      */
     public function customSearch(string $prefixKey, string $query, string $format): array
     {
-        $arguments = [RedisCommands::SEARCH->value, Converter::prefix($prefixKey), $query];
+        $arguments = [RedisCommands::SEARCH->value, self::convertPrefix($prefixKey), $query];
 
         try {
-            $result = call_user_func_array([$this->redis, 'rawCommand'], $arguments);
+            $result = call_user_func_array([$this->redis, 'executeRaw'], [$arguments]);
         } catch (\RedisException $e) {
             $this->handleError(RedisCommands::SEARCH->value, $e->getMessage(), $e);
         }
 
         if ($result === false) {
-            $this->handleError(RedisCommands::SEARCH->value, $this->redis->getLastError());
+            $this->handleError(RedisCommands::SEARCH->value, $this->getLastError());
         }
 
         if ($result[0] === 0) {
@@ -354,20 +363,29 @@ final class RedisClient implements RedisClientInterface
         $arguments[] = $search;
 
         try {
-            $result = call_user_func_array([$this->redis, 'rawCommand'], $arguments);
+            $result = call_user_func_array([$this->redis, 'executeRaw'], [$arguments]);
         } catch (\RedisException $e) {
             $this->handleError(RedisCommands::SEARCH->value, $e->getMessage(), $e);
         }
 
         if ($result === false) {
-            $this->handleError(RedisCommands::SEARCH->value, $this->redis->getLastError());
+            $this->handleError(RedisCommands::SEARCH->value, $this->getLastError());
         }
 
         if ($result[0] === 0) {
             return [];
         }
 
+        if (!is_array($result)) {
+            $this->handleError(RedisCommands::SEARCH->value, 'Unexpected result type from Redis: ' . gettype($result));
+        }
+
         return $this->extractRedisData($result, $format, $numberOfResults);
+    }
+
+    public static function convertPrefix(string $key): string
+    {
+        return str_replace('\\', '_', $key);
     }
 
     private function handleError(string $command, ?string $errorMessage = 'Unknown error', ?\Throwable $previous = null): never

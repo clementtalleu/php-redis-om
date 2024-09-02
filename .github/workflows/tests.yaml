@@ -49,12 +49,16 @@ jobs:
           restore-keys: ${{ runner.os }}-composer-
       - name: Install dependencies
         run: composer install --prefer-dist
+      - name: Install Predis optional package
+        run: composer require predis/predis
       - name: Test cs-fixer
         run: vendor/bin/php-cs-fixer fix src --dry-run --diff --no-ansi
       - name: Run phpstan
         run: vendor/bin/phpstan analyse src --level=5
-      - name: Run tests
-        run: XDEBUG_MODE=coverage vendor/bin/phpunit
+      - name: Run tests with redis extension
+        run: XDEBUG_MODE=coverage REDIS_CLIENT=redis vendor/bin/phpunit
+      - name: Run tests with predis dependency
+        run: XDEBUG_MODE=coverage REDIS_CLIENT=predis vendor/bin/phpunit
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:

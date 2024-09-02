@@ -11,14 +11,21 @@ use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
 final class JsonRepositoryTest extends RedisAbstractTestCase
 {
+
+    private RedisObjectManager $objectManager;
+    protected function setUp(): void
+    {
+        $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createClient());
+        parent::setUp(); 
+    }
+
     public function testFindAll()
     {
         static::emptyRedis();
         static::generateIndex();
         static::loadRedisFixtures(DummyJson::class);
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyJson::class);
+        $repository = $this->objectManager->getRepository(DummyJson::class);
 
         $collection = $repository->findAll();
         $this->assertCount(3, $collection);
@@ -33,8 +40,7 @@ final class JsonRepositoryTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures(DummyJson::class);
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyJson::class);
+        $repository = $this->objectManager->getRepository(DummyJson::class);
 
         $collection = $repository->findBy(['name' => 'Olivier']);
 
@@ -51,8 +57,7 @@ final class JsonRepositoryTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures(DummyJson::class);
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyJson::class);
+        $repository = $this->objectManager->getRepository(DummyJson::class);
 
         $collection = $repository->findBy(['name' => 'Lolivier']);
         $this->assertEmpty($collection);
@@ -64,8 +69,7 @@ final class JsonRepositoryTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures(DummyJson::class);
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyJson::class);
+        $repository = $this->objectManager->getRepository(DummyJson::class);
 
         $collection = $repository->findBy(['name' => 'Olivier'], ['age' => 'ASC']);
         $this->assertCount(2, $collection);
@@ -96,8 +100,7 @@ final class JsonRepositoryTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures(DummyJson::class);
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyJson::class);
+        $repository = $this->objectManager->getRepository(DummyJson::class);
 
         $collection = $repository->findBy(['name' => 'Olivier', 'age' => 34]);
 
@@ -115,8 +118,7 @@ final class JsonRepositoryTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures(DummyJson::class);
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyJson::class);
+        $repository = $this->objectManager->getRepository(DummyJson::class);
 
         $object = $repository->findOneBy(['age' => 34]);
         $this->assertInstanceOf(DummyJson::class, $object);
@@ -129,8 +131,7 @@ final class JsonRepositoryTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures(DummyJson::class);
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyJson::class);
+        $repository = $this->objectManager->getRepository(DummyJson::class);
 
         $collection = $repository->findLike('olivier');
 
@@ -147,8 +148,7 @@ final class JsonRepositoryTest extends RedisAbstractTestCase
         static::generateIndex();
         $collection = static::loadRedisFixtures(DummyJson::class);
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyJson::class);
+        $repository = $this->objectManager->getRepository(DummyJson::class);
 
         $value = $repository->getPropertyValue(1, 'createdAt');
         $value1 = $repository->getPropertyValue(2, 'createdAt');
@@ -179,8 +179,7 @@ final class JsonRepositoryTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures(DummyJson::class);
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyJson::class);
+        $repository = $this->objectManager->getRepository(DummyJson::class);
 
         $this->expectException(BadPropertyException::class);
         $repository->getPropertyValue(1, 'test');
@@ -192,8 +191,7 @@ final class JsonRepositoryTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures(DummyJson::class);
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyJson::class);
+        $repository = $this->objectManager->getRepository(DummyJson::class);
 
         $collection = $repository->findBy(['bar_title' => 'Hello']);
         foreach ($collection as $dummy) {
@@ -208,8 +206,7 @@ final class JsonRepositoryTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures(DummyJson::class);
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyJson::class);
+        $repository = $this->objectManager->getRepository(DummyJson::class);
 
         $collection = $repository->findBy(['bar_id' => 1]);
         foreach ($collection as $dummy) {
@@ -224,8 +221,7 @@ final class JsonRepositoryTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures(DummyJson::class);
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyJson::class);
+        $repository = $this->objectManager->getRepository(DummyJson::class);
 
         $object = $repository->findOneBy(['bar_id' => 1]);
         $this->assertEquals($object->bar->id, 1);

@@ -12,6 +12,13 @@ use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
 class ArrayConsistencyTest extends RedisAbstractTestCase
 {
+    private RedisObjectManager $objectManager;
+    protected function setUp(): void
+    {
+        $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createClient());
+        parent::setUp();
+    }
+
     public function testArrayHash(): void
     {
         self::emptyRedis();
@@ -32,11 +39,11 @@ class ArrayConsistencyTest extends RedisAbstractTestCase
             ]
         ];
 
-        $objectManager = new RedisObjectManager();
-        $objectManager->persist($arrayHash);
-        $objectManager->flush();
 
-        $this->assertEquals($arrayHash, $objectManager->find(ArrayHash::class, 1));
+        $this->objectManager->persist($arrayHash);
+        $this->objectManager->flush();
+
+        $this->assertEquals($arrayHash, $this->objectManager->find(ArrayHash::class, 1));
     }
 
     public function testArrayJson(): void
@@ -60,11 +67,10 @@ class ArrayConsistencyTest extends RedisAbstractTestCase
             ]
         ];
 
-        $objectManager = new RedisObjectManager();
-        $objectManager->persist($arrayJson);
-        $objectManager->flush();
+        $this->objectManager->persist($arrayJson);
+        $this->objectManager->flush();
 
-        $this->assertEquals($arrayJson, $objectManager->find(ArrayJson::class, 1));
+        $this->assertEquals($arrayJson, $this->objectManager->find(ArrayJson::class, 1));
     }
 
     public function createBar(int $id, string $title): Bar

@@ -10,14 +10,21 @@ use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
 final class JsonIdentifierRepositoryTest extends RedisAbstractTestCase
 {
+
+    private RedisObjectManager $objectManager;
+    protected function setUp(): void
+    {
+        $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createClient());
+        parent::setUp(); 
+    }
+
     public function testFindById()
     {
         static::emptyRedis();
         static::generateIndex();
         static::loadRedisFixtures(DummyJson::class);
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyJson::class);
+        $repository = $this->objectManager->getRepository(DummyJson::class);
 
         $collection = $repository->findBy(['id' => 1]);
         foreach ($collection as $dummy) {
@@ -32,8 +39,7 @@ final class JsonIdentifierRepositoryTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures(DummyJson::class);
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyJson::class);
+        $repository = $this->objectManager->getRepository(DummyJson::class);
 
         $objet = $repository->findOneBy(['id' => 2]);
         $this->assertEquals($objet->id, 2);

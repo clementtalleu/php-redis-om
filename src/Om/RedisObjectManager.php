@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Om;
 
-use Talleu\RedisOm\Client\RedisClient;
-use Talleu\RedisOm\Exception\RedisOmInvalidArgumentException;
+use Talleu\RedisOm\Client\RedisClientInterface;
 use Talleu\RedisOm\Om\Converters\HashModel\HashObjectConverter;
 use Talleu\RedisOm\Om\Converters\JsonModel\JsonObjectConverter;
 use Talleu\RedisOm\Om\Key\KeyGenerator;
 use Talleu\RedisOm\Om\Mapping\Entity;
 use Talleu\RedisOm\Om\Metadata\ClassMetadata;
 use Talleu\RedisOm\Om\Metadata\MetadataFactory;
+use Talleu\RedisOm\Om\Persister\HashModel\HashPersister;
+use Talleu\RedisOm\Om\Persister\JsonModel\JsonPersister;
 use Talleu\RedisOm\Om\Persister\ObjectToPersist;
 use Talleu\RedisOm\Om\Persister\PersisterInterface;
 use Talleu\RedisOm\Om\Repository\RepositoryInterface;
@@ -25,8 +26,10 @@ final class RedisObjectManager implements RedisObjectManagerInterface
     protected array $objectsToFlush = [];
     protected ?KeyGenerator $keyGenerator = null;
 
-    public function __construct(private readonly ?bool $createPersistentConnection = null)
-    {
+    public function __construct(
+        private readonly ?RedisClientInterface $redisClient,
+        private readonly ?PersisterInterface   $persister = null,
+    ) {
         $this->keyGenerator = new KeyGenerator();
     }
 
@@ -36,7 +39,7 @@ final class RedisObjectManager implements RedisObjectManagerInterface
     public function persist(object $object): void
     {
         $objectMapper = $this->getEntityMapper($object);
-        $persister = $this->registerPersister($objectMapper, $object);
+        $persister = $this->registerPersister($objectMapper);
 
         $objectToPersist = $persister->persist($objectMapper, $object);
         $this->objectsToFlush[$objectToPersist->persisterClass][$objectToPersist->operation][$objectToPersist->redisKey] = $objectToPersist;
@@ -48,7 +51,7 @@ final class RedisObjectManager implements RedisObjectManagerInterface
     public function remove(object $object): void
     {
         $objectMapper = $this->getEntityMapper($object);
-        $persister = $this->registerPersister($objectMapper, $object);
+        $persister = $this->registerPersister($objectMapper);
 
         $objectToRemove = $persister->delete($objectMapper, $object);
         $this->objectsToFlush[$objectToRemove->persisterClass][$objectToRemove->operation][$objectToRemove->redisKey] = $objectToRemove;
@@ -74,7 +77,7 @@ final class RedisObjectManager implements RedisObjectManagerInterface
     {
         $objectMapper = $this->getEntityMapper($className);
 
-        return $objectMapper->repository->find((string) $id);
+        return $objectMapper->repository->find((string)$id);
     }
 
     /**
@@ -94,7 +97,7 @@ final class RedisObjectManager implements RedisObjectManagerInterface
         $objectMapper = $this->getEntityMapper($object);
         $key = sprintf('%s:%s', $objectMapper->prefix ?: get_class($object), $object->{$identifier->getName()});
 
-        $persisterClassName = get_class($objectMapper->persister);
+        $persisterClassName = get_class($this->registerPersister($objectMapper));
         foreach ($this->objectsToFlush[$persisterClassName] as $operation => $objectsToFlush) {
             foreach ($objectsToFlush as $redisKey => $objectToFlush) {
                 if ($redisKey === $key) {
@@ -112,7 +115,7 @@ final class RedisObjectManager implements RedisObjectManagerInterface
         $objectMapper = $this->getEntityMapper($object);
         $identifierProperty = $this->keyGenerator->getIdentifier(new \ReflectionClass($object));
 
-        return $objectMapper->repository->find($objectMapper->prefix.':'.$object->{$identifierProperty->getName()});
+        return $objectMapper->repository->find($objectMapper->prefix . ':' . $object->{$identifierProperty->getName()});
     }
 
     /**
@@ -157,7 +160,7 @@ final class RedisObjectManager implements RedisObjectManagerInterface
         $identifier = $this->keyGenerator->getIdentifier(new \ReflectionClass($object));
         $objectMapper = $this->getEntityMapper($object);
         $key = sprintf('%s:%s', $objectMapper->prefix ?: get_class($object), $object->{$identifier->getName()});
-        $persisterClassName = get_class($objectMapper->persister);
+        $persisterClassName = get_class($this->registerPersister($objectMapper));
         foreach ($this->objectsToFlush[$persisterClassName] as $operation => $objectsToFlush) {
             foreach ($objectsToFlush as $redisKey => $objectToFlush) {
                 if ($redisKey === $key) {
@@ -184,27 +187,32 @@ final class RedisObjectManager implements RedisObjectManagerInterface
         $redisEntity->repository->setClassName($reflectionClass->getName());
         $redisEntity->repository->setConverter($redisEntity->converter ?? ($redisEntity->format === RedisFormat::HASH->value ? new HashObjectConverter() : new JsonObjectConverter()));
 
-        $redisClient = $redisEntity->redisClient ?? new RedisClient();
-        if ($this->createPersistentConnection === true) {
-            $redisClient->createPersistentConnection();
-        }
-        $redisEntity->repository->setRedisClient($redisClient);
+        $redisEntity->repository->setRedisClient($this->redisClient);
         $redisEntity->repository->setFormat($redisEntity->format);
 
         return $redisEntity;
     }
 
-    protected function registerPersister(Entity $redisEntity, object $object): PersisterInterface
+    protected function registerPersister(Entity $object): PersisterInterface
     {
-        if (is_null($persister = $redisEntity->persister)) {
-            throw new RedisOmInvalidArgumentException(sprintf('No persister found for %s object.', get_class($object)));
-        }
+        $persister = ($object->format === RedisFormat::JSON->value ? new JsonPersister(redis: $this->redisClient) : new HashPersister(redis: $this->redisClient));
 
-        $persisterClass = get_class($persister);
+        $persisterClass = $persister::class;
         if (!array_key_exists($persisterClass, $this->persisters)) {
             $this->persisters[$persisterClass] = $persister;
         }
-
         return $persister;
     }
+
+    public function createIndex(object $object, string $fqcn = null, array $propertiesToIndex = []): void
+    {
+        $this->redisClient->createIndex($object->prefix ?? $fqcn, $object->format ?? RedisFormat::HASH->value, $propertiesToIndex);
+    }
+
+    public function dropIndex(object $object, string $fqcn = null): void
+    {
+        $this->redisClient->dropIndex($object->prefix ?? $fqcn);
+    }
+
+
 }

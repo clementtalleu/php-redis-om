@@ -10,10 +10,18 @@ use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
 class MetadataTest extends RedisAbstractTestCase
 {
+
+    private RedisObjectManager $objectManager;
+    protected function setUp(): void
+    {
+        $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createClient());
+        parent::setUp(); 
+    }
+
     public function testGetClassMetadataHasAssociation()
     {
-        $objectManager = new RedisObjectManager();
-        $classMetadata = $objectManager->getClassMetadata(DummyHash::class);
+
+        $classMetadata = $this->objectManager->getClassMetadata(DummyHash::class);
 
         $this->assertEquals(['id'], $classMetadata->getIdentifier());
         $this->assertCount(11, $classMetadata->fieldsMapping);

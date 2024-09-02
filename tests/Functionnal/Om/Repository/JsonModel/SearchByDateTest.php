@@ -10,14 +10,21 @@ use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
 final class SearchByDateTest extends RedisAbstractTestCase
 {
+    private RedisObjectManager $objectManager;
+    protected function setUp(): void
+    {
+        parent::setUp(); 
+        $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createClient()); 
+    }
+
     public function testFindOneBy()
     {
         static::emptyRedis();
         static::generateIndex();
         $collection = static::loadRedisFixtures(DummyJson::class);
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyJson::class);
+        
+        $repository = $this->objectManager->getRepository(DummyJson::class);
 
         // An existing date
         $createdAt = new \DateTime('2022-01-01 00:00:00');
@@ -51,8 +58,8 @@ final class SearchByDateTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures(DummyJson::class);
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyJson::class);
+        
+        $repository = $this->objectManager->getRepository(DummyJson::class);
 
         // An existing date
         $createdAt = new \DateTime('2022-01-01 00:00:00');
@@ -82,8 +89,8 @@ final class SearchByDateTest extends RedisAbstractTestCase
         static::generateIndex();
         $collection = static::loadRedisFixtures(DummyJson::class);
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyJson::class);
+        
+        $repository = $this->objectManager->getRepository(DummyJson::class);
 
         // An existing date
         $createdAt = new \DateTime('2022-01-01 00:00:00');
@@ -110,8 +117,8 @@ final class SearchByDateTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures(DummyJson::class);
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyJson::class);
+        
+        $repository = $this->objectManager->getRepository(DummyJson::class);
 
         // An existing date
         $createdAt = new \DateTime('2022-01-01 00:00:00');

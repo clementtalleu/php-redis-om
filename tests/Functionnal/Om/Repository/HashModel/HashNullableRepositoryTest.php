@@ -10,21 +10,29 @@ use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
 final class HashNullableRepositoryTest extends RedisAbstractTestCase
 {
+
+    private RedisObjectManager $objectManager;
+    protected function setUp(): void
+    {
+        $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createClient());
+        parent::setUp();
+    }
+
     public function testFindByNull()
     {
         static::emptyRedis();
         static::generateIndex();
         static::loadRedisFixtures(DummyHashWithNullProperties::class);
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyHashWithNullProperties::class);
+
+        $repository = $this->objectManager->getRepository(DummyHashWithNullProperties::class);
 
         // Update 1 object to set unknown to not null
         /** @var DummyHashWithNullProperties $object */
         $object = $repository->findOneBy(['name' => 'Kevin']);
         $object->unknown = 'Not null';
-        $objectManager->persist($object);
-        $objectManager->flush();
+        $this->objectManager->persist($object);
+        $this->objectManager->flush();
 
         $collection = $repository->findBy(['unknown' => null]);
         foreach ($collection as $dummy) {
@@ -39,15 +47,15 @@ final class HashNullableRepositoryTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures(DummyHashWithNullProperties::class);
 
-        $objectManager = new RedisObjectManager();
-        $repository = $objectManager->getRepository(DummyHashWithNullProperties::class);
+
+        $repository = $this->objectManager->getRepository(DummyHashWithNullProperties::class);
 
         // Update 1 object to set unknown to not null
         /** @var DummyHashWithNullProperties $object */
         $object = $repository->findOneBy(['name' => 'Kevin']);
         $object->unknown = 'Notnull';
-        $objectManager->persist($object);
-        $objectManager->flush();
+        $this->objectManager->persist($object);
+        $this->objectManager->flush();
 
         $collection = $repository->findBy(['unknown' => 'Notnull']);
         foreach ($collection as $dummy) {

@@ -11,11 +11,11 @@ use Talleu\RedisOm\Om\Mapping\Entity;
 
 abstract class AbstractPersister implements PersisterInterface
 {
-    protected RedisClientInterface $redis;
-
-    public function __construct(private ?KeyGenerator $keyGenerator = null)
-    {
-        $this->redis = (new RedisClient());
+    public function __construct(
+        private ?KeyGenerator $keyGenerator = null,
+        protected ?RedisClientInterface $redis = null
+    ) {
+        $this->redis = $redis ?? (new RedisClient());
 
         $this->keyGenerator = $keyGenerator ?? new KeyGenerator();
     }
@@ -25,7 +25,7 @@ abstract class AbstractPersister implements PersisterInterface
         $key = $this->keyGenerator->generateKey($objectMapper, $object);
 
         return new ObjectToPersist(
-            persisterClass: get_class($objectMapper->persister),
+            persisterClass: get_class($this),
             operation: PersisterOperations::OPERATION_PERSIST->value,
             redisKey: $key,
             converter: $objectMapper->converter,
@@ -37,9 +37,8 @@ abstract class AbstractPersister implements PersisterInterface
     {
         $identifier = $this->keyGenerator->getIdentifier(new \ReflectionClass($object));
         $key = sprintf('%s:%s', $objectMapper->prefix ?: get_class($object), $object->{$identifier->getName()});
-
         return new ObjectToPersist(
-            persisterClass: get_class($objectMapper->persister),
+            persisterClass: get_class($this),
             operation: PersisterOperations::OPERATION_DELETE->value,
             redisKey: $key,
         );

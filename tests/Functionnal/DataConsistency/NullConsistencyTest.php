@@ -11,6 +11,13 @@ use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
 class NullConsistencyTest extends RedisAbstractTestCase
 {
+    private RedisObjectManager $objectManager;
+    protected function setUp(): void
+    {
+        $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createClient());
+        parent::setUp();
+    }
+
     public function testNullHash(): void
     {
         self::emptyRedis();
@@ -19,11 +26,11 @@ class NullConsistencyTest extends RedisAbstractTestCase
         $nullObject = new NullHash();
         $nullObject->id = 1;
 
-        $objectManager = new RedisObjectManager();
-        $objectManager->persist($nullObject);
-        $objectManager->flush();
 
-        $repository = $objectManager->getRepository(NullHash::class);
+        $this->objectManager->persist($nullObject);
+        $this->objectManager->flush();
+
+        $repository = $this->objectManager->getRepository(NullHash::class);
         $retrieveNullObject = $repository->find(1);
         $this->assertNull($retrieveNullObject->unknown);
     }
@@ -37,11 +44,11 @@ class NullConsistencyTest extends RedisAbstractTestCase
         $nullObject->id = 1;
         $nullObject->unknown = 'test';
 
-        $objectManager = new RedisObjectManager();
-        $objectManager->persist($nullObject);
-        $objectManager->flush();
 
-        $repository = $objectManager->getRepository(NullHash::class);
+        $this->objectManager->persist($nullObject);
+        $this->objectManager->flush();
+
+        $repository = $this->objectManager->getRepository(NullHash::class);
         $retrieveNullObject = $repository->find(1);
         $this->assertEquals($retrieveNullObject->unknown, 'test');
     }
@@ -53,10 +60,10 @@ class NullConsistencyTest extends RedisAbstractTestCase
 
         $nullObject = new NullJson();
         $nullObject->id = 1;
-        $objectManager = new RedisObjectManager();
-        $objectManager->persist($nullObject);
-        $objectManager->flush();
-        $repository = $objectManager->getRepository(NullJson::class);
+
+        $this->objectManager->persist($nullObject);
+        $this->objectManager->flush();
+        $repository = $this->objectManager->getRepository(NullJson::class);
         $retrieveNullObject = $repository->find(1);
         $this->assertNull($retrieveNullObject->unknown);
     }
@@ -70,11 +77,10 @@ class NullConsistencyTest extends RedisAbstractTestCase
         $nullObject->id = 1;
         $nullObject->unknown = 'test';
 
-        $objectManager = new RedisObjectManager();
-        $objectManager->persist($nullObject);
-        $objectManager->flush();
+        $this->objectManager->persist($nullObject);
+        $this->objectManager->flush();
 
-        $repository = $objectManager->getRepository(NullJson::class);
+        $repository = $this->objectManager->getRepository(NullJson::class);
         $retrieveNullObject = $repository->find(1);
         $this->assertEquals($retrieveNullObject->unknown, 'test');
     }

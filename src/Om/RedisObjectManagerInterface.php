@@ -67,4 +67,8 @@ interface RedisObjectManagerInterface
      * Check if the object is managed by the current unit of work.
      */
     public function contains(object $object): bool;
+
+    public function createIndex(object $object): void;
+
+    public function dropIndex(object $object): void;
 }

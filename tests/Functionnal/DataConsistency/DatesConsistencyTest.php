@@ -11,6 +11,14 @@ use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
 class DatesConsistencyTest extends RedisAbstractTestCase
 {
+
+    private RedisObjectManager $objectManager;
+    protected function setUp(): void
+    {
+        $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createClient());
+        parent::setUp();
+    }
+
     public function testDateHash(): void
     {
         self::emptyRedis();
@@ -20,11 +28,11 @@ class DatesConsistencyTest extends RedisAbstractTestCase
         $dateObject->id = 1;
         $dateObject->createdAt = new \DateTime('2021-01-01');
 
-        $objectManager = new RedisObjectManager();
-        $objectManager->persist($dateObject);
-        $objectManager->flush();
 
-        $this->assertEquals($dateObject, $objectManager->find(DateHash::class, 1));
+        $this->objectManager->persist($dateObject);
+        $this->objectManager->flush();
+
+        $this->assertEquals($dateObject, $this->objectManager->find(DateHash::class, 1));
     }
 
     public function testDateJson(): void
@@ -36,10 +44,10 @@ class DatesConsistencyTest extends RedisAbstractTestCase
         $dateObject->id = 1;
         $dateObject->createdAt = new \DateTime('2021-01-01');
 
-        $objectManager = new RedisObjectManager();
-        $objectManager->persist($dateObject);
-        $objectManager->flush();
 
-        $this->assertEquals($dateObject, $objectManager->find(DateJson::class, 1));
+        $this->objectManager->persist($dateObject);
+        $this->objectManager->flush();
+
+        $this->assertEquals($dateObject, $this->objectManager->find(DateJson::class, 1));
     }
 }
