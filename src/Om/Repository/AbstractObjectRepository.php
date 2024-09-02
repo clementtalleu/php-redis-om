@@ -35,11 +35,18 @@ abstract class AbstractObjectRepository implements RepositoryInterface
     /**
      * @inheritdoc
      */
-    public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): array
+    public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = 0): array
     {
         $this->convertDates($criteria);
         $this->convertSpecial($criteria);
-        $data = $this->redisClient->search($this->prefix, $criteria, $orderBy ?? [], $this->format, $limit);
+        $data = $this->redisClient->search(
+            $this->prefix,
+            $criteria,
+            $orderBy ?? [],
+            $this->format,
+            $limit,
+            offset: $offset
+        );
 
         $collection = [];
         foreach ($data as $item) {
@@ -52,7 +59,7 @@ abstract class AbstractObjectRepository implements RepositoryInterface
     /**
      * @inheritdoc
      */
-    public function findByLike(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): array
+    public function findByLike(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = 0): array
     {
         $this->convertDates($criteria);
         $this->convertSpecial($criteria);
@@ -61,7 +68,7 @@ abstract class AbstractObjectRepository implements RepositoryInterface
             unset($criteria[$property]);
         }
 
-        $data = $this->redisClient->search(prefixKey: $this->prefix, search: $criteria, orderBy: $orderBy ?? [], format:  $this->format, numberOfResults: $limit, searchType: Property::INDEX_TEXT);
+        $data = $this->redisClient->search(prefixKey: $this->prefix, search: $criteria, orderBy: $orderBy ?? [], format:  $this->format, numberOfResults: $limit, offset: $offset, searchType: Property::INDEX_TEXT);
 
         $collection = [];
         foreach ($data as $item) {
