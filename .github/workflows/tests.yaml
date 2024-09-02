@@ -50,7 +50,7 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist
       - name: Install Predis optional package
-        run: composer require predis/predis --no-update
+        run: composer require predis/predis
       - name: Test cs-fixer
         run: vendor/bin/php-cs-fixer fix src --dry-run --diff --no-ansi
       - name: Run phpstan
