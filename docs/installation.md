@@ -1,9 +1,11 @@
 # Installation
 
 ### PHP
-To use the library you need a php-version >= 8.2 and the Redis extension installed.
-If you don't have the Redis extension installed, you can use your favorite Redis client (for example Predis),
-and create a new class that implements the `RedisClientInterface` interface, then inject it directly in the `#[RedisOm\Entity(client: YourRedisClient::class)]` attribute.
+To use the library you need a php-version >= 8.2 and the Redis extension installed or the library Predis.
+
+To use it with [phpredis](https://github.com/clementtalleu/php-redis-om/blob/main/docs/phpredis_usage.md) or with [Predis](https://github.com/clementtalleu/php-redis-om/blob/main/docs/predis_usage.md)
+
+
 
 
 ### Redis
@@ -32,3 +34,4 @@ Or add the library to your `composer.json` file:
 ```
 
 Then run `composer update` to install the library.
+

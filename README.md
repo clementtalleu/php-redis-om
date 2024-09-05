@@ -26,7 +26,7 @@ with Redis.
 - PHP 8.2 or higher
 - Redis 4.0 or higher
 - Redisearch module ([installation](https://redis.io/docs/latest/operate/oss_and_stack/install/install-stack/))
-- php-redis extension (or your favorite Redis client)
+- php-redis extension OR Predis library
 - Redis JSON module (optional)
 - Composer
 
@@ -46,6 +46,8 @@ Install the library via Composer:
 ```console
 composer require talleu/php-redis-om
 ```
+
+Depending on your configuration, use phpredis or Predis
 
 ## Basic Usage 🎯
 

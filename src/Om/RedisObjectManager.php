@@ -28,7 +28,6 @@ final class RedisObjectManager implements RedisObjectManagerInterface
 
     public function __construct(
         private readonly ?RedisClientInterface $redisClient,
-        private readonly ?PersisterInterface   $persister = null,
     ) {
         $this->keyGenerator = new KeyGenerator();
     }
