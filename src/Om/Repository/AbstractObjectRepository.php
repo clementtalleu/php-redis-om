@@ -17,7 +17,7 @@ abstract class AbstractObjectRepository implements RepositoryInterface
     public ?string $className = null;
     protected ?RedisClientInterface $redisClient = null;
     protected ?ConverterInterface $converter = null;
-
+    private const DEFAULT_SEARCH_LIMIT = 10000;
     public function __construct(public ?string $format = null)
     {
     }
@@ -83,10 +83,12 @@ abstract class AbstractObjectRepository implements RepositoryInterface
     private function defineLimit(?int $limit = null)
     {
         if ($limit === null) {
-            $limit = $this->count([]);
+            $limit = self::DEFAULT_SEARCH_LIMIT;
         }
+
         return $limit;
     }
+
     /**
      * @inheritdoc
      */
@@ -107,11 +109,25 @@ abstract class AbstractObjectRepository implements RepositoryInterface
     /**
      * @inheritdoc
      */
-    public function findAll(): array
+    public function findAll(): iterable
     {
-        $count = $this->count([]);
+        $limit = self::DEFAULT_SEARCH_LIMIT;
+        $offset = 0;
 
-        return $this->findBy([], limit: $count);
+        do {
+            $results = $this->findBy([], offset: $offset, limit: $limit);
+
+            if (empty($results)) {
+                break;
+            }
+
+            foreach ($results as $result) {
+                yield $result;
+            }
+
+            $offset += $limit;
+
+        } while (true);
     }
 
     /**

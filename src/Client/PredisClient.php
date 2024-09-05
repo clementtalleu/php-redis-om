@@ -230,6 +230,7 @@ final class PredisClient implements RedisClientInterface
         foreach ($criterias as $property => $value) {
             $arguments[] = "@$property:$value";
         }
+
         if ($criterias === []) {
             $arguments[] = '*';
         }
