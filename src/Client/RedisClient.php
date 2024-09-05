@@ -219,7 +219,9 @@ final class RedisClient implements RedisClientInterface
         foreach ($criterias as $property => $value) {
             $arguments[] = "@$property:$value";
         }
-
+        if ($criterias === []) {
+            $arguments[] = '*';
+        }
         $rawResult = call_user_func_array([$this->redis, 'rawCommand'], $arguments);
 
         if (!$rawResult) {
