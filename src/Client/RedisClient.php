@@ -223,6 +223,7 @@ final class RedisClient implements RedisClientInterface
         if ($criterias === []) {
             $arguments[] = '*';
         }
+
         $rawResult = call_user_func_array([$this->redis, 'rawCommand'], $arguments);
 
         if (!$rawResult) {
