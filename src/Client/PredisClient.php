@@ -231,7 +231,11 @@ final class PredisClient implements RedisClientInterface
             $arguments[] = "@$property:$value";
         }
 
-        $rawResult = call_user_func_array([$this->redis, 'executeRaw'], $arguments);
+        if ($criterias === []) {
+            $arguments[] = '*';
+        }
+
+        $rawResult = call_user_func_array([$this->redis, 'executeRaw'], [$arguments]);
 
         if (!$rawResult) {
             $this->handleError(__METHOD__, $this->getLastError());

@@ -42,7 +42,7 @@ interface RepositoryInterface
     /**
      * Find all objects from specific class.
      */
-    public function findAll(): array;
+    public function findAll(): iterable;
 
     /**
      * Find one object by a set of criteria.

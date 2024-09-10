@@ -17,7 +17,7 @@ abstract class AbstractObjectRepository implements RepositoryInterface
     public ?string $className = null;
     protected ?RedisClientInterface $redisClient = null;
     protected ?ConverterInterface $converter = null;
-
+    private const DEFAULT_SEARCH_LIMIT = 10000;
     public function __construct(public ?string $format = null)
     {
     }
@@ -37,6 +37,7 @@ abstract class AbstractObjectRepository implements RepositoryInterface
      */
     public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = 0): array
     {
+        $limit = $this->defineLimit($limit);
         $this->convertDates($criteria);
         $this->convertSpecial($criteria);
         $data = $this->redisClient->search(
@@ -61,14 +62,15 @@ abstract class AbstractObjectRepository implements RepositoryInterface
      */
     public function findByLike(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = 0): array
     {
+        $limit = $this->defineLimit($limit);
         $this->convertDates($criteria);
         $this->convertSpecial($criteria);
         foreach ($criteria as $property => $value) {
-            $criteria[$property.'_text'] = "*$value*";
+            $criteria[$property . '_text'] = "*$value*";
             unset($criteria[$property]);
         }
 
-        $data = $this->redisClient->search(prefixKey: $this->prefix, search: $criteria, orderBy: $orderBy ?? [], format:  $this->format, numberOfResults: $limit, offset: $offset, searchType: Property::INDEX_TEXT);
+        $data = $this->redisClient->search(prefixKey: $this->prefix, search: $criteria, orderBy: $orderBy ?? [], format: $this->format, numberOfResults: $limit, offset: $offset, searchType: Property::INDEX_TEXT);
 
         $collection = [];
         foreach ($data as $item) {
@@ -78,11 +80,22 @@ abstract class AbstractObjectRepository implements RepositoryInterface
         return $collection;
     }
 
+    private function defineLimit(?int $limit = null)
+    {
+        if ($limit === null) {
+            $limit = self::DEFAULT_SEARCH_LIMIT;
+        }
+
+        return $limit;
+    }
+
     /**
      * @inheritdoc
      */
     public function findLike(string $search, ?int $limit = null): array
     {
+        $limit = $this->defineLimit($limit);
+
         $data = $this->redisClient->searchLike($this->prefix, $search, $this->format, $limit);
 
         $collection = [];
@@ -96,9 +109,25 @@ abstract class AbstractObjectRepository implements RepositoryInterface
     /**
      * @inheritdoc
      */
-    public function findAll(): array
+    public function findAll(): iterable
     {
-        return $this->findBy([]);
+        $limit = self::DEFAULT_SEARCH_LIMIT;
+        $offset = 0;
+
+        do {
+            $results = $this->findBy([], offset: $offset, limit: $limit);
+
+            if (empty($results)) {
+                break;
+            }
+
+            foreach ($results as $result) {
+                yield $result;
+            }
+
+            $offset += $limit;
+
+        } while (true);
     }
 
     /**
@@ -125,11 +154,11 @@ abstract class AbstractObjectRepository implements RepositoryInterface
         $this->convertDates($criteria);
         $this->convertSpecial($criteria);
         foreach ($criteria as $property => $value) {
-            $criteria[$property.'_text'] = "*$value*";
+            $criteria[$property . '_text'] = "*$value*";
             unset($criteria[$property]);
         }
 
-        $data = $this->redisClient->search(prefixKey: $this->prefix, search: $criteria, orderBy: $orderBy ?? [], format:  $this->format, numberOfResults: 1, searchType: Property::INDEX_TEXT);
+        $data = $this->redisClient->search(prefixKey: $this->prefix, search: $criteria, orderBy: $orderBy ?? [], format: $this->format, numberOfResults: 1, searchType: Property::INDEX_TEXT);
 
         if ($data === []) {
             return null;
@@ -152,7 +181,7 @@ abstract class AbstractObjectRepository implements RepositoryInterface
     public function createQueryBuilder(): QueryBuilder
     {
         return new QueryBuilder(
-            redisClient:  $this->redisClient,
+            redisClient: $this->redisClient,
             converter: $this->converter,
             className: $this->className,
             redisKey: $this->prefix,
