@@ -17,9 +17,17 @@ final class PredisClient implements RedisClientInterface
 {
     public function __construct(protected ?Predis $redis = null)
     {
-        $this->redis = $redis ?? new Predis(
-            array_key_exists('REDIS_HOST', $_SERVER) ? ['host' => $_SERVER['REDIS_HOST']] : null,
-        );
+        $redisConfig = [];
+
+        if (array_key_exists('REDIS_HOST', $_SERVER)) {
+            $redisConfig['host'] = $_SERVER['REDIS_HOST'];
+        }
+
+        if (array_key_exists('REDIS_PORT', $_SERVER)) {
+            $redisConfig['port'] = $_SERVER['REDIS_PORT'];
+        }
+
+        $this->redis = $redis ?? new Predis($redisConfig !== [] ? $redisConfig : null);
     }
 
     public function createPersistentConnection(?string $host = null, ?int $port = null, ?int $timeout = 0): void

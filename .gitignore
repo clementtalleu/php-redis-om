@@ -7,3 +7,4 @@ test.php
 /.phpunit.cache/
 Makefile
 coverage.xml
+composer.lock

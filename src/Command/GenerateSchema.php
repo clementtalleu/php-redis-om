@@ -21,6 +21,7 @@ final class GenerateSchema
         $redisOm = new RedisObjectManager(
             getenv('REDIS_CLIENT') === 'predis' ? new PredisClient() : new RedisClient(),
         );
+
         $rii = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir));
         $phpFiles = [];
 

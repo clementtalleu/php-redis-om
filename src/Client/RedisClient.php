@@ -15,7 +15,17 @@ final class RedisClient implements RedisClientInterface
 {
     public function __construct(protected ?\Redis $redis = null)
     {
-        $this->redis = $redis ?? new \Redis(array_key_exists('REDIS_HOST', $_SERVER) ? ['host' => $_SERVER['REDIS_HOST']] : null);
+        $redisConfig = [];
+
+        if (array_key_exists('REDIS_HOST', $_SERVER)) {
+            $redisConfig['host'] = $_SERVER['REDIS_HOST'];
+        }
+
+        if (array_key_exists('REDIS_PORT', $_SERVER)) {
+            $redisConfig['port'] = $_SERVER['REDIS_PORT'];
+        }
+
+        $this->redis = $redis ?? new \Redis($redisConfig !== [] ? $redisConfig : null);
     }
 
     /**
