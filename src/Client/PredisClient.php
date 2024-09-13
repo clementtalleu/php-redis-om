@@ -27,6 +27,14 @@ final class PredisClient implements RedisClientInterface
             $redisConfig['port'] = $_SERVER['REDIS_PORT'];
         }
 
+        if (array_key_exists('REDIS_USER', $_SERVER)) {
+            $redisConfig['parameters']['username'] = $_SERVER['REDIS_USER'];
+        }
+
+        if (array_key_exists('REDIS_PASSWORD', $_SERVER)) {
+            $redisConfig['parameters']['password'] = $_SERVER['REDIS_PASSWORD'];
+        }
+
         $this->redis = $redis ?? new Predis($redisConfig !== [] ? $redisConfig : null);
     }
 

@@ -22,7 +22,11 @@ final class RedisClient implements RedisClientInterface
         }
 
         if (array_key_exists('REDIS_PORT', $_SERVER)) {
-            $redisConfig['port'] = $_SERVER['REDIS_PORT'];
+            $redisConfig['port'] = (int) $_SERVER['REDIS_PORT'];
+        }
+
+        if (array_key_exists('REDIS_USER', $_SERVER) && array_key_exists('REDIS_PASSWORD', $_SERVER)) {
+            $redisConfig['auth'] =[$_SERVER['REDIS_USER'], $_SERVER['REDIS_PASSWORD']];
         }
 
         $this->redis = $redis ?? new \Redis($redisConfig !== [] ? $redisConfig : null);
