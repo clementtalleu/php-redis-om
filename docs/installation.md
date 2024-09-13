@@ -35,3 +35,12 @@ Or add the library to your `composer.json` file:
 
 Then run `composer update` to install the library.
 
+
+### Redis configuration
+
+if you want to inject a particular configuration for Redis, you can add the following environment variables to your .env file (all optional)
+
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
+      REDIS_USER:
+      REDIS_PASSWORD:
