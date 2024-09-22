@@ -31,7 +31,7 @@ final class RedisObjectManager implements RedisObjectManagerInterface
     public function __construct(
         private ?RedisClientInterface $redisClient = null,
     ) {
-        $this->redisClient = getenv('REDIS_CLIENT') === 'predis' ? new PredisClient() : new RedisClient();
+        $this->redisClient = $redisClient ?? (getenv('REDIS_CLIENT') === 'predis' ? new PredisClient() : new RedisClient());
 
         $this->keyGenerator = new KeyGenerator();
     }

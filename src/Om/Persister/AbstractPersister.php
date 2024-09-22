@@ -16,7 +16,7 @@ abstract class AbstractPersister implements PersisterInterface
         private ?KeyGenerator $keyGenerator = null,
         protected ?RedisClientInterface $redis = null
     ) {
-        $this->redis = $redis ?? getenv('REDIS_CLIENT') === 'predis' ? new PredisClient() : new RedisClient();
+        $this->redis = $redis ?? (getenv('REDIS_CLIENT') === 'predis' ? new PredisClient() : new RedisClient());
 
         $this->keyGenerator = $keyGenerator ?? new KeyGenerator();
     }
