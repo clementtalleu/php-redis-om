@@ -51,7 +51,6 @@ final class PredisClient implements RedisClientInterface
             'persistent' => true,
             'timeout' => $timeout,
         ]);
-        ;
     }
 
     /**
