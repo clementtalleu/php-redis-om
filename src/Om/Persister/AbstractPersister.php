@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Om\Persister;
 
+use Talleu\RedisOm\Client\PredisClient;
 use Talleu\RedisOm\Client\RedisClient;
 use Talleu\RedisOm\Client\RedisClientInterface;
 use Talleu\RedisOm\Om\Key\KeyGenerator;
@@ -15,7 +16,7 @@ abstract class AbstractPersister implements PersisterInterface
         private ?KeyGenerator $keyGenerator = null,
         protected ?RedisClientInterface $redis = null
     ) {
-        $this->redis = $redis ?? (new RedisClient());
+        $this->redis = $redis ?? getenv('REDIS_CLIENT') === 'predis' ? new PredisClient() : new RedisClient();
 
         $this->keyGenerator = $keyGenerator ?? new KeyGenerator();
     }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Om;
 
+use Talleu\RedisOm\Client\PredisClient;
+use Talleu\RedisOm\Client\RedisClient;
 use Talleu\RedisOm\Client\RedisClientInterface;
 use Talleu\RedisOm\Om\Converters\HashModel\HashObjectConverter;
 use Talleu\RedisOm\Om\Converters\JsonModel\JsonObjectConverter;
@@ -27,8 +29,10 @@ final class RedisObjectManager implements RedisObjectManagerInterface
     protected ?KeyGenerator $keyGenerator = null;
 
     public function __construct(
-        private readonly ?RedisClientInterface $redisClient,
+        private ?RedisClientInterface $redisClient = null,
     ) {
+        $this->redisClient = getenv('REDIS_CLIENT') === 'predis' ? new PredisClient() : new RedisClient();
+
         $this->keyGenerator = new KeyGenerator();
     }
 
@@ -213,5 +217,8 @@ final class RedisObjectManager implements RedisObjectManagerInterface
         $this->redisClient->dropIndex($object->prefix ?? $fqcn);
     }
 
-
+    public function getRedisClient(): ?RedisClientInterface
+    {
+        return $this->redisClient;
+    }
 }
