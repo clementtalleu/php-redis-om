@@ -32,7 +32,10 @@ with Redis.
 
 ## Supported types ✅
 
-- scalar (string, int, float, bool)
+- scalar (string, int, float, bool, double)
+- timestamp
+- json
+- null
 - DateTimeImmutable
 - DateTime
 - array and nested arrays
