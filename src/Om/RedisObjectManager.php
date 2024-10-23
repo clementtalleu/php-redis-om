@@ -27,9 +27,10 @@ final class RedisObjectManager implements RedisObjectManagerInterface
     /** @var array<string, array<string, ObjectToPersist[]>> */
     protected array $objectsToFlush = [];
     protected ?KeyGenerator $keyGenerator = null;
+    private RedisClientInterface $redisClient;
 
     public function __construct(
-        private ?RedisClientInterface $redisClient = null,
+        ?RedisClientInterface $redisClient = null,
     ) {
         $this->redisClient = $redisClient ?? (getenv('REDIS_CLIENT') === 'predis' ? new PredisClient() : new RedisClient());
 
