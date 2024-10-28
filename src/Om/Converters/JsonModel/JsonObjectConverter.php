@@ -6,6 +6,9 @@ namespace Talleu\RedisOm\Om\Converters\JsonModel;
 
 use Talleu\RedisOm\Om\Converters\AbstractDateTimeConverter;
 use Talleu\RedisOm\Om\Converters\AbstractObjectConverter;
+use Talleu\RedisOm\Om\Mapper\ClassMapper;
+use Talleu\RedisOm\Om\Mapper\ConstructorMapper;
+use Talleu\RedisOm\Om\Mapper\SetterMapper;
 use Talleu\RedisOm\Om\Mapping\Property;
 
 final class JsonObjectConverter extends AbstractObjectConverter
@@ -54,11 +57,11 @@ final class JsonObjectConverter extends AbstractObjectConverter
      */
     public function revert($data, string $type): mixed
     {
-        $object = new $type();
 
+        $fieldsWithValue = [];
         foreach ($data as $key => $value) {
 
-            if (!property_exists($object, $key)) {
+            if (!property_exists($type, $key)) {
                 continue;
             }
 
@@ -80,10 +83,10 @@ final class JsonObjectConverter extends AbstractObjectConverter
             }
 
             $revertedValue = $reverter->revert($value, $valueType);
-            $this->assignValue($object, $key, $revertedValue, $type, $reflectionProperty);
+            $fieldsWithValue[$key] = $revertedValue;
         }
 
-        return $object;
+        return $this->assignValue($type, $fieldsWithValue);
     }
 
     public function supportsReversion(string $type, mixed $value): bool
