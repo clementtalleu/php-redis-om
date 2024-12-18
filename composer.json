@@ -15,7 +15,7 @@
   "require": {
     "php": ">=8.2",
     "ext-json": "*",
-    "symfony/framework-bundle": "^7.2"
+    "symfony/framework-bundle": "^7.0"
   },
   "suggest": {
     "ext-redis": "To use the php extension for Redis (phpredis)",
