@@ -15,6 +15,7 @@ with Redis.
 ## Features 🛠️
 
 - Doctrine-like methods and architecture
+- Symfony bundle integration
 - Easy integration with existing PHP applications
 - High performance and scalability with Redis®
 - Support for Redis JSON module
@@ -25,7 +26,7 @@ with Redis.
 
 - PHP 8.2 or higher
 - Redis 4.0 or higher
-- Redisearch module ([installation](https://redis.io/docs/latest/operate/oss_and_stack/install/install-stack/))
+- Redisearch module (available by default with Redis >8) ([installation](https://redis.io/docs/latest/operate/oss_and_stack/install/install-stack/))
 - php-redis extension OR Predis library
 - Redis JSON module (optional)
 - Composer
@@ -52,6 +53,15 @@ composer require talleu/php-redis-om
 
 Depending on your configuration, use phpredis or Predis
 
+## Symfony bundle 🎵
+
+In a Symfony application, you may need to add this line to config/bundles.php
+```console
+    Talleu\RedisOm\Bundle\TalleuPhpRedisOmBundle::class => [‘all’ => true],
+```
+
+And that's it, your installation is complete ! 🚀
+ 
 ## Basic Usage 🎯
 
 Add the RedisOm attribute to your class to map it to a Redis schema:
@@ -79,12 +89,48 @@ class User
 After add the RedisOm attribute to your class,
 you have to run the following command to create the Redis schema for your classes (default path is `./src`): 
 
+For Symfony users : 
+```console
+bin/console redis-om:migrate 
+```
+
+For others PHP applications :
 ```console
 vendor/bin/redisMigration <YOUR DIRECTORY PATH>
 ```
 
-Then you can use the ObjectManager to persist your objects from Redis:
+Then you can use the ObjectManager to persist your objects from Redis ! 💪
 
+For Symfony users, just inject the RedisObjectManagerInterface in the constructor :
+```php
+    <?php
+
+    namespace App\Controller;
+    
+    use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+    use Talleu\RedisOm\Om\RedisObjectManagerInterface;
+    use App\Entity\Book;
+
+    class MySymfonyController extends AbstractController
+    {
+        public function __construct(private RedisObjectManagerInterface $redisObjectManager)
+        {}
+        
+        #[Route('/', name: 'app_home')]
+        public function index(): Response
+        {
+            $book = new Book();
+            $book->name = 'Martin Eden';
+            $this->redisObjectManager->persist($book);
+            $this->redisObjectManager->flush();
+    
+           //..
+        }
+    }
+    
+```
+
+For others PHP applications :
 ```php
 <?php
 
@@ -107,13 +153,13 @@ You can now retrieve your user wherever you like using the repository provided b
 
 ```php
 // Retrieve the object from redis 
-$user = $objectManager->find(User::class, 1);
-$user = $objectManager->getRepository(User::class)->find(1);
-$user = $objectManager->getRepository(User::class)->findOneBy(['name' => 'John Doe']);
+$user = $this->redisObjectManager->find(User::class, 1);
+$user = $this->redisObjectManager->getRepository(User::class)->find(1);
+$user = $this->redisObjectManager->getRepository(User::class)->findOneBy(['name' => 'John Doe']);
 
 // Retrieve a collection of objects
-$users = $objectManager->getRepository(User::class)->findAll();
-$users = $objectManager->getRepository(User::class)->findBy(['name' => 'John Doe'], ['createdAt' => 'DESC'], 10);
+$users = $this->redisObjectManager->getRepository(User::class)->findAll();
+$users = $this->redisObjectManager->getRepository(User::class)->findBy(['name' => 'John Doe'], ['createdAt' => 'DESC'], 10);
 ```
 
 

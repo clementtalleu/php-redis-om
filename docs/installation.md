@@ -7,7 +7,6 @@ To use it with [phpredis](https://github.com/clementtalleu/php-redis-om/blob/mai
 
 
 
-
 ### Redis
 You need a Redis server with a version >= 4.0. If you want to use the [JSON](https://redis.io/docs/latest/develop/data-types/json/) data type 
 you need a Redis server with the JSON module installed. By default, the library uses the HASH format type to store objects in Redis, which does not need any module.
@@ -35,6 +34,10 @@ Or add the library to your `composer.json` file:
 
 Then run `composer update` to install the library.
 
+In a Symfony application, you may need to add this line to config/bundles.php
+```console
+    Talleu\RedisOm\Bundle\TalleuPhpRedisOmBundle::class => [‘all’ => true],
+```
 
 ### Redis configuration
 
