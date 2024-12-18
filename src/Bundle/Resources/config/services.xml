@@ -6,6 +6,9 @@
 
     <services>
         <service id="talleu_php_redis_om.object_manager" class="Talleu\RedisOm\Om\RedisObjectManager" public="true">
+            <tag name="proxy" interface="Talleu\RedisOm\Om\RedisObjectManagerInterface" />
         </service>
+
+        <service id="Talleu\RedisOm\Om\RedisObjectManagerInterface" alias="talleu_php_redis_om.object_manager" />
     </services>
 </container>
