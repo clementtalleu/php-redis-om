@@ -8,6 +8,10 @@
         <service id="talleu_php_redis_om.object_manager" class="Talleu\RedisOm\Om\RedisObjectManager" public="true">
         </service>
 
+        <service id="talleu_php_redis_om.command.migrate" class="Talleu\RedisOm\Command\RedisOmMigrateCommand">
+            <tag name="console.command" />
+        </service>
+
         <service id="Talleu\RedisOm\Om\RedisObjectManagerInterface" alias="talleu_php_redis_om.object_manager" />
     </services>
 </container>
