@@ -5,7 +5,7 @@ The library provides a set of tools to help you manage your Redis objects in a m
 
 You can use the `RedisObjectManager` class to persist, remove, and retrieve objects from Redis.
 ```php
-$objectManager = new RedisObjectManager();
+$objectManager = new RedisObjectManager(); // For Symfony users directly inject RedisObjectManagerInterface in your constructor
 
 // Add the object to the object manager to be persisted on flush
 $objectManager->persist($user);
@@ -28,7 +28,7 @@ $objectManager->contains($user);
 
 You can also retrieve and query your objects with the ObjectManager or a given repository
 ```php
-$objectManager = new RedisObjectManager();
+$objectManager = new RedisObjectManager(); // For Symfony users directly inject RedisObjectManagerInterface in your constructor
 
 // Will retrieve the object from Redis by giving class and identifier
 $objectManager->find(User::class, $id); 

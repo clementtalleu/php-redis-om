@@ -8,6 +8,26 @@ For more information about persistent connections, read this [article](https://m
 
 php-redis-om provide a way to use persistent connections with the `RedisClient` class.
 
+For symfony users
+```php
+class MyGreatSymfonyService
+{
+    public function __construct(private RedisObjectManagerInterface $redisObjectManager) 
+    {
+        // Set the persistent connection to true
+        $this->redisObjectManager->getRedisClient()->createPersistentConnection();
+    }
+}
+
+// Then you can use the ObjectManager normally
+public function manage()
+{ 
+    $this->redisObjectManager->persist($user);
+    $this->redisObjectManager->flush();
+}
+```
+
+For others PHP applications
 ```php
 // Set the persistent connection to true
 $objectManager = new RedisObjectManager();
