@@ -6,9 +6,9 @@ namespace Talleu\RedisOm\Bundle;
 
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
-use Talleu\RedisOm\Bundle\DependencyInjection\TalleuPhpRedisOmExtension;
+use Talleu\RedisOm\Bundle\DependencyInjection\TalleuRedisOmExtension;
 
-final class TalleuPhpRedisOmBundle extends Bundle
+final class TalleuRedisOmBundle extends Bundle
 {
     /**
      * {@inheritdoc}
@@ -20,7 +20,7 @@ final class TalleuPhpRedisOmBundle extends Bundle
     public function getContainerExtension(): ?ExtensionInterface
     {
         if (null === $this->extension) {
-            $this->extension = new TalleuPhpRedisOmExtension();
+            $this->extension = new TalleuRedisOmExtension();
         }
 
         return $this->extension;

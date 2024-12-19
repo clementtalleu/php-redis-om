@@ -36,7 +36,7 @@ Then run `composer update` to install the library.
 
 In a Symfony application, you may need to add this line to config/bundles.php
 ```console
-    Talleu\RedisOm\Bundle\TalleuPhpRedisOmBundle::class => [‘all’ => true],
+    Talleu\RedisOm\Bundle\TalleuRedisOmBundle::class => [‘all’ => true],
 ```
 
 ### Redis configuration
