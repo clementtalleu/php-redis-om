@@ -21,6 +21,7 @@ with Redis.
 - Support for Redis JSON module
 - Automatic schema generation
 - Search and query capabilities
+- Auto-expiration of your objects
 
 ## Requirements ⚙️
 
