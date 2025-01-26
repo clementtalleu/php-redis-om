@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Tests\Fixtures;
 
+use Fixtures\Hash\ExpirationDummyHash;
+
 class FixturesGenerator
 {
     public static function generateDummies($dummyClass): array

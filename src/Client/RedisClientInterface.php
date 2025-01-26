@@ -101,4 +101,9 @@ interface RedisClientInterface
      * Remove all keys from the Redis datastore. Do not use in production.
      */
     public function flushAll(): void;
+
+    /**
+     * Add a "Time To Live" for the object, at the expiration of the time, the object will be delete
+     */
+    public function expire(string $key, int $ttl): void;
 }

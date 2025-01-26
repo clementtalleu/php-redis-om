@@ -292,6 +292,16 @@ final class PredisClient implements RedisClientInterface
     /**
      * @inheritdoc
      */
+    public function expire(string $key, int $ttl): void
+    {
+        if (!$this->redis->expire(Converter::prefix($key), $ttl)) {
+            $this->handleError(__METHOD__, $this->getLastError());
+        }
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function keys(string $pattern): array
     {
         return $this->redis->keys($pattern);

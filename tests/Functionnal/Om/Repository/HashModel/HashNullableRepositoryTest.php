@@ -10,7 +10,6 @@ use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
 final class HashNullableRepositoryTest extends RedisAbstractTestCase
 {
-
     private RedisObjectManager $objectManager;
     protected function setUp(): void
     {

@@ -19,6 +19,9 @@ final class HashPersister extends AbstractPersister
 
         foreach ($objectsToPersist as $objectToPersist) {
             $this->redis->hMSet($objectToPersist->redisKey, $objectToPersist->converter->convert($objectToPersist->value));
+            if (null !== $objectToPersist->ttl) {
+                $this->redis->expire($objectToPersist->redisKey, $objectToPersist->ttl);
+            }
         }
     }
 

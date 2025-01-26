@@ -45,7 +45,7 @@ final class RedisObjectManager implements RedisObjectManagerInterface
         $objectMapper = $this->getEntityMapper($object);
         $persister = $this->registerPersister($objectMapper);
 
-        $objectToPersist = $persister->persist($objectMapper, $object);
+        $objectToPersist = $persister->persist(objectMapper: $objectMapper, object: $object);
         $this->objectsToFlush[$objectToPersist->persisterClass][$objectToPersist->operation][$objectToPersist->redisKey] = $objectToPersist;
     }
 

@@ -19,6 +19,7 @@ use Talleu\RedisOm\Om\RedisFormat;
         converter: new MyCustomConverter(),
         repository: new MyCustomRepository(),
         redisClient: new MyCustomRedisClient(),
+        ttl: 3600
 )]
 class User
 {}
@@ -44,6 +45,11 @@ Each of these parameters are optional and can be omitted. Here is a description 
     - Default: `RedisFormat::HASH->value` (HASH)
     - Type: `string`
     - Note: To use the "JSON" format, your redis server must have the Redis JSON module installed.
+- ttl:
+    - "Time to live", the time (in seconds) before the expiration of the object, leave null to keep your objets for ever.
+    - Example: `3600` (seconds)
+    - Default: `null` 
+    - Type: `integer`
 - persister:
     - The persister to use to persist your objects in Redis. If not set, the default persister will be used.
     - Example: `new MyCustomPersister()`

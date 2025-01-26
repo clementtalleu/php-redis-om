@@ -14,7 +14,7 @@ final class JsonSpaceCharsRepositoryTest extends RedisAbstractTestCase
     protected function setUp(): void
     {
         $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createClient());
-        parent::setUp(); 
+        parent::setUp();
     }
 
     public function testFindOneBySpace()
@@ -42,7 +42,7 @@ final class JsonSpaceCharsRepositoryTest extends RedisAbstractTestCase
         // Update 1 object to set unknown to not null
         /** @var DummyJsonWithSpaceChars[] $collection */
         $collection = $repository->findBy(['spaceChars' => 'With space']);
-        foreach ($collection as $object){
+        foreach ($collection as $object) {
             $this->assertEquals($object->spaceChars, 'With space');
         }
     }

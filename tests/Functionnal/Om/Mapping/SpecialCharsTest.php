@@ -11,7 +11,6 @@ use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
 class SpecialCharsTest extends RedisAbstractTestCase
 {
-
     private RedisObjectManager $objectManager;
     protected function setUp(): void
     {

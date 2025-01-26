@@ -31,6 +31,12 @@ final class JsonPersister extends AbstractPersister
         }
 
         $this->redis->jsonMSet($redisData);
+
+        foreach ($objectsToPersist as $objectToPersist) {
+            if (null !== $objectToPersist->ttl) {
+                $this->redis->expire($objectToPersist->redisKey, $objectToPersist->ttl);
+            }
+        }
     }
 
     /**

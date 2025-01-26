@@ -14,7 +14,6 @@ use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
 class ObjectConsistencyTest extends RedisAbstractTestCase
 {
-
     private RedisObjectManager $objectManager;
     protected function setUp(): void
     {

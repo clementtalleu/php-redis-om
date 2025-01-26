@@ -14,7 +14,7 @@ final class HashSpaceCharsRepositoryTest extends RedisAbstractTestCase
     protected function setUp(): void
     {
         $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createClient());
-        parent::setUp(); 
+        parent::setUp();
     }
 
     public function testFindOneBySpace()
@@ -42,7 +42,7 @@ final class HashSpaceCharsRepositoryTest extends RedisAbstractTestCase
         // Update 1 object to set unknown to not null
         /** @var DummyHashWithSpaceChars[] $collection */
         $collection = $repository->findBy(['spaceChars' => 'With space']);
-        foreach ($collection as $object){
+        foreach ($collection as $object) {
             $this->assertEquals($object->spaceChars, 'With space');
         }
     }

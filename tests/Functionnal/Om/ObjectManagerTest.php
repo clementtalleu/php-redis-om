@@ -16,7 +16,6 @@ use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
 class ObjectManagerTest extends RedisAbstractTestCase
 {
-
     private RedisObjectManager $objectManager;
     protected function setUp(): void
     {
