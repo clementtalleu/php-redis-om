@@ -71,4 +71,9 @@ interface RedisObjectManagerInterface
     public function createIndex(object $object): void;
 
     public function dropIndex(object $object): void;
+
+    /**
+     * Get the expiration datetime of an object
+     */
+    public function getExpirationTime(object $object): ?\DateTimeImmutable;
 }

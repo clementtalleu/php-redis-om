@@ -218,6 +218,24 @@ final class RedisObjectManager implements RedisObjectManagerInterface
         $this->redisClient->dropIndex($object->prefix ?? $fqcn);
     }
 
+    /**
+     * @inheritdoc
+     */
+    public function getExpirationTime(object $object): ?\DateTimeImmutable
+    {
+        $identifier = $this->keyGenerator->getIdentifier(new \ReflectionClass($object));
+        $objectMapper = $this->getEntityMapper($object);
+        $key = sprintf('%s:%s', $objectMapper->prefix ?: get_class($object), $object->{$identifier->getName()});
+
+        $timestamp = $this->redisClient->expireTime($key);
+
+        if (-1 === $timestamp) {
+            return null;
+        }
+
+        return (new \DateTimeImmutable())->setTimestamp($timestamp);
+    }
+
     public function getRedisClient(): ?RedisClientInterface
     {
         return $this->redisClient;
