@@ -106,4 +106,9 @@ interface RedisClientInterface
      * Add a "Time To Live" for the object, at the expiration of the time, the object will be delete
      */
     public function expire(string $key, int $ttl): void;
+
+    /**
+     * Get the expiration time as timestamp
+     */
+    public function expireTime(string $key): int;
 }

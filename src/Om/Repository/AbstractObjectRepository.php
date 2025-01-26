@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Om\Repository;
 
+use Talleu\RedisOm\Client\Helper\Converter;
 use Talleu\RedisOm\Client\RedisClientInterface;
 use Talleu\RedisOm\Om\Converters\AbstractDateTimeConverter;
 use Talleu\RedisOm\Om\Converters\ConverterInterface;
