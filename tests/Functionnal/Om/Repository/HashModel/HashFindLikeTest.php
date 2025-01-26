@@ -10,8 +10,8 @@ use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
 final class HashFindLikeTest extends RedisAbstractTestCase
 {
-
     private RedisObjectManager $objectManager;
+
     protected function setUp(): void
     {
         $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createClient());

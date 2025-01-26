@@ -31,6 +31,7 @@ abstract class AbstractPersister implements PersisterInterface
             redisKey: $key,
             converter: $objectMapper->converter,
             value: $object,
+            ttl: $objectMapper->ttl
         );
     }
 

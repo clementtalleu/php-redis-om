@@ -10,12 +10,11 @@ use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
 class MetadataTest extends RedisAbstractTestCase
 {
-
     private RedisObjectManager $objectManager;
     protected function setUp(): void
     {
         $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createClient());
-        parent::setUp(); 
+        parent::setUp();
     }
 
     public function testGetClassMetadataHasAssociation()

@@ -14,7 +14,7 @@ final class QueryBuilderTest extends RedisAbstractTestCase
     protected function setUp(): void
     {
         $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createClient());
-        parent::setUp(); 
+        parent::setUp();
     }
 
     public function testCustomQueryOr()

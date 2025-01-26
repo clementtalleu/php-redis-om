@@ -10,12 +10,11 @@ use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
 final class JsonNullableRepositoryTest extends RedisAbstractTestCase
 {
-
     private RedisObjectManager $objectManager;
     protected function setUp(): void
     {
         $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createClient());
-        parent::setUp(); 
+        parent::setUp();
     }
 
     public function testFindByNull()

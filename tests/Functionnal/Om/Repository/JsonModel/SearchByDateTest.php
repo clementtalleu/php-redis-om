@@ -13,8 +13,8 @@ final class SearchByDateTest extends RedisAbstractTestCase
     private RedisObjectManager $objectManager;
     protected function setUp(): void
     {
-        parent::setUp(); 
-        $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createClient()); 
+        parent::setUp();
+        $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createClient());
     }
 
     public function testFindOneBy()
@@ -23,7 +23,7 @@ final class SearchByDateTest extends RedisAbstractTestCase
         static::generateIndex();
         $collection = static::loadRedisFixtures(DummyJson::class);
 
-        
+
         $repository = $this->objectManager->getRepository(DummyJson::class);
 
         // An existing date
@@ -58,7 +58,7 @@ final class SearchByDateTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures(DummyJson::class);
 
-        
+
         $repository = $this->objectManager->getRepository(DummyJson::class);
 
         // An existing date
@@ -89,7 +89,7 @@ final class SearchByDateTest extends RedisAbstractTestCase
         static::generateIndex();
         $collection = static::loadRedisFixtures(DummyJson::class);
 
-        
+
         $repository = $this->objectManager->getRepository(DummyJson::class);
 
         // An existing date
@@ -117,7 +117,7 @@ final class SearchByDateTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures(DummyJson::class);
 
-        
+
         $repository = $this->objectManager->getRepository(DummyJson::class);
 
         // An existing date

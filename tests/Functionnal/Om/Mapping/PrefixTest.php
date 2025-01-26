@@ -11,8 +11,8 @@ use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
 class PrefixTest extends RedisAbstractTestCase
 {
-
     private RedisObjectManager $objectManager;
+
     protected function setUp(): void
     {
         $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createClient());
@@ -24,8 +24,6 @@ class PrefixTest extends RedisAbstractTestCase
         static::emptyRedis();
         static::generateIndex();
         static::loadRedisFixtures(PrefixDummyHash::class);
-
-
 
         $keys = $this->createClient()->keys('*');
         foreach ($keys as $key) {
@@ -42,7 +40,6 @@ class PrefixTest extends RedisAbstractTestCase
         static::emptyRedis();
         static::generateIndex();
         static::loadRedisFixtures(PrefixDummyJson::class);
-
 
         $keys = $this->createClient()->keys('*');
         foreach ($keys as $key) {

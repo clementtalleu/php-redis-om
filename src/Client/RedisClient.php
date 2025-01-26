@@ -277,6 +277,16 @@ final class RedisClient implements RedisClientInterface
     /**
      * @inheritdoc
      */
+    public function expire(string $key, int $ttl): void
+    {
+        if (!$this->redis->expire(Converter::prefix($key), $ttl)) {
+            $this->handleError(__METHOD__, $this->redis->getLastError());
+        }
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function keys(string $pattern): array
     {
         return $this->redis->keys($pattern);

@@ -11,7 +11,6 @@ use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
 class PrivatePropertiesTest extends RedisAbstractTestCase
 {
-
     private RedisObjectManager $objectManager;
     protected function setUp(): void
     {
