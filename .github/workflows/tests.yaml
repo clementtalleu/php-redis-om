@@ -49,6 +49,8 @@ jobs:
           restore-keys: ${{ runner.os }}-composer-
       - name: Install dependencies
         run: composer install --prefer-dist
+      - name: Install Symfony framework-bundle for PHPStan
+        run: composer require symfony/framework-bundle
       - name: Install Predis optional package
         run: composer require predis/predis
       - name: Test cs-fixer
