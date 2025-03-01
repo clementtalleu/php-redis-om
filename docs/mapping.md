@@ -13,9 +13,7 @@ use Talleu\RedisOm\Om\RedisFormat;
 
 #[RedisOm\Entity(
         prefix: 'user_redis',
-        expires: 12000,
         format: RedisFormat::JSON->value,
-        persister: new MyCustomPersister(),
         converter: new MyCustomConverter(),
         repository: new MyCustomRepository(),
         redisClient: new MyCustomRedisClient(),
@@ -33,12 +31,6 @@ Each of these parameters are optional and can be omitted. Here is a description 
     - Default: `null`
     - Type: `string`
     - Note: The prefix will be concatenated with the id of the object to create the key in Redis.
-- expires:
-    - The time in seconds before the entry expires in redis. If not set, the key will never expire.
-    - Example: `12000`
-    - Default: `null`
-    - Type: `int`
-    - Note: The key will be set to expire in the given time after the last write operation.
 - format:
     - The format to use to store the object in Redis. If not set, the default format will be used : `HASH`.
     - Example: `RedisFormat::JSON->value` (JSON)
@@ -50,12 +42,6 @@ Each of these parameters are optional and can be omitted. Here is a description 
     - Example: `3600` (seconds)
     - Default: `null` 
     - Type: `integer`
-- persister:
-    - The persister to use to persist your objects in Redis. If not set, the default persister will be used.
-    - Example: `new MyCustomPersister()`
-    - Default: `null`
-    - Type: `PersisterInterface`
-    - Note: The persister must implement the `PersisterInterface` interface.
 - converter: 
     - The converter to use to convert your objects to and from Redis. If not set, the default converter will be used.
     - Example: `new MyCustomConverter()`
