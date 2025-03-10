@@ -38,6 +38,9 @@ final class GenerateSchema
 
             $namespace = self::getNamespace($phpFile);
             $class = self::getClass($phpFile);
+            if (!$class) {
+                continue;
+            }
             $fqcn = "$namespace\\$class";
 
             try {
