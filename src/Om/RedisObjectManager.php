@@ -208,12 +208,12 @@ final class RedisObjectManager implements RedisObjectManagerInterface
         return $persister;
     }
 
-    public function createIndex(object $object, string $fqcn = null, array $propertiesToIndex = []): void
+    public function createIndex(object $object, ?string $fqcn = null, ?array $propertiesToIndex = []): void
     {
         $this->redisClient->createIndex($object->prefix ?? $fqcn, $object->format ?? RedisFormat::HASH->value, $propertiesToIndex);
     }
 
-    public function dropIndex(object $object, string $fqcn = null): void
+    public function dropIndex(object $object, ?string $fqcn = null): void
     {
         $this->redisClient->dropIndex($object->prefix ?? $fqcn);
     }
