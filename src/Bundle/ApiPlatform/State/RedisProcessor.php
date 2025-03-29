@@ -8,7 +8,7 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use Talleu\RedisOm\Om\RedisObjectManagerInterface;
 
-final class PersistProcessor implements ProcessorInterface
+final class RedisProcessor implements ProcessorInterface
 {
     public function __construct(private RedisObjectManagerInterface $redisObjectManager)
     {
@@ -22,5 +22,7 @@ final class PersistProcessor implements ProcessorInterface
 
         $this->redisObjectManager->persist($data);
         $this->redisObjectManager->flush();
+
+        return $data;
     }
 }

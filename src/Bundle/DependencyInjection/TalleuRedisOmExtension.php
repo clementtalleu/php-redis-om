@@ -18,6 +18,7 @@ use Talleu\RedisOm\Bundle\ApiPlatform\Filters\RedisSearchFilter;
 use Talleu\RedisOm\Bundle\ApiPlatform\Filters\SearchFilter;
 use Talleu\RedisOm\Bundle\ApiPlatform\State\CollectionProvider;
 use Talleu\RedisOm\Bundle\ApiPlatform\State\ItemProvider;
+use Talleu\RedisOm\Bundle\ApiPlatform\State\RedisProcessor;
 use Talleu\RedisOm\Bundle\ApiPlatform\State\RedisProvider;
 
 final class TalleuRedisOmExtension extends Extension
@@ -40,6 +41,7 @@ final class TalleuRedisOmExtension extends Extension
             ->addTag('talleu_php_redis_om.api_platform.query_extension.collection');
         
         $this->registerProviders($container);
+        $this->registerProcessor($container);
         $this->registerFilters($container);
     }
 
@@ -49,6 +51,18 @@ final class TalleuRedisOmExtension extends Extension
         foreach ($providers as $provider) {
             $definition = new Definition($provider);
             $definition->addTag('api_platform.state_provider');
+            $definition->setAutowired(true);
+            $definition->setAutoconfigured(true);
+            $container->setDefinition($provider, $definition);
+        }
+    }
+
+    private function registerProcessor(ContainerBuilder $container)
+    {
+        $providers = [RedisProcessor::class];
+        foreach ($providers as $provider) {
+            $definition = new Definition($provider);
+            $definition->addTag('api_platform.state_processor');
             $definition->setAutowired(true);
             $definition->setAutoconfigured(true);
             $container->setDefinition($provider, $definition);

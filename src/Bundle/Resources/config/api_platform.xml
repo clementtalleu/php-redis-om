@@ -27,6 +27,13 @@
             <tag name="api_platform.state_provider" priority="-100" key="talleu_php_redis_om.api_platform.state.collection_provider" />
         </service>
 
+        <service id="talleu_php_redis_om.api_platform.state.processor" class="Talleu\RedisOm\Bundle\ApiPlatform\State\RedisProcessor" public="false">
+            <argument type="service" id="talleu_php_redis_om.object_manager" />
+
+            <tag name="api_platform.state_processor" priority="-100" key="Talleu\RedisOm\Bundle\ApiPlatform\State\RedisProcessor" />
+            <tag name="api_platform.state_processor" priority="-100" key="talleu_php_redis_om.api_platform.state.processor" />
+        </service>
+
         <service id="talleu_php_redis_om.api_platform.state.item_provider" class="Talleu\RedisOm\Bundle\ApiPlatform\State\ItemProvider" public="false">
             <argument type="service" id="talleu_php_redis_om.object_manager" />
 
