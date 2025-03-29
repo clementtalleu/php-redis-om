@@ -46,7 +46,6 @@ final class HashNullableRepositoryTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures(DummyHashWithNullProperties::class);
 
-
         $repository = $this->objectManager->getRepository(DummyHashWithNullProperties::class);
 
         // Update 1 object to set unknown to not null
