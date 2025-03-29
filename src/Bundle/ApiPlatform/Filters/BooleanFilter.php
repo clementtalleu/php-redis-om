@@ -19,7 +19,7 @@ class BooleanFilter extends RedisAbstractFilter
 
             $params['criteria'][$property] = $value;
         }
-        
+
         return $params;
     }
 

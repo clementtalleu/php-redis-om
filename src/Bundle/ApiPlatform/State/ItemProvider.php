@@ -11,7 +11,8 @@ use Talleu\RedisOm\Om\RedisObjectManagerInterface;
 class ItemProvider implements ProviderInterface
 {
     public function __construct(private RedisObjectManagerInterface $redisObjectManager)
-    {}
+    {
+    }
 
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): ?object
     {

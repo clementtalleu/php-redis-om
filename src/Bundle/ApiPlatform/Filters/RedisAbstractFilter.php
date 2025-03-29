@@ -42,7 +42,7 @@ abstract class RedisAbstractFilter implements RedisFilterInterface
                 return true;
             }
         }
-        
+
         return false;
     }
 }

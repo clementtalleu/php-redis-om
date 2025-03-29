@@ -4,16 +4,10 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Bundle\ApiPlatform\Extensions;
 
-use ApiPlatform\Doctrine\Orm\AbstractPaginator;
-use ApiPlatform\Doctrine\Orm\Paginator;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\Pagination\Pagination;
-use Doctrine\ORM\QueryBuilder;
-use Doctrine\ORM\Tools\Pagination\CountWalker;
-use Doctrine\ORM\Tools\Pagination\Paginator as DoctrineOrmPaginator;
 use Talleu\RedisOm\Bundle\ApiPlatform\RedisPaginator;
 use Talleu\RedisOm\Om\RedisObjectManagerInterface;
-use Talleu\RedisOm\Om\Repository\RepositoryInterface;
 
 class PaginationExtension implements QueryResultCollectionExtensionInterface
 {
@@ -28,7 +22,7 @@ class PaginationExtension implements QueryResultCollectionExtensionInterface
         }
 
         [$params['offset'], $params['limit']] = $pagination;
-        
+
         return $params;
     }
 
@@ -44,10 +38,7 @@ class PaginationExtension implements QueryResultCollectionExtensionInterface
         return $this->pagination->isEnabled($operation, $context) && method_exists(self::class, 'getResult');
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getResult(array $params, ?string $resourceClass = null, ?Operation $operation = null, array $context = []): iterable
+    public function getResult(array $params, ?string $resourceClass = null): iterable
     {
         $repository = $this->redisObjectManager->getRepository($resourceClass);
 
@@ -55,7 +46,7 @@ class PaginationExtension implements QueryResultCollectionExtensionInterface
     }
 
     /**
-     * @throws InvalidArgumentException
+     * @throws \InvalidArgumentException
      */
     private function getPagination(array $params, ?Operation $operation, array $context): ?array
     {

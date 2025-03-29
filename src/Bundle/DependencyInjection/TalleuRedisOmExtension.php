@@ -27,19 +27,19 @@ final class TalleuRedisOmExtension extends Extension
     {
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.xml');
-        
+
         // Check api-platform install
         if (class_exists('ApiPlatform\Symfony\Bundle\ApiPlatformBundle')) {
             $this->registerApiPlatformServices($container);
             $loader->load('api_platform.xml');
         }
     }
-    
+
     private function registerApiPlatformServices(ContainerBuilder $container)
     {
         $container->registerForAutoconfiguration(QueryCollectionExtensionInterface::class)
             ->addTag('talleu_php_redis_om.api_platform.query_extension.collection');
-        
+
         $this->registerProviders($container);
         $this->registerProcessor($container);
         $this->registerFilters($container);

@@ -21,7 +21,6 @@
         <service id="talleu_php_redis_om.api_platform.state.collection_provider" class="Talleu\RedisOm\Bundle\ApiPlatform\State\CollectionProvider" public="false">
             <argument type="service" id="talleu_php_redis_om.object_manager" />
             <argument type="tagged_iterator" tag="talleu_php_redis_om.api_platform.query_extension.collection" />
-            <argument type="tagged_locator" tag="api_platform.doctrine.orm.links_handler" index-by="key" />
 
             <tag name="api_platform.state_provider" priority="-100" key="Talleu\RedisOm\Bundle\ApiPlatform\State\CollectionProvider" />
             <tag name="api_platform.state_provider" priority="-100" key="talleu_php_redis_om.api_platform.state.collection_provider" />

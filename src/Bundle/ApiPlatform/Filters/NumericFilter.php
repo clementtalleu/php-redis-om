@@ -17,13 +17,13 @@ class NumericFilter extends RedisAbstractFilter
                 return $params;
             }
 
-            if (!$this->isPropertyEnabled($property, $resourceClass, $params)) {
+            if (!$this->isPropertyEnabled($property, $resourceClass)) {
                 return $params;
             }
-            
+
             $params['criteria'][$property] = $value;
         }
-        
+
         return $params;
     }
 

@@ -30,10 +30,10 @@ class OrderFilter extends RedisAbstractFilter
                     continue;
                 }
 
-                if (!$this->isPropertyEnabled($propertyToOrder, $resourceClass, $params)) {
+                if (!$this->isPropertyEnabled($propertyToOrder, $resourceClass)) {
                     continue;
                 }
-                
+
                 $params['orderBy'][$propertyToOrder] = strtoupper($strategy);
             }
         }

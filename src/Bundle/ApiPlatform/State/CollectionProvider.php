@@ -20,13 +20,14 @@ class CollectionProvider implements ProviderInterface
     /**
      * @param QueryCollectionExtensionInterface[] $collectionExtensions
      */
-    public function __construct(private RedisObjectManagerInterface $redisObjectManager, private readonly iterable $collectionExtensions = [], ?ContainerInterface $handleLinksLocator = null)
-    {}
+    public function __construct(private RedisObjectManagerInterface $redisObjectManager, private readonly iterable $collectionExtensions = [])
+    {
+    }
 
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): iterable
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): array
     {
         $entityClass = $operation->getClass();
-        
+
         $params = [
             'criteria' => []
         ];
