@@ -4,22 +4,13 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Bundle\ApiPlatform\Extensions;
 
-use ApiPlatform\Doctrine\Orm\Filter\FilterInterface;
-use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
 use ApiPlatform\Metadata\Operation;
-use ApiPlatform\State\Pagination\Pagination;
-use Doctrine\ORM\QueryBuilder;
-use Doctrine\ORM\Tools\Pagination\CountWalker;
-use Doctrine\ORM\Tools\Pagination\Paginator as DoctrineOrmPaginator;
 use Psr\Container\ContainerInterface;
 use Talleu\RedisOm\Bundle\ApiPlatform\Filters\RedisFilterInterface;
-use Talleu\RedisOm\Bundle\ApiPlatform\RedisPaginator;
-use Talleu\RedisOm\Om\RedisObjectManagerInterface;
-use Talleu\RedisOm\Om\Repository\RepositoryInterface;
 
-class FilterExtension implements QueryCollectionExtensionInterface
+final readonly class FilterExtension implements QueryCollectionExtensionInterface
 {
-    public function __construct(private readonly ContainerInterface $filterLocator)
+    public function __construct(private ContainerInterface $filterLocator)
     {
     }
 

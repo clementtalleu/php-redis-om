@@ -9,9 +9,9 @@ use ApiPlatform\State\Pagination\Pagination;
 use Talleu\RedisOm\Bundle\ApiPlatform\RedisPaginator;
 use Talleu\RedisOm\Om\RedisObjectManagerInterface;
 
-class PaginationExtension implements QueryResultCollectionExtensionInterface
+final readonly class PaginationExtension implements QueryResultCollectionExtensionInterface
 {
-    public function __construct(private RedisObjectManagerInterface $redisObjectManager, private readonly ?Pagination $pagination)
+    public function __construct(private RedisObjectManagerInterface $redisObjectManager, private ?Pagination $pagination)
     {
     }
 
@@ -26,9 +26,6 @@ class PaginationExtension implements QueryResultCollectionExtensionInterface
         return $params;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function supportsResult(string $resourceClass, ?Operation $operation = null, array $context = []): bool
     {
         if ($context['graphql_operation_name'] ?? false) {
