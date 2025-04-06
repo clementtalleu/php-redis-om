@@ -7,7 +7,6 @@
          displayDetailsOnTestsThatTriggerWarnings="true"
 >
     <php>
-        <env name="XDEBUG_MODE" value="coverage" />
         <server name="KERNEL_CLASS" value="Talleu\RedisOm\Tests\ApiPlatform\Kernel" />
     </php>
 
