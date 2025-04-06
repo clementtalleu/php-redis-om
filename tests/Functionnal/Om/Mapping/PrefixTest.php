@@ -15,7 +15,7 @@ class PrefixTest extends RedisAbstractTestCase
 
     protected function setUp(): void
     {
-        $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createClient());
+        $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createRedisClient());
         parent::setUp();
     }
 
@@ -25,7 +25,7 @@ class PrefixTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures(PrefixDummyHash::class);
 
-        $keys = $this->createClient()->keys('*');
+        $keys = $this->createRedisClient()->keys('*');
         foreach ($keys as $key) {
             $this->assertStringContainsString('dummy:', $key);
         }
@@ -41,7 +41,7 @@ class PrefixTest extends RedisAbstractTestCase
         static::generateIndex();
         static::loadRedisFixtures(PrefixDummyJson::class);
 
-        $keys = $this->createClient()->keys('*');
+        $keys = $this->createRedisClient()->keys('*');
         foreach ($keys as $key) {
             $this->assertStringContainsString('dummy:', $key);
         }

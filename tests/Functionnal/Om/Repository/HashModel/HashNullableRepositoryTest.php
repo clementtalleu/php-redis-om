@@ -13,7 +13,7 @@ final class HashNullableRepositoryTest extends RedisAbstractTestCase
     private RedisObjectManager $objectManager;
     protected function setUp(): void
     {
-        $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createClient());
+        $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createRedisClient());
         parent::setUp();
     }
 
@@ -45,7 +45,6 @@ final class HashNullableRepositoryTest extends RedisAbstractTestCase
         static::emptyRedis();
         static::generateIndex();
         static::loadRedisFixtures(DummyHashWithNullProperties::class);
-
 
         $repository = $this->objectManager->getRepository(DummyHashWithNullProperties::class);
 

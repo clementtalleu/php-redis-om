@@ -15,6 +15,6 @@ class Client
     public function __construct()
     {
         $this->redisClient = getenv('REDIS_CLIENT') === 'predis' ? new PredisClient() : new RedisClient();
-        $this->redisClient->createPersistentConnection($_SERVER['REDIS_HOST']);
+        $this->redisClient->createPersistentConnection($_SERVER['REDIS_HOST'] ?? null);
     }
 }

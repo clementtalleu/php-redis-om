@@ -15,7 +15,7 @@ class ExpirationTest extends RedisAbstractTestCase
 
     protected function setUp(): void
     {
-        $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createClient());
+        $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createRedisClient());
         parent::setUp();
     }
 

@@ -226,16 +226,20 @@ final class RedisClient implements RedisClientInterface
     /**
      * @inheritdoc
      */
-    public function count(string $prefixKey, array $criterias = []): int
+    public function count(string $prefixKey, array $criterias = [], ?string $searchType = Property::INDEX_TAG): int
     {
         $arguments = [RedisCommands::SEARCH->value, Converter::prefix($prefixKey)];
 
-        foreach ($criterias as $property => $value) {
-            $arguments[] = "@$property:$value";
-        }
-
         if ($criterias === []) {
             $arguments[] = '*';
+        } else {
+            foreach ($criterias as $property => $value) {
+                if ($searchType === Property::INDEX_TAG) {
+                    $arguments[] = sprintf('@%s:{%s}', $property, $value);
+                } else {
+                    $arguments[] = sprintf('@%s:%s', $property, $value);
+                }
+            }
         }
 
         $rawResult = call_user_func_array([$this->redis, 'rawCommand'], $arguments);

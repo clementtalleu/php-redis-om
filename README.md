@@ -22,6 +22,7 @@ with Redis.
 - Automatic schema generation
 - Search and query capabilities
 - Auto-expiration of your objects
+- API Platform support (beta)
 
 ## Requirements ⚙️
 
@@ -62,6 +63,10 @@ In a Symfony application, you may need to add this line to config/bundles.php
 ```
 
 And that's it, your installation is complete ! 🚀
+
+## API Platform support 🕷️
+
+For API Platform users, a basic implementation is provided here : [API Platfom X Redis ](https://github.com/clementtalleu/php-redis-om/blob/main/docs/api_platform.md)
  
 ## Basic Usage 🎯
 
