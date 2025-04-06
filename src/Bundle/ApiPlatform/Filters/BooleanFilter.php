@@ -14,7 +14,7 @@ class BooleanFilter extends RedisAbstractFilter
     {
         foreach ($context['filters'] as $property => $value) {
             if (!property_exists($resourceClass, $property)) {
-                return $params;
+                continue;
             }
 
             $params['criteria'][$property] = $value;

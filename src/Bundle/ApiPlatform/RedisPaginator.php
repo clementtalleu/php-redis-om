@@ -17,6 +17,7 @@ final class RedisPaginator implements PaginatorInterface, HasNextPagePaginatorIn
     protected ?int $maxResults;
     protected array $params;
     private ?int $totalItems = null;
+    private ?string $strategy = 'exact';
 
     /**
      * @throws InvalidArgumentException
@@ -27,6 +28,11 @@ final class RedisPaginator implements PaginatorInterface, HasNextPagePaginatorIn
         $this->params = $params;
         $this->firstResult = $params['offset'];
         $this->maxResults = $params['limit'];
+
+        if (array_key_exists('search_strategy', $params)) {
+            $this->strategy = $params['search_strategy'];
+            unset($this->params['search_strategy']);
+        }
     }
 
     /**
@@ -46,7 +52,7 @@ final class RedisPaginator implements PaginatorInterface, HasNextPagePaginatorIn
      */
     public function getItemsPerPage(): float
     {
-        return (float)$this->maxResults;
+        return (float) $this->maxResults;
     }
 
     /**
@@ -54,9 +60,9 @@ final class RedisPaginator implements PaginatorInterface, HasNextPagePaginatorIn
      */
     public function getIterator(): \Traversable
     {
-        $result = $this->repository->findBy(...$this->params);
+        $method = $this->strategy === 'exact' ? 'findBy' : 'findByLike';
 
-        return new \ArrayIterator($result);
+        return new \ArrayIterator($this->repository->$method(...$this->params));
     }
 
     /**
@@ -84,7 +90,10 @@ final class RedisPaginator implements PaginatorInterface, HasNextPagePaginatorIn
      */
     public function getTotalItems(): float
     {
-        return (float)($this->totalItems ?? $this->totalItems = $this->repository->count($this->params['criteria'] ?? []));
+        $criteria = $this->params['criteria'] ?? [];
+        $method = $this->strategy === 'exact' ? 'count' : 'countByLike';
+
+        return (float)($this->totalItems ?? $this->totalItems = $this->repository->$method($criteria));
     }
 
     /**

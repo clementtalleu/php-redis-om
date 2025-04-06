@@ -76,6 +76,11 @@ interface RepositoryInterface
     public function count(array $criteria = []): int;
 
     /**
+     * Count objects by a set of criteria with a "LIKE" strategy.
+     */
+    public function countByLike(array $criteria = []): int;
+
+    /**
      * Create a new QueryBuilder instance.
      */
     public function createQueryBuilder(): QueryBuilder;

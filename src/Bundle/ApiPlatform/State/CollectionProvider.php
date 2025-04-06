@@ -4,16 +4,12 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Bundle\ApiPlatform\State;
 
-use ApiPlatform\Doctrine\Orm\State\Options;
-use ApiPlatform\Doctrine\Orm\Util\QueryNameGenerator;
-use ApiPlatform\Metadata\Exception\RuntimeException;
 use ApiPlatform\Metadata\Operation;
-use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInterface;
 use ApiPlatform\State\ProviderInterface;
-use Psr\Container\ContainerInterface;
 use Talleu\RedisOm\Bundle\ApiPlatform\Extensions\QueryCollectionExtensionInterface;
+use Talleu\RedisOm\Bundle\ApiPlatform\Extensions\QueryResultCollectionExtensionInterface;
+use Talleu\RedisOm\Bundle\ApiPlatform\RedisPaginator;
 use Talleu\RedisOm\Om\RedisObjectManagerInterface;
-use Talleu\RedisOm\Om\Repository\RepositoryInterface;
 
 class CollectionProvider implements ProviderInterface
 {
@@ -24,7 +20,7 @@ class CollectionProvider implements ProviderInterface
     {
     }
 
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): array
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): object|array|null
     {
         $entityClass = $operation->getClass();
 
@@ -34,10 +30,14 @@ class CollectionProvider implements ProviderInterface
 
         foreach ($this->collectionExtensions as $extension) {
             $params = $extension->buildParams($params, $entityClass, $operation, $context);
+
+            if ($extension instanceof QueryResultCollectionExtensionInterface && $extension->supportsResult($entityClass, $operation, $context)) {
+                return $extension->getResult($params, $entityClass);
+            }
         }
 
         $method = 'findBy';
-        if (array_key_exists('search_strategy', $params)) {
+        if (array_key_exists('search_strategy', $params) && $params['search_strategy'] === 'partial') {
             $method = 'findByLike';
             unset($params['search_strategy']);
         }

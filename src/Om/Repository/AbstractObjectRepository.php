@@ -179,6 +179,21 @@ abstract class AbstractObjectRepository implements RepositoryInterface
     /**
      * @inheritdoc
      */
+    public function countByLike(array $criteria = []): int
+    {
+        $this->convertDates($criteria);
+        $this->convertSpecial($criteria);
+        foreach ($criteria as $property => $value) {
+            $criteria[$property . '_text'] = "*$value*";
+            unset($criteria[$property]);
+        }
+
+        return $this->redisClient->count($this->prefix, $criteria, Property::INDEX_TEXT);
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function createQueryBuilder(): QueryBuilder
     {
         return new QueryBuilder(

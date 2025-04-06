@@ -32,7 +32,7 @@ final readonly class PaginationExtension implements QueryResultCollectionExtensi
             return $this->pagination->isGraphQlEnabled($operation, $context);
         }
 
-        return $this->pagination->isEnabled($operation, $context) && method_exists(self::class, 'getResult');
+        return $this->pagination->isEnabled($operation, $context);
     }
 
     public function getResult(array $params, ?string $resourceClass = null): iterable
@@ -53,22 +53,6 @@ final readonly class PaginationExtension implements QueryResultCollectionExtensi
             return null;
         }
 
-        $context = $this->addCountToContext($params, $context);
-
         return \array_slice($this->pagination->getPagination($operation, $context), 1);
-    }
-
-    private function addCountToContext(array $params, array $context): array
-    {
-        if (!($context['graphql_operation_name'] ?? false)) {
-            return $context;
-        }
-
-        if (isset($context['filters']['last']) && !isset($context['filters']['before'])) {
-            $count = $this->redisObjectManager->getRepository($context['ressource_class'])->count($params['criteria'] ?? []);
-            $context['count'] = $count;
-        }
-
-        return $context;
     }
 }

@@ -22,9 +22,7 @@ final readonly class FilterExtension implements QueryCollectionExtensionInterfac
             return [];
         }
 
-        $orderFilters = [];
         foreach ($resourceFilters as $filterId) {
-
             $filter = $this->filterLocator->has($filterId) ? $this->filterLocator->get($filterId) : null;
             if ($filter instanceof RedisFilterInterface) {
                 $context['filters'] ??= [];

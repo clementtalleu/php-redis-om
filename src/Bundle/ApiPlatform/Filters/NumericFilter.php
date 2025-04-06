@@ -14,11 +14,11 @@ class NumericFilter extends RedisAbstractFilter
     {
         foreach ($context['filters'] as $property => $value) {
             if (!property_exists($resourceClass, $property)) {
-                return $params;
+                continue;
             }
 
             if (!$this->isPropertyEnabled($property, $resourceClass)) {
-                return $params;
+                continue;
             }
 
             $params['criteria'][$property] = $value;

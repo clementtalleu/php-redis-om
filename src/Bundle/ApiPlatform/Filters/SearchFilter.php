@@ -13,12 +13,16 @@ class SearchFilter extends RedisAbstractFilter
     public function apply(array $params, string $resourceClass, ?Operation $operation = null, array $context = []): array
     {
         foreach ($context['filters'] as $property => $value) {
+            if ('order' === $property) {
+                continue;
+            }
+
             if (!property_exists($resourceClass, $property)) {
-                return $params;
+                continue;
             }
 
             if (!$this->isPropertyEnabled($property, $resourceClass)) {
-                return $params;
+                continue;
             }
 
             $strategy = $this->properties[$property];
@@ -31,7 +35,6 @@ class SearchFilter extends RedisAbstractFilter
 
         return $params;
     }
-
 
     public function getDescription(string $resourceClass): array
     {

@@ -14,7 +14,7 @@ final class SearchByDateTest extends RedisAbstractTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createClient());
+        $this->objectManager = new RedisObjectManager(RedisAbstractTestCase::createRedisClient());
     }
 
     public function testFindOneBy()
