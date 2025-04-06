@@ -1,7 +1,7 @@
 # 🕷 API Platform support (beta)
 
 
-Are you an API Platform user? Great idea ;)
+You are an API Platform user, congratulations ;)
 
 An implementation of API Platform's main features is provided, enabling you to use the library without a SQL database and only with Redis.
 
