@@ -16,8 +16,6 @@ use Talleu\RedisOm\Om\Mapping as RedisOm;
     paginationClientEnabled: true,
     paginationClientItemsPerPage: true,
     paginationPartial: true,
-    provider: RedisProvider::class,
-    processor: RedisProcessor::class,
 )]
 #[ApiFilter(SearchFilter::class, properties: ['name' => 'partial'])]
 class Book

@@ -40,12 +40,16 @@
             <tag name="api_platform.state_provider" priority="-100" key="talleu_php_redis_om.api_platform.state.item_provider" />
         </service>
 
-        <service id="talleu_php_redis_om.api_platform.state.redis_provider" class="Talleu\RedisOm\Bundle\ApiPlatform\State\RedisProvider" public="false">
+        <service id="talleu_php_redis_om.api_platform.state.state.redis_provider" class="Talleu\RedisOm\Bundle\ApiPlatform\State\RedisProvider" public="false">
             <argument type="service" id="talleu_php_redis_om.api_platform.state.collection_provider" />
             <argument type="service" id="talleu_php_redis_om.api_platform.state.item_provider" />
 
             <tag name="api_platform.state_provider" priority="-100" key="Talleu\RedisOm\Bundle\ApiPlatform\State\RedisProvider" />
             <tag name="api_platform.state_provider" priority="-100" key="talleu_php_redis_om.api_platform.state.redis_provider" />
+        </service>
+
+        <service id="talleu_php_redis_om.api_platform.metadata.resource.metadata_collection_factory" class="Talleu\RedisOm\Bundle\ApiPlatform\Metadata\ResourceCollectionMetadataFactory" decorates="api_platform.metadata.resource.metadata_collection_factory" decoration-priority="40">
+            <argument type="service" id="talleu_php_redis_om.api_platform.metadata.resource.metadata_collection_factory.inner" />
         </service>
     </services>
 </container>

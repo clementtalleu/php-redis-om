@@ -1,6 +1,7 @@
 /var/
 /vendor/
 /fixtures/
+/converage/
 test.php
 /.php-cs-fixer.php
 /.php-cs-fixer.cache

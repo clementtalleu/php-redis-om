@@ -51,7 +51,7 @@ jobs:
         run: composer install --prefer-dist
       - name: Install Predis optional package
         run: composer require predis/predis
-      - name: Install API-Platform
+      - name: Install API Platform
         run: composer require api-platform/core
       - name: Test cs-fixer
         run: vendor/bin/php-cs-fixer fix src --dry-run --diff --no-ansi
