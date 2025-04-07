@@ -8,7 +8,6 @@ services:
     volumes:
       - redis_data:/data
   php:
-    image: dunglas/frankenphp
     build: .
     ports:
       - "80:80" # HTTP
