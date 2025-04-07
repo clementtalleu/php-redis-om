@@ -11,15 +11,15 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
-use Talleu\RedisOm\Bundle\ApiPlatform\Extensions\QueryCollectionExtensionInterface;
+use Talleu\RedisOm\ApiPlatform\Extensions\QueryCollectionExtensionInterface;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
-use Talleu\RedisOm\Bundle\ApiPlatform\Filters\RedisSearchFilter;
-use Talleu\RedisOm\Bundle\ApiPlatform\Filters\SearchFilter;
-use Talleu\RedisOm\Bundle\ApiPlatform\State\CollectionProvider;
-use Talleu\RedisOm\Bundle\ApiPlatform\State\ItemProvider;
-use Talleu\RedisOm\Bundle\ApiPlatform\State\RedisProcessor;
-use Talleu\RedisOm\Bundle\ApiPlatform\State\RedisProvider;
+use Talleu\RedisOm\ApiPlatform\Filters\RedisSearchFilter;
+use Talleu\RedisOm\ApiPlatform\Filters\SearchFilter;
+use Talleu\RedisOm\ApiPlatform\State\CollectionProvider;
+use Talleu\RedisOm\ApiPlatform\State\ItemProvider;
+use Talleu\RedisOm\ApiPlatform\State\RedisProcessor;
+use Talleu\RedisOm\ApiPlatform\State\RedisProvider;
 
 final class TalleuRedisOmExtension extends Extension
 {

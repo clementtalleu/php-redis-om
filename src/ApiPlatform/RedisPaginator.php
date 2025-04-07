@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Talleu\RedisOm\Bundle\ApiPlatform;
+namespace Talleu\RedisOm\ApiPlatform;
 
 use ApiPlatform\Metadata\Exception\InvalidArgumentException;
 use ApiPlatform\State\Pagination\HasNextPagePaginatorInterface;

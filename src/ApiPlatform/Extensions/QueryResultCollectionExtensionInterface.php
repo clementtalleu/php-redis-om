@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Talleu\RedisOm\Bundle\ApiPlatform\Extensions;
+namespace Talleu\RedisOm\ApiPlatform\Extensions;
 
 use ApiPlatform\Metadata\Operation;
 
