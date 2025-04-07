@@ -59,21 +59,21 @@ Depending on your configuration, use phpredis or Predis
 
 In a Symfony application, you may need to add this line to config/bundles.php
 ```console
-    Talleu\RedisOm\Bundle\TalleuRedisOmBundle::class => [‘all’ => true],
+    Talleu\RedisOm\Bundle\TalleuRedisOmBundle::class => ['all' => true],
 ```
 
 And that's it, your installation is complete ! 🚀
 
 ## API Platform support 🕷️
 
-For API Platform users, a basic implementation is provided here : [API Platfom X Redis ](https://github.com/clementtalleu/php-redis-om/blob/main/docs/api_platform.md)
+For API Platform users, a basic implementation is provided here: [API Platfom X Redis](docs/api_platform.md)
  
 ## Basic Usage 🎯
 
 Add the RedisOm attribute to your class to map it to a Redis schema:
 
-```php  
-<?php 
+```php
+<?php
 
 use Talleu\RedisOm\Om\Mapping as RedisOm;
 
@@ -95,48 +95,51 @@ class User
 After add the RedisOm attribute to your class,
 you have to run the following command to create the Redis schema for your classes (default path is `./src`): 
 
-For Symfony users : 
+For Symfony users:
+
 ```console
 bin/console redis-om:migrate 
 ```
 
-For others PHP applications :
+For others PHP applications:
+
 ```console
 vendor/bin/redisMigration <YOUR DIRECTORY PATH>
 ```
 
 Then you can use the ObjectManager to persist your objects from Redis ! 💪
 
-For Symfony users, just inject the RedisObjectManagerInterface in the constructor :
+For Symfony users, just inject the RedisObjectManagerInterface in the constructor:
+
 ```php
-    <?php
+<?php
 
-    namespace App\Controller;
+namespace App\Controller;
+
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Talleu\RedisOm\Om\RedisObjectManagerInterface;
+use App\Entity\Book;
+
+class MySymfonyController extends AbstractController
+{
+    public function __construct(private RedisObjectManagerInterface $redisObjectManager)
+    {}
     
-    use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-    use Talleu\RedisOm\Om\RedisObjectManagerInterface;
-    use App\Entity\Book;
-
-    class MySymfonyController extends AbstractController
+    #[Route('/', name: 'app_home')]
+    public function index(): Response
     {
-        public function __construct(private RedisObjectManagerInterface $redisObjectManager)
-        {}
-        
-        #[Route('/', name: 'app_home')]
-        public function index(): Response
-        {
-            $book = new Book();
-            $book->name = 'Martin Eden';
-            $this->redisObjectManager->persist($book);
-            $this->redisObjectManager->flush();
-    
-           //..
-        }
+        $book = new Book();
+        $book->name = 'Martin Eden';
+        $this->redisObjectManager->persist($book);
+        $this->redisObjectManager->flush();
+
+       //..
     }
-    
+}
 ```
 
-For others PHP applications :
+For others PHP applications:
+
 ```php
 <?php
 
@@ -155,7 +158,7 @@ $objectManager->flush();
 🥳 Congratulations, your PHP object is now registered in Redis !
 
 
-You can now retrieve your user wherever you like using the repository provided by the Object Manager (or the object manager directly) :
+You can now retrieve your user wherever you like using the repository provided by the Object Manager (or the object manager directly):
 
 ```php
 // Retrieve the object from redis 

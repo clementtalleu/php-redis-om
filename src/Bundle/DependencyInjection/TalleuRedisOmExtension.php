@@ -23,19 +23,19 @@ use Talleu\RedisOm\Bundle\ApiPlatform\State\RedisProvider;
 
 final class TalleuRedisOmExtension extends Extension
 {
-    public function load(array $configs, ContainerBuilder $container)
+    public function load(array $configs, ContainerBuilder $container): void
     {
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.xml');
 
         // Check api-platform install
-        if (class_exists('ApiPlatform\Symfony\Bundle\ApiPlatformBundle')) {
+        if (class_exists(ApiPlatformBundle::class)) {
             $this->registerApiPlatformServices($container);
             $loader->load('api_platform.xml');
         }
     }
 
-    private function registerApiPlatformServices(ContainerBuilder $container)
+    private function registerApiPlatformServices(ContainerBuilder $container): void
     {
         $container->registerForAutoconfiguration(QueryCollectionExtensionInterface::class)
             ->addTag('talleu_php_redis_om.api_platform.query_extension.collection');
@@ -45,7 +45,7 @@ final class TalleuRedisOmExtension extends Extension
         $this->registerFilters($container);
     }
 
-    private function registerProviders(ContainerBuilder $container)
+    private function registerProviders(ContainerBuilder $container): void
     {
         $providers = [CollectionProvider::class, ItemProvider::class, RedisProvider::class];
         foreach ($providers as $provider) {
@@ -57,7 +57,7 @@ final class TalleuRedisOmExtension extends Extension
         }
     }
 
-    private function registerProcessor(ContainerBuilder $container)
+    private function registerProcessor(ContainerBuilder $container): void
     {
         $providers = [RedisProcessor::class];
         foreach ($providers as $provider) {
@@ -69,7 +69,7 @@ final class TalleuRedisOmExtension extends Extension
         }
     }
 
-    private function registerFilters(ContainerBuilder $container)
+    private function registerFilters(ContainerBuilder $container): void
     {
         $definition = new Definition(SearchFilter::class);
         $definition->addTag('api_platform.filter');
