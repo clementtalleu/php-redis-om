@@ -6,9 +6,9 @@ namespace Talleu\RedisOm\Tests\ApiPlatform\Entity;
 
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
-use Talleu\RedisOm\Bundle\ApiPlatform\Filters\SearchFilter;
-use Talleu\RedisOm\Bundle\ApiPlatform\State\RedisProcessor;
-use Talleu\RedisOm\Bundle\ApiPlatform\State\RedisProvider;
+use Talleu\RedisOm\ApiPlatform\Filters\SearchFilter;
+use Talleu\RedisOm\ApiPlatform\State\RedisProcessor;
+use Talleu\RedisOm\ApiPlatform\State\RedisProvider;
 use Talleu\RedisOm\Om\Mapping as RedisOm;
 
 #[RedisOm\Entity]

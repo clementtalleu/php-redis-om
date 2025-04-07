@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Talleu\RedisOm\Bundle\ApiPlatform\State;
+namespace Talleu\RedisOm\ApiPlatform\State;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
-use Talleu\RedisOm\Bundle\ApiPlatform\Extensions\QueryCollectionExtensionInterface;
-use Talleu\RedisOm\Bundle\ApiPlatform\Extensions\QueryResultCollectionExtensionInterface;
-use Talleu\RedisOm\Bundle\ApiPlatform\RedisPaginator;
+use Talleu\RedisOm\ApiPlatform\Extensions\QueryCollectionExtensionInterface;
+use Talleu\RedisOm\ApiPlatform\Extensions\QueryResultCollectionExtensionInterface;
+use Talleu\RedisOm\ApiPlatform\RedisPaginator;
 use Talleu\RedisOm\Om\RedisObjectManagerInterface;
 
 class CollectionProvider implements ProviderInterface

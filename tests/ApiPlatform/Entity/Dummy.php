@@ -6,12 +6,12 @@ namespace Talleu\RedisOm\Tests\ApiPlatform\Entity;
 
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
-use Talleu\RedisOm\Bundle\ApiPlatform\Filters\BooleanFilter;
-use Talleu\RedisOm\Bundle\ApiPlatform\Filters\NumericFilter;
-use Talleu\RedisOm\Bundle\ApiPlatform\Filters\OrderFilter;
-use Talleu\RedisOm\Bundle\ApiPlatform\Filters\SearchFilter;
-use Talleu\RedisOm\Bundle\ApiPlatform\State\RedisProcessor;
-use Talleu\RedisOm\Bundle\ApiPlatform\State\RedisProvider;
+use Talleu\RedisOm\ApiPlatform\Filters\BooleanFilter;
+use Talleu\RedisOm\ApiPlatform\Filters\NumericFilter;
+use Talleu\RedisOm\ApiPlatform\Filters\OrderFilter;
+use Talleu\RedisOm\ApiPlatform\Filters\SearchFilter;
+use Talleu\RedisOm\ApiPlatform\State\RedisProcessor;
+use Talleu\RedisOm\ApiPlatform\State\RedisProvider;
 use Talleu\RedisOm\Om\Mapping as RedisOm;
 use Talleu\RedisOm\Tests\Fixtures\Hash\DummyHash;
 

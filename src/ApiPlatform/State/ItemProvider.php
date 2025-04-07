@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Talleu\RedisOm\Bundle\ApiPlatform\State;
+namespace Talleu\RedisOm\ApiPlatform\State;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;

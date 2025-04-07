@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Talleu\RedisOm\Bundle\ApiPlatform\Metadata;
+namespace Talleu\RedisOm\ApiPlatform\Metadata;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInterface;
 use ApiPlatform\Metadata\Resource\ResourceMetadataCollection;
-use Talleu\RedisOm\Bundle\ApiPlatform\State\CollectionProvider;
-use Talleu\RedisOm\Bundle\ApiPlatform\State\ItemProvider;
-use Talleu\RedisOm\Bundle\ApiPlatform\State\RedisProcessor;
+use Talleu\RedisOm\ApiPlatform\State\CollectionProvider;
+use Talleu\RedisOm\ApiPlatform\State\ItemProvider;
+use Talleu\RedisOm\ApiPlatform\State\RedisProcessor;
 use Talleu\RedisOm\Om\Mapping\Entity;
 
 /**
