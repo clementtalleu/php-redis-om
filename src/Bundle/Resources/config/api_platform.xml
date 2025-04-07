@@ -40,7 +40,7 @@
             <tag name="api_platform.state_provider" priority="-100" key="talleu_php_redis_om.api_platform.state.item_provider" />
         </service>
 
-        <service id="talleu_php_redis_om.api_platform.state.state.redis_provider" class="Talleu\RedisOm\ApiPlatform\State\RedisProvider" public="false">
+        <service id="talleu_php_redis_om.api_platform.state.redis_provider" class="Talleu\RedisOm\Bundle\ApiPlatform\State\RedisProvider" public="false">
             <argument type="service" id="talleu_php_redis_om.api_platform.state.collection_provider" />
             <argument type="service" id="talleu_php_redis_om.api_platform.state.item_provider" />
 
