@@ -4,32 +4,13 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Bundle\ApiPlatform\Filters;
 
-use ApiPlatform\Metadata\ApiFilter;
-use ApiPlatform\Metadata\FilterInterface;
-use ApiPlatform\Metadata\Operation;
+use ApiPlatform\Metadata\Parameter;
 
 class NumericFilter extends RedisAbstractFilter
 {
-    public function apply(array $params, string $resourceClass, ?Operation $operation = null, array $context = []): array
+    public function __invoke(array $params, Parameter $parameter = null, array $context = []): array
     {
-        foreach ($context['filters'] as $property => $value) {
-            if (!property_exists($resourceClass, $property)) {
-                continue;
-            }
-
-            if (!$this->isPropertyEnabled($property, $resourceClass)) {
-                continue;
-            }
-
-            $params['criteria'][$property] = $value;
-        }
-
+        $params['criteria'][$parameter->getProperty() ?? $parameter->getKey()] = $parameter->getValue();
         return $params;
-    }
-
-
-    public function getDescription(string $resourceClass): array
-    {
-        return [];
     }
 }

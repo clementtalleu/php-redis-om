@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Tests\ApiPlatform\Entity;
 
-use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\QueryParameter;
 use Talleu\RedisOm\Bundle\ApiPlatform\Filters\SearchFilter;
-use Talleu\RedisOm\Bundle\ApiPlatform\State\RedisProcessor;
-use Talleu\RedisOm\Bundle\ApiPlatform\State\RedisProvider;
 use Talleu\RedisOm\Om\Mapping as RedisOm;
 
 #[RedisOm\Entity]
@@ -17,7 +15,6 @@ use Talleu\RedisOm\Om\Mapping as RedisOm;
     paginationClientItemsPerPage: true,
     paginationPartial: true,
 )]
-#[ApiFilter(SearchFilter::class, properties: ['name' => 'partial'])]
 class Book
 {
     #[RedisOm\Id]

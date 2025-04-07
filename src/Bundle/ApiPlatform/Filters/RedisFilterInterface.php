@@ -5,9 +5,15 @@ declare(strict_types=1);
 namespace Talleu\RedisOm\Bundle\ApiPlatform\Filters;
 
 use ApiPlatform\Metadata\FilterInterface;
-use ApiPlatform\Metadata\Operation;
+use ApiPlatform\Metadata\Parameter;
 
 interface RedisFilterInterface extends FilterInterface
 {
-    public function apply(array $params, string $resourceClass, ?Operation $operation = null, array $context = []): array;
+    /**
+     * @param array<string, mixed> $params
+     * @param array<string, mixed> $context
+     *
+     * @return array<string, mixed>
+     */
+    public function __invoke(array $params, Parameter $parameter = null, array $context = []): array;
 }
