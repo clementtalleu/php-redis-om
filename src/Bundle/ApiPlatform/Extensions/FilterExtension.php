@@ -5,29 +5,23 @@ declare(strict_types=1);
 namespace Talleu\RedisOm\Bundle\ApiPlatform\Extensions;
 
 use ApiPlatform\Metadata\Operation;
-use Psr\Container\ContainerInterface;
+use ApiPlatform\State\ParameterNotFound;
 use Talleu\RedisOm\Bundle\ApiPlatform\Filters\RedisFilterInterface;
 
 final readonly class FilterExtension implements QueryCollectionExtensionInterface
 {
-    public function __construct(private ContainerInterface $filterLocator)
-    {
-    }
-
     public function buildParams(array $params, string $resourceClass, ?Operation $operation = null, array $context = []): array
     {
-        $resourceFilters = $operation?->getFilters();
-
-        if (empty($resourceFilters)) {
-            return [];
-        }
-
-        foreach ($resourceFilters as $filterId) {
-            $filter = $this->filterLocator->has($filterId) ? $this->filterLocator->get($filterId) : null;
-            if ($filter instanceof RedisFilterInterface) {
-                $context['filters'] ??= [];
-                $params = $filter->apply($params, $resourceClass, $operation, $context);
+        foreach ($operation?->getParameters() ?? [] as $parameter) {
+            if (null === ($v = $parameter->getValue()) || $v instanceof ParameterNotFound) {
+                continue;
             }
+
+            if (null === ($filter = $parameter->getFilter()) || !$filter instanceof RedisFilterInterface) {
+                continue;
+            }
+
+            $params = $filter->__invoke($params, $parameter, [...$context, ...$parameter->getFilterContext() ?? [], 'operation' => $operation]);
         }
 
         return $params;
