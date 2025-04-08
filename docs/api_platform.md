@@ -55,21 +55,22 @@ Implement them as follows:
 ```php
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
+use Talleu\RedisOm\Bundle\ApiPlatform\Filters\ExactSearchFilter;
 use Talleu\RedisOm\Bundle\ApiPlatform\Filters\BooleanFilter;
 use Talleu\RedisOm\Bundle\ApiPlatform\Filters\NumericFilter;
 use Talleu\RedisOm\Bundle\ApiPlatform\Filters\OrderFilter;
 use Talleu\RedisOm\Bundle\ApiPlatform\Filters\SearchFilter;
-use Talleu\RedisOm\Bundle\ApiPlatform\State\RedisProcessor;
-use Talleu\RedisOm\Bundle\ApiPlatform\State\RedisProvider;
 use Talleu\RedisOm\Om\Mapping as RedisOm;
 use Talleu\RedisOm\Tests\Fixtures\Hash\DummyHash;
 
 #[RedisOm\Entity]
 #[ApiResource]
-#[ApiFilter(SearchFilter::class, properties: ['name' => 'exact', 'partialName' => 'partial'])]
-#[ApiFilter(NumericFilter::class, properties: ['age', 'price'])]
-#[ApiFilter(BooleanFilter::class, properties: ['enabled'])]
-#[ApiFilter(OrderFilter::class, properties: ['age', 'id', 'name'])]
+#[QueryParameter(key: 'name', filter: new ExactSearchFilter())]
+#[QueryParameter(key: 'partialName', filter: new SearchFilter())]
+#[QueryParameter(key: 'age', filter: new NumericFilter())]
+#[QueryParameter(key: 'price', filter: new NumericFilter())]
+#[QueryParameter(key: 'enabled', filter: new BooleanFilter())]
+#[QueryParameter(key: 'order[:property]', filter: new OrderFilter(properties: ['age', 'id', 'name']))]
 class Book
 {
 }
