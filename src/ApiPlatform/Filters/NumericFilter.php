@@ -8,7 +8,7 @@ use ApiPlatform\Metadata\Parameter;
 
 class NumericFilter extends RedisAbstractFilter
 {
-    public function __invoke(array $params, Parameter $parameter = null, array $context = []): array
+    public function __invoke(array $params, ?Parameter $parameter = null, array $context = []): array
     {
         $params['criteria'][$parameter->getProperty() ?? $parameter->getKey()] = $parameter->getValue();
         return $params;
