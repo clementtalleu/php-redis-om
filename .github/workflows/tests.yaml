@@ -53,6 +53,8 @@ jobs:
         run: composer require predis/predis
       - name: Install API Platform
         run: composer require api-platform/core
+      - name: Update php-cs-fixer
+        run: composer require friendsofphp/php-cs-fixer --dev --no-interaction
       - name: Test cs-fixer
         run: vendor/bin/php-cs-fixer fix src --dry-run --diff --no-ansi
       - name: Run phpstan
