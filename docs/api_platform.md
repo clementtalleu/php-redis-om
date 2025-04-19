@@ -55,6 +55,7 @@ Implement them as follows:
 ```php
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\QueryParameter;
 use Talleu\RedisOm\ApiPlatform\Filters\ExactSearchFilter;
 use Talleu\RedisOm\ApiPlatform\Filters\BooleanFilter;
 use Talleu\RedisOm\ApiPlatform\Filters\NumericFilter;

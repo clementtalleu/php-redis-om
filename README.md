@@ -28,9 +28,9 @@ with Redis.
 
 - PHP 8.2 or higher
 - Redis 4.0 or higher
-- Redisearch module (available by default with Redis >8) ([installation](https://redis.io/docs/latest/operate/oss_and_stack/install/install-stack/))
+- Redisearch module (available by default with Redis >8 or in redis-stack distribution) ([installation](https://redis.io/docs/latest/operate/oss_and_stack/install/install-stack/))
 - php-redis extension OR Predis library
-- Redis JSON module (optional)
+- Redis JSON module (optional, include in redis-stack)
 - Composer
 
 ## Supported types ✅
