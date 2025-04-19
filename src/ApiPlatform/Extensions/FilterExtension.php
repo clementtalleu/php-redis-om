@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Talleu\RedisOm\Bundle\ApiPlatform\Extensions;
+namespace Talleu\RedisOm\ApiPlatform\Extensions;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ParameterNotFound;
-use Talleu\RedisOm\Bundle\ApiPlatform\Filters\RedisFilterInterface;
+use Talleu\RedisOm\ApiPlatform\Filters\RedisFilterInterface;
 
 final readonly class FilterExtension implements QueryCollectionExtensionInterface
 {

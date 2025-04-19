@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Talleu\RedisOm\Bundle\ApiPlatform\Extensions;
+namespace Talleu\RedisOm\ApiPlatform\Extensions;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\Pagination\Pagination;
-use Talleu\RedisOm\Bundle\ApiPlatform\RedisPaginator;
+use Talleu\RedisOm\ApiPlatform\RedisPaginator;
 use Talleu\RedisOm\Om\RedisObjectManagerInterface;
 
 final readonly class PaginationExtension implements QueryResultCollectionExtensionInterface
