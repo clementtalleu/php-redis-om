@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Talleu\RedisOm\Bundle\ApiPlatform\Filters;
+namespace Talleu\RedisOm\ApiPlatform\Filters;
 
 use ApiPlatform\Metadata\Parameter;
 

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Talleu\RedisOm\Bundle\ApiPlatform\Filters;
+namespace Talleu\RedisOm\ApiPlatform\Filters;
 
 use ApiPlatform\Metadata\Parameter;
 
-class BooleanFilter extends RedisAbstractFilter
+class ExactSearchFilter extends RedisAbstractFilter
 {
     public function __invoke(array $params, Parameter $parameter = null, array $context = []): array
     {

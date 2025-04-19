@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Talleu\RedisOm\Tests\ApiPlatform\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\QueryParameter;
-use Talleu\RedisOm\Bundle\ApiPlatform\Filters\SearchFilter;
 use Talleu\RedisOm\Om\Mapping as RedisOm;
 
 #[RedisOm\Entity]
