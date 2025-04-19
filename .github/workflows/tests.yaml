@@ -38,25 +38,23 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Configure Xdebug
         run: echo "xdebug.mode=coverage" | sudo tee -a /etc/php/${{ matrix.php-versions }}/cli/conf.d/20-xdebug.ini
-#      - name: Get composer cache directory
-#        id: composer-cache
-#        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-#      - name: Cache dependencies
-#        uses: actions/cache@v4
-#        with:
-#          path: ${{ steps.composer-cache.outputs.dir }}
-#          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
-#          restore-keys: ${{ runner.os }}-composer-
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
+          restore-keys: ${{ runner.os }}-composer-
       - name: Install dependencies
         run: composer install --prefer-dist
       - name: Install Predis optional package
         run: composer require predis/predis
       - name: Install API Platform
         run: composer require api-platform/core
-      - name: Update cs-fixer
-        run: composer update friendsofphp/php-cs-fixer --dev --no-interaction
       - name: Test cs-fixer
-        run: vendor/bin/php-cs-fixer fix src --dry-run --diff --no-ansi
+        run: PHP_CS_FIXER_IGNORE_ENV=1 vendor/bin/php-cs-fixer fix src --dry-run --diff --no-ansi
       - name: Run phpstan
         run: vendor/bin/phpstan analyse src --level=5
       - name: Run tests with redis extension
