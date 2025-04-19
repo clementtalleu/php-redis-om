@@ -23,7 +23,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-versions: ['8.2', '8.3']
+        php-versions: ['8.2', '8.3', '8.4']
     env:
       REDIS_HOST: localhost
     steps:
@@ -54,7 +54,7 @@ jobs:
       - name: Install API Platform
         run: composer require api-platform/core
       - name: Test cs-fixer
-        run: vendor/bin/php-cs-fixer fix src --dry-run --diff --no-ansi
+        run: PHP_CS_FIXER_IGNORE_ENV=1 vendor/bin/php-cs-fixer fix src --dry-run --diff --no-ansi
       - name: Run phpstan
         run: vendor/bin/phpstan analyse src --level=5
       - name: Run tests with redis extension

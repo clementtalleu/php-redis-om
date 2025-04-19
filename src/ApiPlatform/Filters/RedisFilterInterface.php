@@ -15,5 +15,5 @@ interface RedisFilterInterface extends FilterInterface
      *
      * @return array<string, mixed>
      */
-    public function __invoke(array $params, Parameter $parameter = null, array $context = []): array;
+    public function __invoke(array $params, ?Parameter $parameter = null, array $context = []): array;
 }

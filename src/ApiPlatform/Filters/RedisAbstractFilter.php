@@ -13,7 +13,7 @@ abstract class RedisAbstractFilter implements RedisFilterInterface, JsonSchemaFi
      * @param array<string, mixed> $params
      * @param array<string, mixed> $context
      */
-    abstract public function __invoke(array $params, Parameter $parameter = null, array $context = []): array;
+    abstract public function __invoke(array $params, ?Parameter $parameter = null, array $context = []): array;
 
     public function getSchema(Parameter $parameter): array
     {

@@ -12,7 +12,7 @@ class OrderFilter extends RedisAbstractFilter
     {
     }
 
-    public function __invoke(array $params, Parameter $parameter = null, array $context = []): array
+    public function __invoke(array $params, ?Parameter $parameter = null, array $context = []): array
     {
         // todo: use constraint validations instead
         if (!is_array($parameter->getValue())) {
