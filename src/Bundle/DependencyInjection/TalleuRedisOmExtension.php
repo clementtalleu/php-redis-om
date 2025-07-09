@@ -56,13 +56,13 @@ final class TalleuRedisOmExtension extends Extension
 
     private function registerProcessor(ContainerBuilder $container): void
     {
-        $providers = [RedisProcessor::class];
-        foreach ($providers as $provider) {
-            $definition = new Definition($provider);
+        $processors = [RedisProcessor::class];
+        foreach ($processors as $processor) {
+            $definition = new Definition($processor);
             $definition->addTag('api_platform.state_processor');
             $definition->setAutowired(true);
             $definition->setAutoconfigured(true);
-            $container->setDefinition($provider, $definition);
+            $container->setDefinition($processor, $definition);
         }
     }
 
