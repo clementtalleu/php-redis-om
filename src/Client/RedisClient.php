@@ -336,11 +336,6 @@ final class RedisClient implements RedisClientInterface
             $arguments[] = $property;
             $arguments[] = $direction;
         }
-        if ($numberOfResults !== null) {
-            $arguments[] = 'LIMIT';
-            $arguments[] = $offset;
-            $arguments[] = $numberOfResults;
-        }
 
         if ($numberOfResults !== null) {
             $arguments[] = 'LIMIT';
