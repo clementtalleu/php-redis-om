@@ -63,22 +63,50 @@ abstract class AbstractObjectRepository implements RepositoryInterface
      */
     public function findByLike(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = 0): array
     {
+        return $this->findByPattern($criteria, '*%s*', $orderBy, $limit, $offset);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function findByStartWith(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = 0): array
+    {
+        return $this->findByPattern($criteria, '%s*', $orderBy, $limit, $offset);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function findByEndWith(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = 0): array
+    {
+        return $this->findByPattern($criteria, '*%s', $orderBy, $limit, $offset);
+    }
+
+    private function findByPattern(array $criteria, string $pattern, ?array $orderBy, ?int $limit, ?int $offset): array
+    {
         $limit = $this->defineLimit($limit);
         $this->convertDates($criteria);
         $this->convertSpecial($criteria);
+
+        $transformedCriteria = [];
         foreach ($criteria as $property => $value) {
-            $criteria[$property . '_text'] = "*$value*";
-            unset($criteria[$property]);
+            $transformedCriteria["{$property}_text"] = sprintf($pattern, $value);
         }
 
-        $data = $this->redisClient->search(prefixKey: $this->prefix, search: $criteria, orderBy: $orderBy ?? [], format: $this->format, numberOfResults: $limit, offset: $offset, searchType: Property::INDEX_TEXT);
+        $data = $this->redisClient->search(
+            prefixKey: $this->prefix,
+            search: $transformedCriteria,
+            orderBy: $orderBy ?? [],
+            format: $this->format,
+            numberOfResults: $limit,
+            offset: $offset,
+            searchType: Property::INDEX_TEXT
+        );
 
-        $collection = [];
-        foreach ($data as $item) {
-            $collection[] = $this->converter->revert($item, $this->className);
-        }
-
-        return $collection;
+        return array_map(
+            fn ($item) => $this->converter->revert($item, $this->className),
+            $data
+        );
     }
 
     private function defineLimit(?int $limit = null)

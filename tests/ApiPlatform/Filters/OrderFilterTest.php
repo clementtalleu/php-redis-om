@@ -69,7 +69,7 @@ class OrderFilterTest extends RedisAbstractTestCase
 
         $response = self::createClient()->request('GET', '/api/dummies?order[age]=DESC&name=Olivier');
         $this->assertEquals(200, $response->getStatusCode());
-        $responseContent = $response->toArray();
+        $responseContent = $response->toArray(false);
 
         $this->assertEquals(2, $responseContent['totalItems']);
         $this->assertTrue($responseContent['member'][0]['age'] > $responseContent['member'][1]['age']);

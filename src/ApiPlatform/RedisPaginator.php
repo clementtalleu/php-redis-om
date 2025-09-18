@@ -7,6 +7,7 @@ namespace Talleu\RedisOm\ApiPlatform;
 use ApiPlatform\Metadata\Exception\InvalidArgumentException;
 use ApiPlatform\State\Pagination\HasNextPagePaginatorInterface;
 use ApiPlatform\State\Pagination\PaginatorInterface;
+use Talleu\RedisOm\ApiPlatform\Filters\SearchStrategy;
 use Talleu\RedisOm\Om\Repository\RepositoryInterface;
 
 final class RedisPaginator implements PaginatorInterface, HasNextPagePaginatorInterface, \IteratorAggregate
@@ -17,7 +18,7 @@ final class RedisPaginator implements PaginatorInterface, HasNextPagePaginatorIn
     protected ?int $maxResults;
     protected array $params;
     private ?int $totalItems = null;
-    private ?string $strategy = 'exact';
+    private SearchStrategy $strategy = SearchStrategy::Exact;
 
     /**
      * @throws InvalidArgumentException
@@ -60,7 +61,12 @@ final class RedisPaginator implements PaginatorInterface, HasNextPagePaginatorIn
      */
     public function getIterator(): \Traversable
     {
-        $method = $this->strategy === 'exact' ? 'findBy' : 'findByLike';
+        $method = match($this->strategy) {
+            SearchStrategy::Exact => 'findBy',
+            SearchStrategy::Partial => 'findByLike',
+            SearchStrategy::Start => 'findByStartWith',
+            SearchStrategy::End => 'findByEndWith',
+        };
 
         return new \ArrayIterator($this->repository->$method(...$this->params));
     }
@@ -91,7 +97,7 @@ final class RedisPaginator implements PaginatorInterface, HasNextPagePaginatorIn
     public function getTotalItems(): float
     {
         $criteria = $this->params['criteria'] ?? [];
-        $method = $this->strategy === 'exact' ? 'count' : 'countByLike';
+        $method = $this->strategy === SearchStrategy::Exact ? 'count' : 'countByLike';
 
         return (float)($this->totalItems ?? $this->totalItems = $this->repository->$method($criteria));
     }

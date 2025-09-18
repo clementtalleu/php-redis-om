@@ -35,6 +35,20 @@ interface RepositoryInterface
     public function findByLike(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = 0): array;
 
     /**
+     * Find objects whose properties start with a given value (Case insensitive and does not need to be strictly equals)
+     * @param array $criteria as ['property' => 'val'] should return objects where property contains val/value/orval...
+     * @param array|null $orderBy as ['property' => 'ASC|DESC']
+     */
+    public function findByStartWith(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = 0): array;
+
+    /**
+     * Find objects whose properties end with a given value (Case insensitive and does not need to be strictly equals)
+     * @param array $criteria as ['property' => 'val'] should return objects where property contains val/value/orval...
+     * @param array|null $orderBy as ['property' => 'ASC|DESC']
+     */
+    public function findByEndWith(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = 0): array;
+
+    /**
      * Find objects by a full text search.
      */
     public function findLike(string $search, ?int $limit = null): array;
