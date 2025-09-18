@@ -52,7 +52,7 @@ class SearchFilterTest extends RedisAbstractTestCase
         self::generateIndex();
         self::loadRedisFixtures(Dummy::class);
 
-        $response = self::createClient()->request('GET', '/api/dummies?partialName=Mar');
+        $response = self::createClient()->request('GET', '/api/dummies?partialName=ar');
         $this->assertEquals(200, $response->getStatusCode());
         $responseContent = $response->toArray();
 
@@ -69,6 +69,64 @@ class SearchFilterTest extends RedisAbstractTestCase
         self::loadRedisFixtures(Dummy::class);
 
         $response = self::createClient()->request('GET', '/api/dummies?partialName=Test');
+        $this->assertEquals(200, $response->getStatusCode());
+        $responseContent = $response->toArray();
+
+        $this->assertEquals(0, $responseContent['totalItems']);
+    }
+
+    public function testSearchStartWith(): void
+    {
+        self::emptyRedis();
+        self::generateIndex();
+        self::loadRedisFixtures(Dummy::class);
+
+        $response = self::createClient()->request('GET', '/api/dummies?startWithName=Mar');
+        $this->assertEquals(200, $response->getStatusCode());
+        $responseContent = $response->toArray();
+
+        $this->assertEquals(3, $responseContent['totalItems']);
+        foreach ($responseContent['member'] as $result) {
+            $this->assertEquals('Martin', $result['startWithName']);
+        }
+    }
+
+    public function testSearchStartWithEmpty(): void
+    {
+        self::emptyRedis();
+        self::generateIndex();
+        self::loadRedisFixtures(Dummy::class);
+
+        $response = self::createClient()->request('GET', '/api/dummies?startWithName=Test');
+        $this->assertEquals(200, $response->getStatusCode());
+        $responseContent = $response->toArray();
+
+        $this->assertEquals(0, $responseContent['totalItems']);
+    }
+
+    public function testSearchEndWith(): void
+    {
+        self::emptyRedis();
+        self::generateIndex();
+        self::loadRedisFixtures(Dummy::class);
+
+        $response = self::createClient()->request('GET', '/api/dummies?endWithName=in');
+        $this->assertEquals(200, $response->getStatusCode());
+        $responseContent = $response->toArray();
+
+        $this->assertEquals(3, $responseContent['totalItems']);
+        foreach ($responseContent['member'] as $result) {
+            $this->assertEquals('Martin', $result['startWithName']);
+        }
+    }
+
+    public function testSearchEndWithEmpty(): void
+    {
+        self::emptyRedis();
+        self::generateIndex();
+        self::loadRedisFixtures(Dummy::class);
+
+        $response = self::createClient()->request('GET', '/api/dummies?endWithName=Test');
         $this->assertEquals(200, $response->getStatusCode());
         $responseContent = $response->toArray();
 

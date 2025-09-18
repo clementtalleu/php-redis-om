@@ -8,6 +8,7 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use Talleu\RedisOm\ApiPlatform\Extensions\QueryCollectionExtensionInterface;
 use Talleu\RedisOm\ApiPlatform\Extensions\QueryResultCollectionExtensionInterface;
+use Talleu\RedisOm\ApiPlatform\Filters\SearchStrategy;
 use Talleu\RedisOm\Om\RedisObjectManagerInterface;
 
 class CollectionProvider implements ProviderInterface
@@ -36,8 +37,13 @@ class CollectionProvider implements ProviderInterface
         }
 
         $method = 'findBy';
-        if (array_key_exists('search_strategy', $params) && $params['search_strategy'] === 'partial') {
-            $method = 'findByLike';
+        if (array_key_exists('search_strategy', $params) && $params['search_strategy'] !== SearchStrategy::Exact) {
+            $method = match($params['search_strategy']) {
+                SearchStrategy::Partial => 'findByLike',
+                SearchStrategy::Start => 'findByStartWith',
+                SearchStrategy::End => 'findByEndWith',
+                default => $method,
+            };
             unset($params['search_strategy']);
         }
 
