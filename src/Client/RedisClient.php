@@ -181,11 +181,9 @@ final class RedisClient implements RedisClientInterface
             $format,
         ];
 
-        if ($format === RedisFormat::HASH->value) {
-            $arguments[] = 'PREFIX';
-            $arguments[] = '1';
-            $arguments[] = "$prefixKey:";
-        }
+        $arguments[] = 'PREFIX';
+        $arguments[] = '1';
+        $arguments[] = "$prefixKey:";
 
         $arguments[] = 'SCHEMA';
 
