@@ -55,8 +55,6 @@ final class Property
             if (!in_array($indexType, self::INDEX_TYPES)) {
                 throw new \InvalidArgumentException("Index type $indexType is not supported, should be one of: " . implode(', ', self::INDEX_TYPES));
             }
-
-            $this->index = true;
         }
     }
 }
