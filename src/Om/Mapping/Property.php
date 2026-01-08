@@ -43,7 +43,7 @@ final class Property
         public ?string                $getter = null,
         public ?string                $setter = null,
     ) {
-        if (is_bool($index)) {
+        if (is_bool($index) || is_null($index)) {
             return;
         }
 
