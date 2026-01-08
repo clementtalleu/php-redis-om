@@ -1,6 +1,4 @@
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace Talleu\RedisOm\Bundle\DependencyInjection;
 
@@ -9,26 +7,25 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Extension\Extension;
-use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Talleu\RedisOm\ApiPlatform\Extensions\QueryCollectionExtensionInterface;
 use Talleu\RedisOm\ApiPlatform\Filters\SearchFilter;
 use Talleu\RedisOm\ApiPlatform\State\CollectionProvider;
 use Talleu\RedisOm\ApiPlatform\State\ItemProvider;
 use Talleu\RedisOm\ApiPlatform\State\RedisProcessor;
 use Talleu\RedisOm\ApiPlatform\State\RedisProvider;
-use Talleu\RedisOm\ApiPlatform\Filters\RedisSearchFilter;
 
 final class TalleuRedisOmExtension extends Extension
 {
     public function load(array $configs, ContainerBuilder $container): void
     {
-        $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
-        $loader->load('services.xml');
+        $loader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
+        $loader->load('services.yaml');
 
         // Check api-platform install
         if (class_exists(ApiPlatformBundle::class)) {
             $this->registerApiPlatformServices($container);
-            $loader->load('api_platform.xml');
+            $loader->load('api_platform.yaml');
         }
     }
 

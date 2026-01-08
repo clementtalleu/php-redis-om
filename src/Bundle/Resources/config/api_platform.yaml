@@ -1,0 +1,60 @@
+services:
+  talleu_php_redis_om.api_platform.query_extension.filters:
+    class: Talleu\RedisOm\ApiPlatform\Extensions\FilterExtension
+    public: false
+    tags:
+      - { name: talleu_php_redis_om.api_platform.query_extension.collection, priority: -64 }
+
+  talleu_php_redis_om.api_platform.query_extension.pagination:
+    class: Talleu\RedisOm\ApiPlatform\Extensions\PaginationExtension
+    public: false
+    arguments:
+      - '@talleu_php_redis_om.object_manager'
+      - '@api_platform.pagination'
+    tags:
+      - { name: talleu_php_redis_om.api_platform.query_extension.collection, priority: -64 }
+
+  talleu_php_redis_om.api_platform.state.collection_provider:
+    class: Talleu\RedisOm\ApiPlatform\State\CollectionProvider
+    public: false
+    arguments:
+      - '@talleu_php_redis_om.object_manager'
+      - !tagged_iterator talleu_php_redis_om.api_platform.query_extension.collection
+    tags:
+      - { name: api_platform.state_provider, priority: -100, key: 'Talleu\RedisOm\ApiPlatform\State\CollectionProvider' }
+      - { name: api_platform.state_provider, priority: -100, key: talleu_php_redis_om.api_platform.state.collection_provider }
+
+  talleu_php_redis_om.api_platform.state.processor:
+    class: Talleu\RedisOm\ApiPlatform\State\RedisProcessor
+    public: false
+    arguments:
+      - '@talleu_php_redis_om.object_manager'
+    tags:
+      - { name: api_platform.state_processor, priority: -100, key: 'Talleu\RedisOm\ApiPlatform\State\RedisProcessor' }
+      - { name: api_platform.state_processor, priority: -100, key: talleu_php_redis_om.api_platform.state.processor }
+
+  talleu_php_redis_om.api_platform.state.item_provider:
+    class: Talleu\RedisOm\ApiPlatform\State\ItemProvider
+    public: false
+    arguments:
+      - '@talleu_php_redis_om.object_manager'
+    tags:
+      - { name: api_platform.state_provider, priority: -100, key: 'Talleu\RedisOm\ApiPlatform\State\ItemProvider' }
+      - { name: api_platform.state_provider, priority: -100, key: talleu_php_redis_om.api_platform.state.item_provider }
+
+  talleu_php_redis_om.api_platform.state.redis_provider:
+    class: Talleu\RedisOm\ApiPlatform\State\RedisProvider
+    public: false
+    arguments:
+      - '@talleu_php_redis_om.api_platform.state.collection_provider'
+      - '@talleu_php_redis_om.api_platform.state.item_provider'
+    tags:
+      - { name: api_platform.state_provider, priority: -100, key: 'Talleu\RedisOm\ApiPlatform\State\RedisProvider' }
+      - { name: api_platform.state_provider, priority: -100, key: talleu_php_redis_om.api_platform.state.redis_provider }
+
+  talleu_php_redis_om.api_platform.metadata.resource.metadata_collection_factory:
+    class: Talleu\RedisOm\ApiPlatform\Metadata\ResourceCollectionMetadataFactory
+    decorates: api_platform.metadata.resource.metadata_collection_factory
+    decoration_priority: 40
+    arguments:
+      - '@talleu_php_redis_om.api_platform.metadata.resource.metadata_collection_factory.inner'

@@ -1,0 +1,20 @@
+services:
+  talleu_php_redis_om.object_manager:
+    class: Talleu\RedisOm\Om\RedisObjectManager
+    public: true
+
+  talleu_php_redis_om.command.migrate:
+    class: Talleu\RedisOm\Command\RedisOmMigrateCommand
+    tags:
+      - { name: console.command }
+
+  Talleu\RedisOm\Om\RedisObjectManagerInterface:
+    alias: talleu_php_redis_om.object_manager
+
+        <service id="talleu_php_redis_om.command.migrate" class="Talleu\RedisOm\Command\RedisOmMigrateCommand">
+            <tag name="console.command" />
+        </service>
+
+        <service id="Talleu\RedisOm\Om\RedisObjectManagerInterface" alias="talleu_php_redis_om.object_manager" />
+    </services>
+</container>
