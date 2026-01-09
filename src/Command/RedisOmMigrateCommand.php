@@ -14,7 +14,7 @@ use Talleu\RedisOm\Console\Runner;
 #[AsCommand(name: 'redis-om:migrate')]
 class RedisOmMigrateCommand extends Command
 {
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setDescription('Run Redis OM migrations')
