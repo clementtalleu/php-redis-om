@@ -5,7 +5,7 @@ namespace Talleu\RedisOm\Event;
 final class EventManager implements EventManagerInterface
 {
     /**
-     * @var array<string, object[]>
+     * @var array<string, (object|callable|array)[]>
      */
     private array $listeners = [];
 

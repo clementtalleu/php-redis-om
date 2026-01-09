@@ -2,7 +2,7 @@
 
 namespace Talleu\RedisOm\Event\Bridge;
 
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Talleu\RedisOm\Event\EventArgs;
 use Talleu\RedisOm\Event\EventManagerInterface;
 use Talleu\RedisOm\Event\EventSubscriberInterface;
