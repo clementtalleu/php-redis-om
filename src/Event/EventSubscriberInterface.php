@@ -7,7 +7,7 @@ interface EventSubscriberInterface
     /**
      * Returns the subscribed events.
      *
-     * @return array<string, string|array> Format : ['eventName' => 'methodName'] ou ['eventName' => ['methodName', priority]]
+     * @return array<string, string|array> Format : ['eventName' => 'methodName'] or ['eventName' => ['methodName', priority]]
      */
     public function getSubscribedEvents(): array;
 }

@@ -29,7 +29,7 @@ interface EventManagerInterface
     public function addEventSubscriber(EventSubscriberInterface $subscriber): void;
 
     /**
-     * Retire un event subscriber.
+     * Removes an event subscriber.
      */
     public function removeEventSubscriber(EventSubscriberInterface $subscriber): void;
 

@@ -49,7 +49,6 @@ final readonly class TimestampableListener
     {
         $entity = $args->getObject();
         
-        // Vérifier si l'entité a les méthodes nécessaires
         if (!method_exists($entity, 'setCreatedAt') || !method_exists($entity, 'getCreatedAt')) {
             return;
         }
@@ -58,16 +57,6 @@ final readonly class TimestampableListener
             $entity->setCreatedAt(new \DateTimeImmutable());
         }
 
-        if (method_exists($entity, 'setUpdatedAt')) {
-            $entity->setUpdatedAt(new \DateTimeImmutable());
-        }
-    }
-
-    #[AsEventListener(event: Events::PRE_UPDATE, priority: 10)]
-    public function onPreUpdate(LifecycleEventArgs $args): void
-    {
-        $entity = $args->getObject();
-        
         if (method_exists($entity, 'setUpdatedAt')) {
             $entity->setUpdatedAt(new \DateTimeImmutable());
         }
