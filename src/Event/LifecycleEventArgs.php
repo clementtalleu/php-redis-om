@@ -7,7 +7,7 @@ use Talleu\RedisOm\Om\RedisObjectManagerInterface;
 final class LifecycleEventArgs extends EventArgs
 {
     public function __construct(
-        object $object,
+        ?object $object,
         private readonly RedisObjectManagerInterface $objectManager
     ) {
         parent::__construct($object);
