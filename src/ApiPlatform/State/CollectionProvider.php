@@ -32,6 +32,7 @@ class CollectionProvider implements ProviderInterface
             $params = $extension->buildParams($params, $entityClass, $operation, $context);
 
             if ($extension instanceof QueryResultCollectionExtensionInterface && $extension->supportsResult($entityClass, $operation, $context)) {
+
                 return $extension->getResult($params, $entityClass);
             }
         }
