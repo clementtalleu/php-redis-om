@@ -421,7 +421,7 @@ final class RedisClient implements RedisClientInterface
     {
         $entities = [];
         foreach ($result as $key => $redisData) {
-            if ($key > 0 && $key % 2 == 0) {
+            if ($key > 0 && $key % 2 === 0) {
 
                 if ($format === RedisFormat::JSON->value) {
                     foreach ($redisData as $data) {
