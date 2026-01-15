@@ -141,7 +141,7 @@ final class RedisClient implements RedisClientInterface
                 throw new \InvalidArgumentException("Should provide 3 parameters for each key, path and value");
             }
 
-            for ($i = 0; $i < count($param); $i += 3) {
+            for ($i = 0, $iMax = count($param); $i < $iMax; $i += 3) {
                 $arguments[] = Converter::prefix($param[$i]);
                 $arguments[] = $param[$i + 1] ?? '$';
                 $arguments[] = $param[$i + 2] ?? '{}';
@@ -435,7 +435,7 @@ final class RedisClient implements RedisClientInterface
                     continue;
                 } else {
                     $data = [];
-                    for ($i = 0; $i < count($redisData); $i += 2) {
+                    for ($i = 0, $iMax = count($redisData); $i < $iMax; $i += 2) {
                         $property = $redisData[$i];
                         $value = $redisData[$i + 1];
                         $data[$property] = $value;
