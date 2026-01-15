@@ -319,6 +319,9 @@ final class RedisClient implements RedisClientInterface
         } else {
             $criteria = '';
             foreach ($search as $property => $value) {
+                if (is_string($value) && str_contains($value, '-')) {
+                    $value = str_replace('-', '\-', $value);
+                }
                 if ($searchType === Property::INDEX_TAG) {
                     $criteria .= sprintf('@%s:{%s}', $property, $value);
                 } else {
