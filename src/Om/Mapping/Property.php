@@ -43,7 +43,7 @@ final class Property
         public ?string                $getter = null,
         public ?string                $setter = null,
     ) {
-        if (is_bool($index)) {
+        if (is_bool($index) || is_null($index)) {
             return;
         }
 
@@ -55,8 +55,6 @@ final class Property
             if (!in_array($indexType, self::INDEX_TYPES)) {
                 throw new \InvalidArgumentException("Index type $indexType is not supported, should be one of: " . implode(', ', self::INDEX_TYPES));
             }
-
-            $this->index = true;
         }
     }
 }

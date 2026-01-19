@@ -104,6 +104,13 @@ class User
     
     #[RedisOm\Property]
     public ?string $description;
+
+    #[
+        RedisOm\Property(
+            index: ['createdAt#timestamp' => RedisOm\Property::INDEX_NUMERIC],
+        )
+    ]
+    private ?DateTimeInterface $createdAt = null;
 }
 ```
 
