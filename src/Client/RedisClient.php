@@ -189,6 +189,14 @@ final class RedisClient implements RedisClientInterface
 
         /** @var PropertyToIndex $propertyToIndex */
         foreach ($properties as $propertyToIndex) {
+            if (str_contains($propertyToIndex->indexName, '#timestamp')) {
+                $arguments[] = $propertyToIndex->indexName;
+                $arguments[] = 'AS';
+                $arguments[] = $propertyToIndex->indexName;
+                $arguments[] = $propertyToIndex->indexType;
+                $arguments[] = 'SORTABLE';
+                continue;
+            }
             $arguments[] = $propertyToIndex->name;
             $arguments[] = 'AS';
             $arguments[] = $propertyToIndex->indexName;

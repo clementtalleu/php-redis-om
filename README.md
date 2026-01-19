@@ -178,4 +178,5 @@ $users = $this->redisObjectManager->getRepository(User::class)->findBy(['name' =
 - [Docker integration](https://github.com/clementtalleu/php-redis-om/blob/main/docs/docker_integration.md)
 - [Mapping ](https://github.com/clementtalleu/php-redis-om/blob/main/docs/mapping.md)
 - [Advanced usage ](https://github.com/clementtalleu/php-redis-om/blob/main/docs/advanced_usage.md)
+- [Events ](https://github.com/clementtalleu/php-redis-om/blob/main/docs/events.md)
 - [API Platform ](https://github.com/clementtalleu/php-redis-om/blob/main/docs/api_platform.md)
