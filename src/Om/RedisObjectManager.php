@@ -7,6 +7,10 @@ namespace Talleu\RedisOm\Om;
 use Talleu\RedisOm\Client\PredisClient;
 use Talleu\RedisOm\Client\RedisClient;
 use Talleu\RedisOm\Client\RedisClientInterface;
+use Talleu\RedisOm\Event\EventManager;
+use Talleu\RedisOm\Event\EventManagerInterface;
+use Talleu\RedisOm\Event\Events;
+use Talleu\RedisOm\Event\LifecycleEventArgs;
 use Talleu\RedisOm\Om\Converters\HashModel\HashObjectConverter;
 use Talleu\RedisOm\Om\Converters\JsonModel\JsonObjectConverter;
 use Talleu\RedisOm\Om\Key\KeyGenerator;
@@ -26,14 +30,17 @@ final class RedisObjectManager implements RedisObjectManagerInterface
 
     /** @var array<string, array<string, ObjectToPersist[]>> */
     protected array $objectsToFlush = [];
+
     protected ?KeyGenerator $keyGenerator = null;
     private RedisClientInterface $redisClient;
+    private EventManagerInterface $eventManager;
 
     public function __construct(
         ?RedisClientInterface $redisClient = null,
+        ?EventManagerInterface $eventManager = null,
     ) {
         $this->redisClient = $redisClient ?? (getenv('REDIS_CLIENT') === 'predis' ? new PredisClient() : new RedisClient());
-
+        $this->eventManager = $eventManager ?? new EventManager();
         $this->keyGenerator = new KeyGenerator();
     }
 
@@ -42,11 +49,21 @@ final class RedisObjectManager implements RedisObjectManagerInterface
      */
     public function persist(object $object): void
     {
+        $this->eventManager->dispatchEvent(
+            Events::PRE_PERSIST,
+            new LifecycleEventArgs($object, $this)
+        );
+
         $objectMapper = $this->getEntityMapper($object);
         $persister = $this->registerPersister($objectMapper);
 
         $objectToPersist = $persister->persist(objectMapper: $objectMapper, object: $object);
         $this->objectsToFlush[$objectToPersist->persisterClass][$objectToPersist->operation][$objectToPersist->redisKey] = $objectToPersist;
+
+        $this->eventManager->dispatchEvent(
+            Events::POST_PERSIST,
+            new LifecycleEventArgs($object, $this)
+        );
     }
 
     /**
@@ -54,11 +71,21 @@ final class RedisObjectManager implements RedisObjectManagerInterface
      */
     public function remove(object $object): void
     {
+        $this->eventManager->dispatchEvent(
+            Events::PRE_REMOVE,
+            new LifecycleEventArgs($object, $this)
+        );
+
         $objectMapper = $this->getEntityMapper($object);
         $persister = $this->registerPersister($objectMapper);
 
         $objectToRemove = $persister->delete($objectMapper, $object);
         $this->objectsToFlush[$objectToRemove->persisterClass][$objectToRemove->operation][$objectToRemove->redisKey] = $objectToRemove;
+
+        $this->eventManager->dispatchEvent(
+            Events::POST_REMOVE,
+            new LifecycleEventArgs($object, $this)
+        );
     }
 
     /**
@@ -69,6 +96,12 @@ final class RedisObjectManager implements RedisObjectManagerInterface
         foreach ($this->objectsToFlush as $persisterClassName => $objectsByOperation) {
             foreach ($objectsByOperation as $operation => $objectToPersists) {
                 $this->persisters[$persisterClassName]->{$operation}($objectToPersists);
+                foreach ($objectToPersists as $objectToPersist) {
+                    $this->eventManager->dispatchEvent(
+                        Events::POST_FLUSH,
+                        new LifecycleEventArgs($objectToPersist->value, $this)
+                    );
+                }
                 unset($this->objectsToFlush[$persisterClassName][$operation]);
             }
         }
@@ -239,5 +272,10 @@ final class RedisObjectManager implements RedisObjectManagerInterface
     public function getRedisClient(): ?RedisClientInterface
     {
         return $this->redisClient;
+    }
+
+    public function getEventManager(): EventManagerInterface
+    {
+        return $this->eventManager;
     }
 }

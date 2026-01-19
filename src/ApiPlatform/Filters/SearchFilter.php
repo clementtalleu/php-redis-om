@@ -16,6 +16,7 @@ class SearchFilter extends RedisAbstractFilter
     {
         $params['search_strategy'] = $this->strategy;
         $params['criteria'][$parameter->getProperty() ?? $parameter->getKey()] = $parameter->getValue();
+
         return $params;
     }
 }
