@@ -154,7 +154,7 @@ final class PredisClient implements RedisClientInterface
                 throw new \InvalidArgumentException("Should provide 3 parameters for each key, path and value");
             }
 
-            for ($i = 0; $i < count($param); $i += 3) {
+            for ($i = 0, $iMax = count($param); $i < $iMax; $i += 3) {
                 $arguments[] = Converter::prefix($param[$i]);
                 $arguments[] = $param[$i + 1] ?? '$';
                 $arguments[] = $param[$i + 2] ?? '{}';
@@ -252,6 +252,9 @@ final class PredisClient implements RedisClientInterface
             $arguments[] = '*';
         } else {
             foreach ($criterias as $property => $value) {
+                if (is_string($value) && str_contains($value, '-')) {
+                    $value = str_replace('-', '\-', $value);
+                }
                 if ($searchType === Property::INDEX_TAG) {
                     $arguments[] = sprintf('@%s:{%s}', $property, $value);
                 } else {
@@ -339,6 +342,9 @@ final class PredisClient implements RedisClientInterface
         } else {
             $criteria = '';
             foreach ($search as $property => $value) {
+                if (is_string($value) && str_contains($value, '-')) {
+                    $value = str_replace('-', '\-', $value);
+                }
                 if ($searchType === Property::INDEX_TAG) {
                     $criteria .= sprintf('@%s:{%s}', $property, $value);
                 } else {
@@ -450,7 +456,7 @@ final class PredisClient implements RedisClientInterface
     {
         $entities = [];
         foreach ($result as $key => $redisData) {
-            if ($key > 0 && $key % 2 == 0) {
+            if ($key > 0 && $key % 2 === 0) {
 
                 if ($format === RedisFormat::JSON->value) {
                     foreach ($redisData as $data) {
@@ -464,7 +470,7 @@ final class PredisClient implements RedisClientInterface
                     continue;
                 } else {
                     $data = [];
-                    for ($i = 0; $i < count($redisData); $i += 2) {
+                    for ($i = 0, $iMax = count($redisData); $i < $iMax; $i += 2) {
                         $property = $redisData[$i];
                         $value = $redisData[$i + 1];
                         $data[$property] = $value;

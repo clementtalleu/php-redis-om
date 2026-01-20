@@ -6,7 +6,9 @@ namespace Talleu\RedisOm\Tests\Functionnal\Om\Mapping;
 
 use Talleu\RedisOm\Om\RedisObjectManager;
 use Talleu\RedisOm\Tests\Fixtures\Hash\SpecialCharsDummyHash;
+use Talleu\RedisOm\Tests\Fixtures\Hash\UuidStringDummyHash;
 use Talleu\RedisOm\Tests\Fixtures\Json\SpecialCharsDummyJson;
+use Talleu\RedisOm\Tests\Fixtures\Json\UuidStringDummyJson;
 use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
 class SpecialCharsTest extends RedisAbstractTestCase
@@ -132,5 +134,27 @@ class SpecialCharsTest extends RedisAbstractTestCase
         $repository = $this->objectManager->getRepository(SpecialCharsDummyJson::class);
         $object = $repository->findOneBy(['specialChars' => 'o//\\']);
         $this->assertNull($object);
+    }
+
+    public function testUuidSpecialCharsFindOneBy(): void
+    {
+        static::emptyRedis();
+        static::generateIndex();
+        $dummies = static::loadRedisFixtures(UuidStringDummyHash::class);
+
+        $repository = $this->objectManager->getRepository(UuidStringDummyHash::class);
+        $object = $repository->findOneBy(['specialChars' => '1f0f2176-5dae-6524-8d77-dbe79e5a7b83']);
+        $this->assertEquals($dummies[0], $object);
+    }
+
+    public function testUuidSpecialCharsFindOneByJson(): void
+    {
+        static::emptyRedis();
+        static::generateIndex();
+        $dummies = static::loadRedisFixtures(UuidStringDummyJson::class);
+
+        $repository = $this->objectManager->getRepository(UuidStringDummyJson::class);
+        $object = $repository->findOneBy(['specialChars' => '1f0f2176-5dae-6524-8d77-dbe79e5a7b83']);
+        $this->assertEquals($dummies[0], $object);
     }
 }
