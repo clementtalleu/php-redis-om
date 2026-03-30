@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Console;
 
+use Talleu\RedisOm\Client\RedisClientInterface;
 use Talleu\RedisOm\Command\GenerateSchema;
 
 final class Runner
 {
-    public static function generateSchema(string $dirPath): void
+    public static function generateSchema(string $dirPath, ?RedisClientInterface $redisClient = null): void
     {
         if (!is_dir($dirPath)) {
             // Not a valid directory absolute path, try to find the directory in the project root
@@ -18,6 +19,6 @@ final class Runner
             }
         }
 
-        GenerateSchema::generateSchema($dirPath);
+        GenerateSchema::generateSchema($dirPath, $redisClient);
     }
 }

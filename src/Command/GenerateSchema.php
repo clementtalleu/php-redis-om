@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Command;
 
-use Talleu\RedisOm\Client\PredisClient;
-use Talleu\RedisOm\Client\RedisClient;
+use Talleu\RedisOm\Client\RedisClientInterface;
 use Talleu\RedisOm\Exception\BadIdentifierConfigurationException;
 use Talleu\RedisOm\Om\Converters\AbstractDateTimeConverter;
 use Talleu\RedisOm\Om\Mapping\Entity;
@@ -16,11 +15,9 @@ use Talleu\RedisOm\Om\RedisObjectManager;
 
 final class GenerateSchema
 {
-    public static function generateSchema(string $dir): void
+    public static function generateSchema(string $dir, ?RedisClientInterface $redisClient = null): void
     {
-        $redisOm = new RedisObjectManager(
-            getenv('REDIS_CLIENT') === 'predis' ? new PredisClient() : new RedisClient(),
-        );
+        $redisOm = new RedisObjectManager($redisClient);
 
         $rii = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir));
         $phpFiles = [];

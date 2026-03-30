@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Talleu\RedisOm\Event\Bridge;
 
@@ -15,7 +17,8 @@ final class SymfonyEventManagerAdapter implements EventManagerInterface
 {
     public function __construct(
         private readonly EventDispatcherInterface $dispatcher
-    ) {}
+    ) {
+    }
 
     public function dispatchEvent(string $eventName, ?EventArgs $eventArgs = null): void
     {
