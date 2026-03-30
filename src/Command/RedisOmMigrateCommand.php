@@ -9,11 +9,18 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Talleu\RedisOm\Client\RedisClientInterface;
 use Talleu\RedisOm\Console\Runner;
 
 #[AsCommand(name: 'redis-om:migrate')]
 class RedisOmMigrateCommand extends Command
 {
+    public function __construct(
+        private ?RedisClientInterface $redisClient = null,
+    ) {
+        parent::__construct();
+    }
+
     protected function configure(): void
     {
         $this
@@ -24,7 +31,7 @@ class RedisOmMigrateCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $dirPath = $input->getArgument('dir');
-        Runner::generateSchema($dirPath);
+        Runner::generateSchema($dirPath, $this->redisClient);
         $output->writeln('<info>Redis migrations executed successfully.</info>');
 
         return Command::SUCCESS;

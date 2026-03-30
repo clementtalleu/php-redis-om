@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Talleu\RedisOm\Event;
 
@@ -51,7 +53,7 @@ final class EventManager implements EventManagerInterface
 
             $this->listeners[$event] = array_filter(
                 $this->listeners[$event],
-                static fn($registeredListener) => $registeredListener !== $listener
+                static fn ($registeredListener) => $registeredListener !== $listener
             );
         }
     }

@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Talleu\RedisOm\Event;
 
@@ -12,7 +14,8 @@ final class Events
 
     public const POST_FLUSH = 'postFlush';
 
-    private function __construct() {
+    private function __construct()
+    {
         // Must be private, we must not instance this class
     }
 }

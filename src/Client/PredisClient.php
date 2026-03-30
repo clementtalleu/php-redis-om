@@ -286,7 +286,6 @@ final class PredisClient implements RedisClientInterface
                     $keys[] = $scan;
                 }
             }
-            /** @phpstan-ignore-next-line */
         } while ($iterator !== 0);
 
         return $keys;
