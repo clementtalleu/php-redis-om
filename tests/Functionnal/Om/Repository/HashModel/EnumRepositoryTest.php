@@ -1,0 +1,105 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Talleu\RedisOm\Tests\Functionnal\Om\Repository\HashModel;
+
+use Talleu\RedisOm\Om\RedisObjectManager;
+use Talleu\RedisOm\Tests\Fixtures\Hash\EnumDummyHash;
+use Talleu\RedisOm\Tests\Fixtures\PriorityEnum;
+use Talleu\RedisOm\Tests\Fixtures\StatusEnum;
+use Talleu\RedisOm\Tests\RedisAbstractTestCase;
+
+final class EnumRepositoryTest extends RedisAbstractTestCase
+{
+    private RedisObjectManager $objectManager;
+
+    protected function setUp(): void
+    {
+        $this->objectManager = new RedisObjectManager(self::createRedisClient());
+        parent::setUp();
+    }
+
+    public function testPersistAndFindWithEnums(): void
+    {
+        static::emptyRedis();
+        static::generateIndex();
+
+        $entity = new EnumDummyHash();
+        $entity->id = 1;
+        $entity->name = 'Task 1';
+        $entity->status = StatusEnum::ACTIVE;
+        $entity->priority = PriorityEnum::HIGH;
+
+        $this->objectManager->persist($entity);
+        $this->objectManager->flush();
+        $this->objectManager->clear();
+
+        $found = $this->objectManager->find(EnumDummyHash::class, 1);
+
+        $this->assertInstanceOf(EnumDummyHash::class, $found);
+        $this->assertSame(StatusEnum::ACTIVE, $found->status);
+        $this->assertSame(PriorityEnum::HIGH, $found->priority);
+        $this->assertSame('Task 1', $found->name);
+    }
+
+    public function testFindByEnum(): void
+    {
+        static::emptyRedis();
+        static::generateIndex();
+
+        $entity1 = new EnumDummyHash();
+        $entity1->id = 1;
+        $entity1->name = 'Active task';
+        $entity1->status = StatusEnum::ACTIVE;
+        $entity1->priority = PriorityEnum::LOW;
+
+        $entity2 = new EnumDummyHash();
+        $entity2->id = 2;
+        $entity2->name = 'Inactive task';
+        $entity2->status = StatusEnum::INACTIVE;
+        $entity2->priority = PriorityEnum::HIGH;
+
+        $entity3 = new EnumDummyHash();
+        $entity3->id = 3;
+        $entity3->name = 'Another active';
+        $entity3->status = StatusEnum::ACTIVE;
+        $entity3->priority = PriorityEnum::MEDIUM;
+
+        $this->objectManager->persist($entity1);
+        $this->objectManager->persist($entity2);
+        $this->objectManager->persist($entity3);
+        $this->objectManager->flush();
+        $this->objectManager->clear();
+
+        $repo = $this->objectManager->getRepository(EnumDummyHash::class);
+        $activeEntities = $repo->findBy(['status' => 'active']);
+
+        $this->assertCount(2, $activeEntities);
+        foreach ($activeEntities as $entity) {
+            $this->assertSame(StatusEnum::ACTIVE, $entity->status);
+        }
+    }
+
+    public function testEnumRoundTripAllValues(): void
+    {
+        static::emptyRedis();
+        static::generateIndex();
+
+        foreach (StatusEnum::cases() as $i => $status) {
+            $entity = new EnumDummyHash();
+            $entity->id = $i + 10;
+            $entity->name = "Status: {$status->value}";
+            $entity->status = $status;
+            $entity->priority = PriorityEnum::LOW;
+            $this->objectManager->persist($entity);
+        }
+        $this->objectManager->flush();
+        $this->objectManager->clear();
+
+        foreach (StatusEnum::cases() as $i => $status) {
+            $found = $this->objectManager->find(EnumDummyHash::class, $i + 10);
+            $this->assertSame($status, $found->status);
+        }
+    }
+}

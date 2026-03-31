@@ -9,6 +9,7 @@ use Talleu\RedisOm\Client\RedisClientInterface;
 use Talleu\RedisOm\Om\Converters\AbstractDateTimeConverter;
 use Talleu\RedisOm\Om\Converters\ConverterInterface;
 use Talleu\RedisOm\Om\Mapping\Property;
+use Talleu\RedisOm\Om\Paginator;
 use Talleu\RedisOm\Om\QueryBuilder;
 use Talleu\RedisOm\Om\RedisFormat;
 
@@ -39,6 +40,7 @@ abstract class AbstractObjectRepository implements RepositoryInterface
     public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = 0): array
     {
         $limit = $this->defineLimit($limit);
+        $rangeFilters = $this->extractRangeFilters($criteria);
         $this->convertDates($criteria);
         $this->convertSpecial($criteria);
         $data = $this->redisClient->search(
@@ -47,7 +49,8 @@ abstract class AbstractObjectRepository implements RepositoryInterface
             $orderBy ?? [],
             $this->format,
             $limit,
-            offset: $offset
+            offset: $offset,
+            rangeFilters: $rangeFilters,
         );
 
         $collection = [];
@@ -138,6 +141,62 @@ abstract class AbstractObjectRepository implements RepositoryInterface
     /**
      * @inheritdoc
      */
+    public function findByGeoRadius(string $geoField, float $longitude, float $latitude, float $radius, string $unit = 'km', ?int $limit = null): array
+    {
+        $limit = $this->defineLimit($limit);
+        $geoQuery = sprintf('@%s:[%s %s %s %s]', $geoField, $longitude, $latitude, $radius, $unit);
+
+        $data = $this->redisClient->search(
+            $this->prefix,
+            [],
+            [],
+            $this->format,
+            $limit,
+            rangeFilters: ['_geo' => $geoQuery],
+        );
+
+        $collection = [];
+        foreach ($data as $item) {
+            $collection[] = $this->converter->revert($item, $this->className);
+        }
+
+        return $collection;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function paginate(array $criteria = [], int $page = 1, int $itemsPerPage = 20, ?array $orderBy = null): Paginator
+    {
+        $page = max(1, $page);
+        $offset = ($page - 1) * $itemsPerPage;
+
+        $rangeFilters = $this->extractRangeFilters($criteria);
+        $this->convertDates($criteria);
+        $this->convertSpecial($criteria);
+
+        $totalItems = $this->redisClient->count($this->prefix, $criteria);
+        $data = $this->redisClient->search(
+            $this->prefix,
+            $criteria,
+            $orderBy ?? [],
+            $this->format,
+            $itemsPerPage,
+            offset: $offset,
+            rangeFilters: $rangeFilters,
+        );
+
+        $items = [];
+        foreach ($data as $item) {
+            $items[] = $this->converter->revert($item, $this->className);
+        }
+
+        return new Paginator($items, $totalItems, $page, $itemsPerPage);
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function findAll(): iterable
     {
         $limit = self::DEFAULT_SEARCH_LIMIT;
@@ -164,9 +223,10 @@ abstract class AbstractObjectRepository implements RepositoryInterface
      */
     public function findOneBy(array $criteria, ?array $orderBy = null): ?object
     {
+        $rangeFilters = $this->extractRangeFilters($criteria);
         $this->convertDates($criteria);
         $this->convertSpecial($criteria);
-        $data = $this->redisClient->search($this->prefix, $criteria, $orderBy ?? [], $this->format, 1);
+        $data = $this->redisClient->search($this->prefix, $criteria, $orderBy ?? [], $this->format, 1, rangeFilters: $rangeFilters);
 
         if ($data === []) {
             return null;
@@ -262,6 +322,61 @@ abstract class AbstractObjectRepository implements RepositoryInterface
     public function setFormat(?string $format = null): void
     {
         $this->format = $format ?? RedisFormat::HASH->value;
+    }
+
+    /**
+     * Extract range filters from criteria.
+     * Range filters use MongoDB-style operators: $gte, $gt, $lte, $lt
+     * Example: ['age' => ['$gte' => 18, '$lte' => 65]] → @age:[18 65]
+     *
+     * @return array<string, string> Numeric range query parts keyed by property
+     */
+    /**
+     * Extract range filters from criteria.
+     * Range filters use MongoDB-style operators: $gte, $gt, $lte, $lt
+     * Example: ['age' => ['$gte' => 18, '$lte' => 65]] → @age_numeric:[18 65]
+     *
+     * Requires a NUMERIC index on the property (automatic for HASH int/float,
+     * use #[Property(index: ['field' => 'NUMERIC'])] for JSON).
+     *
+     * @return array<string, string> Numeric range query parts keyed by property
+     */
+    protected function extractRangeFilters(array &$criteria): array
+    {
+        $rangeFilters = [];
+
+        foreach ($criteria as $property => $value) {
+            if (!is_array($value)) {
+                continue;
+            }
+
+            $rangeKeys = array_intersect(array_keys($value), ['$gte', '$gt', '$lte', '$lt']);
+            if (empty($rangeKeys)) {
+                continue;
+            }
+
+            $min = '-inf';
+            $max = '+inf';
+
+            if (isset($value['$gte'])) {
+                $min = (string) $value['$gte'];
+            } elseif (isset($value['$gt'])) {
+                $min = '(' . $value['$gt'];
+            }
+
+            if (isset($value['$lte'])) {
+                $max = (string) $value['$lte'];
+            } elseif (isset($value['$lt'])) {
+                $max = '(' . $value['$lt'];
+            }
+
+            // Use _numeric alias (auto-created for HASH int/float, must be explicit for JSON)
+            $numericAlias = $property . '_numeric';
+            $rangeFilters[$property] = sprintf('@%s:[%s %s]', $numericAlias, $min, $max);
+            unset($criteria[$property]);
+        }
+
+        return $rangeFilters;
     }
 
     protected function convertSpecial(array|string &$criteria): void

@@ -20,8 +20,14 @@ with Redis.
 - High performance and scalability with Redis®
 - Support for Redis JSON module
 - Automatic schema generation
-- Search and query capabilities
+- Search and query capabilities with range filters
 - Auto-expiration of your objects
+- PHP enum support (backed enums)
+- Identity map and dirty tracking with partial updates
+- Atomic transactions (MULTI/EXEC)
+- Pagination with total count
+- GEO queries (radius search)
+- Pipeline batch reads
 - API Platform support (beta)
 
 ## Requirements ⚙️
@@ -36,6 +42,7 @@ with Redis.
 ## Supported types ✅
 
 - scalar (string, int, float, bool, double)
+- PHP backed enums (string and int)
 - timestamp
 - json
 - null
@@ -171,6 +178,113 @@ $users = $this->redisObjectManager->getRepository(User::class)->findAll();
 $users = $this->redisObjectManager->getRepository(User::class)->findBy(['name' => 'John Doe'], ['createdAt' => 'DESC'], 10);
 ```
 
+
+## Enum Support 🏷️
+
+PHP backed enums are natively supported:
+
+```php
+enum Status: string
+{
+    case ACTIVE = 'active';
+    case INACTIVE = 'inactive';
+}
+
+#[RedisOm\Entity]
+class Task
+{
+    #[RedisOm\Id]
+    #[RedisOm\Property]
+    public int $id;
+
+    #[RedisOm\Property(index: true)]
+    public Status $status;
+}
+```
+
+Search by enum value:
+```php
+$activeTasks = $repository->findBy(['status' => 'active']);
+```
+
+## Range Queries 🔢
+
+Use MongoDB-style operators for numeric range searches:
+
+```php
+// Age between 18 and 65
+$users = $repository->findBy(['age' => ['$gte' => 18, '$lte' => 65]]);
+
+// Price greater than 100
+$products = $repository->findBy(['price' => ['$gt' => 100]]);
+
+// Score less than 50
+$results = $repository->findBy(['score' => ['$lt' => 50]]);
+
+// Combine with exact match
+$results = $repository->findBy(['name' => 'John', 'age' => ['$gte' => 18]]);
+```
+
+Supported operators: `$gte` (>=), `$gt` (>), `$lte` (<=), `$lt` (<).
+
+> **Note:** Range queries work automatically with HASH format (NUMERIC index is auto-generated for int/float).
+> For JSON format, you must explicitly declare a NUMERIC index: `#[Property(index: ['age' => 'NUMERIC'])]`.
+
+## Pagination 📄
+
+```php
+$paginator = $repository->paginate(
+    criteria: ['status' => 'active'],
+    page: 2,
+    itemsPerPage: 20,
+    orderBy: ['createdAt' => 'DESC']
+);
+
+$paginator->getItems();        // Current page items
+$paginator->getTotalItems();   // Total matching count
+$paginator->getTotalPages();   // Total number of pages
+$paginator->getCurrentPage();  // Current page number
+$paginator->hasNextPage();     // bool
+$paginator->hasPreviousPage(); // bool
+
+// Iterable
+foreach ($paginator as $item) {
+    // ...
+}
+```
+
+## Partial Updates (Merge) ⚡
+
+Instead of re-persisting the entire object, use `merge()` to only update changed fields:
+
+```php
+$user = $objectManager->find(User::class, 1);
+$user->name = 'New Name'; // Only this field changed
+
+$objectManager->merge($user);  // Detects change, updates only 'name'
+$objectManager->flush();
+```
+
+For new objects (not loaded via `find()`), `merge()` falls back to a full `persist()`.
+
+## Batch Reads (Pipeline) 🚀
+
+Load multiple objects by ID in a single Redis pipeline call:
+
+```php
+$users = $repository->findMultiple([1, 2, 3, 4, 5]);
+```
+
+## GEO Queries 🌍
+
+Search objects within a geographic radius (requires a GEO-indexed property):
+
+```php
+#[RedisOm\Property(index: ['location' => 'GEO'])]
+public string $location; // Format: "longitude,latitude"
+
+$nearby = $repository->findByGeoRadius('location', 2.3522, 48.8566, 10, 'km');
+```
 
 ## Advanced documentation 📚
 - [Installation](https://github.com/clementtalleu/php-redis-om/blob/main/docs/installation.md)

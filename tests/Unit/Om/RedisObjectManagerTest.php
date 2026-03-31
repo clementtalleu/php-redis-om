@@ -173,6 +173,60 @@ final class RedisObjectManagerTest extends TestCase
         $this->assertNotNull($this->objectManager->getEventManager());
     }
 
+    public function testIdentityMapReturnsSameObjectOnSecondFind(): void
+    {
+        $this->redisClient->expects($this->once())
+            ->method('hGetAll')
+            ->willReturn(['id' => '1', 'name' => 'cached']);
+
+        $result1 = $this->objectManager->find(OMTestHashEntity::class, 1);
+        $result2 = $this->objectManager->find(OMTestHashEntity::class, 1);
+
+        $this->assertSame($result1, $result2);
+    }
+
+    public function testIdentityMapPopulatedByPersist(): void
+    {
+        $this->redisClient->method('hMSet');
+        $this->redisClient->expects($this->never())->method('hGetAll');
+
+        $object = new OMTestHashEntity();
+        $object->id = 42;
+        $object->name = 'persisted';
+
+        $this->objectManager->persist($object);
+        $this->objectManager->flush();
+
+        $found = $this->objectManager->find(OMTestHashEntity::class, 42);
+        $this->assertSame($object, $found);
+    }
+
+    public function testIdentityMapClearedOnClear(): void
+    {
+        $this->redisClient->expects($this->exactly(2))
+            ->method('hGetAll')
+            ->willReturn(['id' => '1', 'name' => 'test']);
+
+        $this->objectManager->find(OMTestHashEntity::class, 1);
+        $this->objectManager->clear();
+        $this->objectManager->find(OMTestHashEntity::class, 1);
+    }
+
+    public function testIdentityMapRemovedOnRemove(): void
+    {
+        $this->redisClient->method('del');
+        $this->redisClient->expects($this->exactly(2))
+            ->method('hGetAll')
+            ->willReturn(['id' => '1', 'name' => 'test']);
+
+        $result = $this->objectManager->find(OMTestHashEntity::class, 1);
+        $this->objectManager->remove($result);
+        $this->objectManager->flush();
+
+        // Should hit Redis again since removed from identity map
+        $this->objectManager->find(OMTestHashEntity::class, 1);
+    }
+
     public function testPersistWithNullIdGeneratesOne(): void
     {
         $this->redisClient->method('hMSet');

@@ -21,6 +21,7 @@ use Talleu\RedisOm\Om\Persister\HashModel\HashPersister;
 use Talleu\RedisOm\Om\Persister\JsonModel\JsonPersister;
 use Talleu\RedisOm\Om\Persister\ObjectToPersist;
 use Talleu\RedisOm\Om\Persister\PersisterInterface;
+use Talleu\RedisOm\Om\Persister\PersisterOperations;
 use Talleu\RedisOm\Om\Repository\RepositoryInterface;
 
 final class RedisObjectManager implements RedisObjectManagerInterface
@@ -30,6 +31,15 @@ final class RedisObjectManager implements RedisObjectManagerInterface
 
     /** @var array<string, array<string, ObjectToPersist[]>> */
     protected array $objectsToFlush = [];
+
+    /** @var array<string, Entity> */
+    private array $entityMapperCache = [];
+
+    /** @var array<string, array<string|int, object>> Identity map: className -> id -> object */
+    private array $identityMap = [];
+
+    /** @var array<string, array> Snapshot of converted data at load time: "class:id" -> converted array */
+    private array $snapshots = [];
 
     protected ?KeyGenerator $keyGenerator = null;
     private RedisClientInterface $redisClient;
@@ -60,10 +70,67 @@ final class RedisObjectManager implements RedisObjectManagerInterface
         $objectToPersist = $persister->persist(objectMapper: $objectMapper, object: $object);
         $this->objectsToFlush[$objectToPersist->persisterClass][$objectToPersist->operation][$objectToPersist->redisKey] = $objectToPersist;
 
+        // Register in identity map
+        $identifier = $this->keyGenerator->getIdentifier(new \ReflectionClass($object));
+        $id = $object->{$identifier->getName()};
+        if ($id !== null) {
+            $this->identityMap[get_class($object)][$id] = $object;
+        }
+
         $this->eventManager->dispatchEvent(
             Events::POST_PERSIST,
             new LifecycleEventArgs($object, $this)
         );
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function merge(object $object): void
+    {
+        $objectMapper = $this->getEntityMapper($object);
+        $identifierProperty = $this->keyGenerator->getIdentifier(new \ReflectionClass($object));
+        $id = $object->{$identifierProperty->getName()};
+        $className = get_class($object);
+        $snapshotKey = $className . ':' . $id;
+
+        $currentData = $objectMapper->converter->convert($object);
+
+        // If we have a snapshot, compute diff
+        if (isset($this->snapshots[$snapshotKey])) {
+            $changedFields = [];
+            foreach ($currentData as $field => $value) {
+                if (!array_key_exists($field, $this->snapshots[$snapshotKey]) || $this->snapshots[$snapshotKey][$field] !== $value) {
+                    $changedFields[$field] = $value;
+                }
+            }
+
+            if ($changedFields === []) {
+                return; // Nothing changed
+            }
+        } else {
+            // No snapshot = full persist (new object or not loaded via find)
+            $this->persist($object);
+            return;
+        }
+
+        $persister = $this->registerPersister($objectMapper);
+        $key = sprintf('%s:%s', $objectMapper->prefix ?: $className, $id);
+
+        $objectToMerge = new ObjectToPersist(
+            persisterClass: get_class($persister),
+            operation: PersisterOperations::OPERATION_MERGE->value,
+            redisKey: $key,
+            converter: $objectMapper->converter,
+            value: $object,
+            changedFields: $changedFields,
+        );
+
+        $this->objectsToFlush[$objectToMerge->persisterClass][$objectToMerge->operation][$objectToMerge->redisKey] = $objectToMerge;
+
+        // Update snapshot
+        $this->snapshots[$snapshotKey] = $currentData;
+        $this->identityMap[$className][$id] = $object;
     }
 
     /**
@@ -82,6 +149,11 @@ final class RedisObjectManager implements RedisObjectManagerInterface
         $objectToRemove = $persister->delete($objectMapper, $object);
         $this->objectsToFlush[$objectToRemove->persisterClass][$objectToRemove->operation][$objectToRemove->redisKey] = $objectToRemove;
 
+        // Remove from identity map
+        $identifier = $this->keyGenerator->getIdentifier(new \ReflectionClass($object));
+        $id = $object->{$identifier->getName()};
+        unset($this->identityMap[get_class($object)][$id]);
+
         $this->eventManager->dispatchEvent(
             Events::POST_REMOVE,
             new LifecycleEventArgs($object, $this)
@@ -93,17 +165,28 @@ final class RedisObjectManager implements RedisObjectManagerInterface
      */
     public function flush(): void
     {
-        foreach ($this->objectsToFlush as $persisterClassName => $objectsByOperation) {
-            foreach ($objectsByOperation as $operation => $objectToPersists) {
-                $this->persisters[$persisterClassName]->{$operation}($objectToPersists);
-                foreach ($objectToPersists as $objectToPersist) {
-                    $this->eventManager->dispatchEvent(
-                        Events::POST_FLUSH,
-                        new LifecycleEventArgs($objectToPersist->value, $this)
-                    );
+        if ($this->objectsToFlush === []) {
+            return;
+        }
+
+        $this->redisClient->multi();
+        try {
+            foreach ($this->objectsToFlush as $persisterClassName => $objectsByOperation) {
+                foreach ($objectsByOperation as $operation => $objectToPersists) {
+                    $this->persisters[$persisterClassName]->{$operation}($objectToPersists);
+                    foreach ($objectToPersists as $objectToPersist) {
+                        $this->eventManager->dispatchEvent(
+                            Events::POST_FLUSH,
+                            new LifecycleEventArgs($objectToPersist->value, $this)
+                        );
+                    }
+                    unset($this->objectsToFlush[$persisterClassName][$operation]);
                 }
-                unset($this->objectsToFlush[$persisterClassName][$operation]);
             }
+            $this->redisClient->exec();
+        } catch (\Throwable $e) {
+            $this->redisClient->discard();
+            throw $e;
         }
     }
 
@@ -112,9 +195,22 @@ final class RedisObjectManager implements RedisObjectManagerInterface
      */
     public function find(string $className, $id): ?object
     {
-        $objectMapper = $this->getEntityMapper($className);
+        // Check identity map first
+        if (isset($this->identityMap[$className][$id])) {
+            return $this->identityMap[$className][$id];
+        }
 
-        return $objectMapper->repository->find((string)$id);
+        $objectMapper = $this->getEntityMapper($className);
+        $object = $objectMapper->repository->find((string)$id);
+
+        // Store in identity map and take snapshot for dirty tracking
+        if ($object !== null) {
+            $this->identityMap[$className][$id] = $object;
+            $snapshotKey = $className . ':' . $id;
+            $this->snapshots[$snapshotKey] = $objectMapper->converter->convert($object);
+        }
+
+        return $object;
     }
 
     /**
@@ -123,6 +219,8 @@ final class RedisObjectManager implements RedisObjectManagerInterface
     public function clear(): void
     {
         $this->objectsToFlush = [];
+        $this->identityMap = [];
+        $this->snapshots = [];
     }
 
     /**
@@ -217,7 +315,13 @@ final class RedisObjectManager implements RedisObjectManagerInterface
 
     protected function getEntityMapper(string|object $object): Entity
     {
-        $reflectionClass = new \ReflectionClass($object);
+        $className = is_string($object) ? $object : get_class($object);
+
+        if (array_key_exists($className, $this->entityMapperCache)) {
+            return $this->entityMapperCache[$className];
+        }
+
+        $reflectionClass = new \ReflectionClass($className);
         $attributes = $reflectionClass->getAttributes(Entity::class);
         if ($attributes === []) {
             throw new \InvalidArgumentException('The object must be annotated with #[RedisOm\Entity] attribute');
@@ -232,6 +336,8 @@ final class RedisObjectManager implements RedisObjectManagerInterface
 
         $redisEntity->repository->setRedisClient($this->redisClient);
         $redisEntity->repository->setFormat($redisEntity->format);
+
+        $this->entityMapperCache[$className] = $redisEntity;
 
         return $redisEntity;
     }

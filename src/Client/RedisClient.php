@@ -71,6 +71,14 @@ final class RedisClient implements RedisClientInterface
     /**
      * @inheritdoc
      */
+    public function hSet(string $key, string $field, string $value): void
+    {
+        $this->redis->hSet(Converter::prefix($key), $field, $value);
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function hGetAll(string $key): array
     {
         $result = $this->redis->hGetAll(Converter::prefix($key));
@@ -128,6 +136,14 @@ final class RedisClient implements RedisClientInterface
         if (!$this->redis->rawCommand(RedisCommands::JSON_SET->value, Converter::prefix($key), $path, $value)) {
             $this->handleError(__METHOD__, $this->redis->getLastError());
         }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function jsonSetProperty(string $key, string $property, string $value): void
+    {
+        $this->redis->rawCommand(RedisCommands::JSON_SET->value, Converter::prefix($key), '$.' . $property, $value);
     }
 
     /**
@@ -315,6 +331,70 @@ final class RedisClient implements RedisClientInterface
     /**
      * @inheritdoc
      */
+    public function hGetAllMultiple(array $keys): array
+    {
+        $pipeline = $this->redis->pipeline();
+        foreach ($keys as $key) {
+            $pipeline->hGetAll(Converter::prefix($key));
+        }
+        $results = $pipeline->exec();
+
+        $data = [];
+        foreach ($keys as $i => $key) {
+            if (!empty($results[$i])) {
+                $data[$key] = $results[$i];
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function jsonGetMultiple(array $keys): array
+    {
+        $pipeline = $this->redis->pipeline();
+        foreach ($keys as $key) {
+            $pipeline->rawCommand(RedisCommands::JSON_GET->value, Converter::prefix($key));
+        }
+        $results = $pipeline->exec();
+
+        $data = [];
+        foreach ($keys as $i => $key) {
+            $data[$key] = $results[$i] !== false ? $results[$i] : null;
+        }
+
+        return $data;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function multi(): void
+    {
+        $this->redis->multi();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function exec(): void
+    {
+        $this->redis->exec();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function discard(): void
+    {
+        $this->redis->discard();
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function keys(string $pattern): array
     {
         return $this->redis->keys($pattern);
@@ -323,11 +403,11 @@ final class RedisClient implements RedisClientInterface
     /**
      * @inheritdoc
      */
-    public function search(string $prefixKey, array $search, array $orderBy, ?string $format = RedisFormat::HASH->value, ?int $numberOfResults = null, int $offset = 0, ?string $searchType = Property::INDEX_TAG): array
+    public function search(string $prefixKey, array $search, array $orderBy, ?string $format = RedisFormat::HASH->value, ?int $numberOfResults = null, int $offset = 0, ?string $searchType = Property::INDEX_TAG, array $rangeFilters = []): array
     {
         $arguments = [RedisCommands::SEARCH->value, Converter::prefix($prefixKey)];
 
-        if ($search === []) {
+        if ($search === [] && $rangeFilters === []) {
             $arguments[] = '*';
         } else {
             $criteria = '';
@@ -340,6 +420,10 @@ final class RedisClient implements RedisClientInterface
                 } else {
                     $criteria .= sprintf('@%s:%s', $property, $value);
                 }
+            }
+
+            foreach ($rangeFilters as $rangeQuery) {
+                $criteria .= $rangeQuery;
             }
 
             $arguments[] = $criteria;
