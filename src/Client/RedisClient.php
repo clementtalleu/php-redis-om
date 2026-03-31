@@ -61,7 +61,7 @@ final class RedisClient implements RedisClientInterface
     {
         $result = $this->redis->hget(Converter::prefix($key), $property);
 
-        if (!$result) {
+        if ($result === false) {
             $this->handleError(__METHOD__, $this->redis->getLastError());
         }
 
@@ -267,12 +267,14 @@ final class RedisClient implements RedisClientInterface
     {
         $keys = [];
         $iterator = null;
-        while ($iterator !== 0) {
+        do {
             $scans = $this->redis->scan($iterator, sprintf('%s*', Converter::prefix($prefixKey)));
-            foreach ($scans as $scan) {
-                $keys[] = $scan;
+            if ($scans !== false) {
+                foreach ($scans as $scan) {
+                    $keys[] = $scan;
+                }
             }
-        }
+        } while ($iterator > 0);
 
         return $keys;
     }
@@ -303,11 +305,11 @@ final class RedisClient implements RedisClientInterface
     public function expireTime(string $key): int
     {
         $timestamp = $this->redis->expireTime(Converter::prefix($key));
-        if (!$timestamp) {
+        if ($timestamp === false) {
             $this->handleError(__METHOD__, $this->redis->getLastError());
         }
 
-        return $timestamp;
+        return (int) $timestamp;
     }
 
     /**

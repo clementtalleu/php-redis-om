@@ -46,6 +46,7 @@ final class JsonRepository extends AbstractObjectRepository
 
         if (is_array($data) && array_key_exists('#type', $data)) {
             $valueType = $data['#type'];
+            unset($data['#type']);
         } elseif ($reflectionProperty->hasType()) {
             /** @var \ReflectionNamedType $propertyType */
             $propertyType = $reflectionProperty->getType();
