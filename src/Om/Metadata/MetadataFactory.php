@@ -62,8 +62,18 @@ class MetadataFactory
                 continue;
             }
 
-            $associationClassName = $attributes[0]->getName();
-            $reflectionAssociation = new \ReflectionClass($associationClassName);
+            /** @var \ReflectionNamedType|null $propertyType */
+            $propertyType = $property->getType();
+            if ($propertyType === null || $propertyType->isBuiltin()) {
+                continue;
+            }
+
+            $typeName = $propertyType->getName();
+            if (!class_exists($typeName)) {
+                continue;
+            }
+
+            $reflectionAssociation = new \ReflectionClass($typeName);
             $attributesMapping = $reflectionAssociation->getAttributes(Entity::class);
             if ($attributesMapping !== []) {
                 $associations[] = $property->getName();

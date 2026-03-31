@@ -38,11 +38,11 @@ final class JsonObjectConverter extends AbstractObjectConverter
             }
 
             $convertedValue = $converter->convert($value);
+            $convertedData[$property->getName()] = $convertedValue;
+
             if ($converter instanceof JsonObjectConverter || $converter instanceof ArrayConverter || $converter instanceof StandardClassConverter) {
                 $convertedData[$property->getName()]['#type'] = $valueType;
             }
-
-            $convertedData[$property->getName()] = $convertedValue;
         }
 
         return $convertedData;
@@ -65,6 +65,7 @@ final class JsonObjectConverter extends AbstractObjectConverter
             $reflectionProperty = new \ReflectionProperty($type, $key);
             if (is_array($value) && array_key_exists('#type', $value)) {
                 $valueType = $value['#type'];
+                unset($value['#type']);
             } elseif ($reflectionProperty->hasType()) {
                 /** @var \ReflectionNamedType $propertyType */
                 $propertyType = $reflectionProperty->getType();

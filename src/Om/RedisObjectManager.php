@@ -135,6 +135,9 @@ final class RedisObjectManager implements RedisObjectManagerInterface
         $key = sprintf('%s:%s', $objectMapper->prefix ?: get_class($object), $object->{$identifier->getName()});
 
         $persisterClassName = get_class($this->registerPersister($objectMapper));
+        if (!array_key_exists($persisterClassName, $this->objectsToFlush)) {
+            return;
+        }
         foreach ($this->objectsToFlush[$persisterClassName] as $operation => $objectsToFlush) {
             foreach ($objectsToFlush as $redisKey => $objectToFlush) {
                 if ($redisKey === $key) {
@@ -198,6 +201,9 @@ final class RedisObjectManager implements RedisObjectManagerInterface
         $objectMapper = $this->getEntityMapper($object);
         $key = sprintf('%s:%s', $objectMapper->prefix ?: get_class($object), $object->{$identifier->getName()});
         $persisterClassName = get_class($this->registerPersister($objectMapper));
+        if (!array_key_exists($persisterClassName, $this->objectsToFlush)) {
+            return false;
+        }
         foreach ($this->objectsToFlush[$persisterClassName] as $operation => $objectsToFlush) {
             foreach ($objectsToFlush as $redisKey => $objectToFlush) {
                 if ($redisKey === $key) {

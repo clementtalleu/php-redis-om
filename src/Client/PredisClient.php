@@ -88,7 +88,7 @@ final class PredisClient implements RedisClientInterface
     {
         $result = $this->redis->hget(Converter::prefix($key), $property);
 
-        if (!$result) {
+        if ($result === null) {
             $this->handleError(__METHOD__, $this->getLastError());
         }
 
@@ -185,7 +185,7 @@ final class PredisClient implements RedisClientInterface
             return;
         }
 
-        $prefixKey = self::convertPrefix($prefixKey);
+        $prefixKey = Converter::prefix($prefixKey);
 
         $arguments = [
             RedisCommands::CREATE_INDEX->value,
@@ -232,7 +232,7 @@ final class PredisClient implements RedisClientInterface
     public function dropIndex(string $prefixKey): bool
     {
         try {
-            $key = self::convertPrefix($prefixKey);
+            $key = Converter::prefix($prefixKey);
             $this->redis->executeRaw([RedisCommands::DROP_INDEX->value, $key]);
         } catch (\RedisException) {
             return false;
@@ -278,16 +278,17 @@ final class PredisClient implements RedisClientInterface
     public function scanKeys(string $prefixKey): array
     {
         $keys = [];
-        $iterator = 0;
+        $cursor = 0;
         do {
-            $scans = $this->redis->scan($iterator, [sprintf('%s*', Converter::prefix($prefixKey))]);
-            if (!empty($scans)) {
-                foreach ($scans as $scan) {
+            /** @var array{0: string, 1: array} $result */
+            $result = $this->redis->scan($cursor, ['MATCH' => sprintf('%s*', Converter::prefix($prefixKey))]);
+            $cursor = (int) $result[0];
+            if (!empty($result[1])) {
+                foreach ($result[1] as $scan) {
                     $keys[] = $scan;
                 }
             }
-            /** @phpstan-ignore-next-line */
-        } while ($iterator !== 0);
+        } while ($cursor > 0);
 
         return $keys;
     }
@@ -314,10 +315,8 @@ final class PredisClient implements RedisClientInterface
 
     public function expireTime(string $key): int
     {
+        /** @var int $timestamp */
         $timestamp = $this->redis->expiretime(Converter::prefix($key));
-        if (!$timestamp) {
-            $this->handleError(__METHOD__, $this->getLastError());
-        }
 
         return $timestamp;
     }
@@ -335,7 +334,7 @@ final class PredisClient implements RedisClientInterface
      */
     public function search(string $prefixKey, array $search, array $orderBy, ?string $format = RedisFormat::HASH->value, ?int $numberOfResults = null, int $offset = 0, ?string $searchType = Property::INDEX_TAG): array
     {
-        $arguments = [RedisCommands::SEARCH->value, self::convertPrefix($prefixKey)];
+        $arguments = [RedisCommands::SEARCH->value, Converter::prefix($prefixKey)];
 
         if ($search === []) {
             $arguments[] = '*';
@@ -389,7 +388,7 @@ final class PredisClient implements RedisClientInterface
      */
     public function customSearch(string $prefixKey, string $query, string $format): array
     {
-        $arguments = [RedisCommands::SEARCH->value, self::convertPrefix($prefixKey), $query];
+        $arguments = [RedisCommands::SEARCH->value, Converter::prefix($prefixKey), $query];
 
         try {
             $result = call_user_func_array([$this->redis, 'executeRaw'], [$arguments]);
@@ -436,11 +435,6 @@ final class PredisClient implements RedisClientInterface
         }
 
         return $this->extractRedisData($result, $format, $numberOfResults);
-    }
-
-    public static function convertPrefix(string $key): string
-    {
-        return str_replace('\\', '_', $key);
     }
 
     private function handleError(string $command, ?string $errorMessage = 'Unknown error', ?\Throwable $previous = null): never

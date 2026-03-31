@@ -68,9 +68,9 @@ interface RedisObjectManagerInterface
      */
     public function contains(object $object): bool;
 
-    public function createIndex(object $object): void;
+    public function createIndex(object $object, ?string $fqcn = null, ?array $propertiesToIndex = []): void;
 
-    public function dropIndex(object $object): void;
+    public function dropIndex(object $object, ?string $fqcn = null): void;
 
     /**
      * Get the expiration datetime of an object

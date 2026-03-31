@@ -303,7 +303,7 @@ abstract class AbstractObjectRepository implements RepositoryInterface
                     $value = new \DateTime($value);
                 }
 
-                $criteria[$property] = strtotime($value->format(AbstractDateTimeConverter::FORMAT));
+                $criteria[$property] = $value->getTimestamp();
             }
         }
     }

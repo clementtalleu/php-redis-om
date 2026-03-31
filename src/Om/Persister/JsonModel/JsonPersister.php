@@ -20,6 +20,9 @@ final class JsonPersister extends AbstractPersister
         if (count($objectsToPersist) === 1) {
             $objectToPersist = reset($objectsToPersist);
             $this->redis->jsonSet(key: $objectToPersist->redisKey, value: \json_encode($objectToPersist->converter->convert($objectToPersist->value)));
+            if (null !== $objectToPersist->ttl) {
+                $this->redis->expire($objectToPersist->redisKey, $objectToPersist->ttl);
+            }
             return;
         }
 

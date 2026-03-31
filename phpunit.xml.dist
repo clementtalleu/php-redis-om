@@ -11,8 +11,20 @@
     </php>
 
     <testsuites>
-        <testsuite name="default">
-            <directory>tests</directory>
+        <testsuite name="unit">
+            <directory>tests/Unit</directory>
+        </testsuite>
+        <testsuite name="functional">
+            <directory>tests/Functionnal</directory>
+        </testsuite>
+        <testsuite name="api-platform">
+            <directory>tests/ApiPlatform</directory>
+        </testsuite>
+        <testsuite name="metadata">
+            <directory>tests/Metadata</directory>
+        </testsuite>
+        <testsuite name="console">
+            <directory>tests/Console</directory>
         </testsuite>
     </testsuites>
 
