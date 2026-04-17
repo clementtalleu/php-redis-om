@@ -9,7 +9,7 @@ use Talleu\RedisOm\Om\Mapping as RedisOm;
 abstract class AbstractDummy
 {
     #[RedisOm\Id]
-    #[RedisOm\Property(index: true)]
+    #[RedisOm\Property]
     public ?int $id = null;
 
     #[RedisOm\Property(index: true)]
