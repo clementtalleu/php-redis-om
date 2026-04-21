@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Talleu\RedisOm\Tests\Functionnal\Om\Repository\HashModel;
 
+use Talleu\RedisOm\Exception\BadIdentifierConfigurationException;
 use Talleu\RedisOm\Exception\BadPropertyException;
 use Talleu\RedisOm\Om\RedisObjectManager;
+use Talleu\RedisOm\Tests\Fixtures\Bar;
 use Talleu\RedisOm\Tests\Fixtures\Hash\DummyHash;
 use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
@@ -225,5 +227,83 @@ final class HashRepositoryTest extends RedisAbstractTestCase
 
         $object = $repository->findOneBy(['bar_id' => 2]);
         $this->assertEquals($object->bar->id, 2);
+    }
+
+    public function testFindByObjectCriterion()
+    {
+        static::emptyRedis();
+        static::generateIndex();
+        static::loadRedisFixtures();
+
+        $repository = $this->objectManager->getRepository(DummyHash::class);
+
+        $bar = new Bar();
+        $bar->id = 2;
+
+        $collection = $repository->findBy(['bar' => $bar]);
+        $this->assertNotEmpty($collection);
+        foreach ($collection as $dummy) {
+            $this->assertInstanceOf(DummyHash::class, $dummy);
+            $this->assertEquals(2, $dummy->bar->id);
+        }
+    }
+
+    public function testFindOneByObjectCriterion()
+    {
+        static::emptyRedis();
+        static::generateIndex();
+        static::loadRedisFixtures();
+
+        $repository = $this->objectManager->getRepository(DummyHash::class);
+
+        $bar = new Bar();
+        $bar->id = 2;
+
+        $object = $repository->findOneBy(['bar' => $bar]);
+        $this->assertInstanceOf(DummyHash::class, $object);
+        $this->assertEquals(2, $object->bar->id);
+    }
+
+    public function testCountByObjectCriterion()
+    {
+        static::emptyRedis();
+        static::generateIndex();
+        static::loadRedisFixtures();
+
+        $repository = $this->objectManager->getRepository(DummyHash::class);
+
+        $bar = new Bar();
+        $bar->id = 2;
+
+        $this->assertSame(
+            $repository->count(['bar_id' => 2]),
+            $repository->count(['bar' => $bar]),
+        );
+    }
+
+    public function testFindByObjectCriterionWithNullIdThrows()
+    {
+        static::emptyRedis();
+        static::generateIndex();
+        static::loadRedisFixtures();
+
+        $repository = $this->objectManager->getRepository(DummyHash::class);
+
+        $bar = new Bar();
+
+        $this->expectException(BadIdentifierConfigurationException::class);
+        $repository->findBy(['bar' => $bar]);
+    }
+
+    public function testFindByObjectWithoutIdAttributeThrows()
+    {
+        static::emptyRedis();
+        static::generateIndex();
+        static::loadRedisFixtures();
+
+        $repository = $this->objectManager->getRepository(DummyHash::class);
+
+        $this->expectException(BadIdentifierConfigurationException::class);
+        $repository->findBy(['bar' => new \stdClass()]);
     }
 }

@@ -6,8 +6,10 @@ namespace Talleu\RedisOm\Om\Repository;
 
 use Talleu\RedisOm\Client\Helper\Converter;
 use Talleu\RedisOm\Client\RedisClientInterface;
+use Talleu\RedisOm\Exception\BadIdentifierConfigurationException;
 use Talleu\RedisOm\Om\Converters\AbstractDateTimeConverter;
 use Talleu\RedisOm\Om\Converters\ConverterInterface;
+use Talleu\RedisOm\Om\Mapping\Id;
 use Talleu\RedisOm\Om\Mapping\Property;
 use Talleu\RedisOm\Om\QueryBuilder;
 use Talleu\RedisOm\Om\RedisFormat;
@@ -39,6 +41,7 @@ abstract class AbstractObjectRepository implements RepositoryInterface
     public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = 0): array
     {
         $limit = $this->defineLimit($limit);
+        $this->convertObjects($criteria);
         $this->convertDates($criteria);
         $this->convertSpecial($criteria);
         $data = $this->redisClient->search(
@@ -85,6 +88,7 @@ abstract class AbstractObjectRepository implements RepositoryInterface
     private function findByPattern(array $criteria, string $pattern, ?array $orderBy, ?int $limit, ?int $offset): array
     {
         $limit = $this->defineLimit($limit);
+        $this->convertObjects($criteria);
         $this->convertDates($criteria);
         $this->convertSpecial($criteria);
 
@@ -164,6 +168,7 @@ abstract class AbstractObjectRepository implements RepositoryInterface
      */
     public function findOneBy(array $criteria, ?array $orderBy = null): ?object
     {
+        $this->convertObjects($criteria);
         $this->convertDates($criteria);
         $this->convertSpecial($criteria);
         $data = $this->redisClient->search($this->prefix, $criteria, $orderBy ?? [], $this->format, 1);
@@ -180,6 +185,7 @@ abstract class AbstractObjectRepository implements RepositoryInterface
      */
     public function findOneByLike(array $criteria, ?array $orderBy = null): ?object
     {
+        $this->convertObjects($criteria);
         $this->convertDates($criteria);
         $this->convertSpecial($criteria);
         foreach ($criteria as $property => $value) {
@@ -201,6 +207,8 @@ abstract class AbstractObjectRepository implements RepositoryInterface
      */
     public function count(array $criteria = []): int
     {
+        $this->convertObjects($criteria);
+
         return $this->redisClient->count($this->prefix, $criteria);
     }
 
@@ -209,6 +217,7 @@ abstract class AbstractObjectRepository implements RepositoryInterface
      */
     public function countByLike(array $criteria = []): int
     {
+        $this->convertObjects($criteria);
         $this->convertDates($criteria);
         $this->convertSpecial($criteria);
         foreach ($criteria as $property => $value) {
@@ -285,6 +294,61 @@ abstract class AbstractObjectRepository implements RepositoryInterface
             $criteria[$property] = str_replace([':'], ['\:'], $value);
             $criteria[$property] = str_replace([' '], ['\ '], $criteria[$property]);
         }
+    }
+
+    /**
+     * Resolves object values in criteria to their identifier.
+     *
+     * Given `['author' => $userObject]`, rewrites the entry to
+     * `['author_id' => $userObject->id]` so the existing RediSearch
+     * index (created as `{property}_{subProperty}`) matches.
+     *
+     * The identifier property is the one marked with #[Id] on the value's class.
+     */
+    protected function convertObjects(array &$criteria): void
+    {
+        foreach ($criteria as $property => $value) {
+            if (!is_object($value) || $value instanceof \DateTimeInterface) {
+                continue;
+            }
+
+            $idPropertyName = $this->resolveIdPropertyName($value);
+            $idValue = $this->extractIdValue($value, $idPropertyName);
+
+            if ($idValue === null) {
+                throw new BadIdentifierConfigurationException(sprintf(
+                    'Cannot use object of class %s as criterion "%s": its identifier property "%s" is null.',
+                    get_class($value),
+                    $property,
+                    $idPropertyName,
+                ));
+            }
+
+            unset($criteria[$property]);
+            $criteria[$property . '_' . $idPropertyName] = $idValue;
+        }
+    }
+
+    private function resolveIdPropertyName(object $object): string
+    {
+        $reflectionClass = new \ReflectionClass($object);
+        foreach ($reflectionClass->getProperties() as $property) {
+            if ($property->getAttributes(Id::class) !== []) {
+                return $property->getName();
+            }
+        }
+
+        throw new BadIdentifierConfigurationException(sprintf(
+            'Cannot use object of class %s as a criterion: no property is marked with #[Id].',
+            $reflectionClass->getName(),
+        ));
+    }
+
+    private function extractIdValue(object $object, string $idPropertyName): mixed
+    {
+        $reflectionProperty = new \ReflectionProperty($object, $idPropertyName);
+
+        return $reflectionProperty->getValue($object);
     }
 
     protected function convertDates(array &$criteria): void

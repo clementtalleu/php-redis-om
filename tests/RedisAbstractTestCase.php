@@ -14,6 +14,15 @@ use Talleu\RedisOm\Tests\Fixtures\Hash\DummyHash;
 
 class RedisAbstractTestCase extends ApiTestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // API Platform >=4.1 deprecates implicit kernel boot inside createClient();
+        // in 5.0 it won't boot at all. Boot it explicitly.
+        static::bootKernel();
+    }
+
     public static function createRedisClient(): RedisClientInterface
     {
         return (new Client())->redisClient;
