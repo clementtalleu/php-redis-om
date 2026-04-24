@@ -51,4 +51,20 @@ final class JsonPersister extends AbstractPersister
             $this->redis->jsonDel($objectToRemove->redisKey);
         }
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function doMerge(array $objectsToMerge): void
+    {
+        foreach ($objectsToMerge as $objectToMerge) {
+            if ($objectToMerge->changedFields === null) {
+                continue;
+            }
+
+            foreach ($objectToMerge->changedFields as $field => $value) {
+                $this->redis->jsonSetProperty($objectToMerge->redisKey, $field, \json_encode($value));
+            }
+        }
+    }
 }

@@ -17,6 +17,11 @@ use Talleu\RedisOm\Om\Mapping as RedisOm;
 
 final class ConverterFactoryTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        ConverterFactory::clearCache();
+    }
+
     public function testGetConverterForInt(): void
     {
         $converter = ConverterFactory::getConverter('int', 42);

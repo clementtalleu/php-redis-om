@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Talleu\RedisOm\Client;
 
 use Predis\Client as Predis;
+use Predis\Command\RawCommand;
 use Predis\Connection\StreamConnection;
 use Talleu\RedisOm\Client\Helper\Converter;
 use Talleu\RedisOm\Command\PropertyToIndex;
@@ -76,6 +77,14 @@ final class PredisClient implements RedisClientInterface
     /**
      * @inheritdoc
      */
+    public function hSet(string $key, string $field, string $value): void
+    {
+        $this->redis->hset(Converter::prefix($key), $field, $value);
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function hGetAll(string $key): array
     {
         return $this->redis->hgetall(Converter::prefix($key));
@@ -141,6 +150,14 @@ final class PredisClient implements RedisClientInterface
         if (!$this->redis->executeRaw([RedisCommands::JSON_SET->value, Converter::prefix($key), $path, $value])) {
             $this->handleError(__METHOD__, $this->getLastError());
         }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function jsonSetProperty(string $key, string $property, string $value): void
+    {
+        $this->redis->executeRaw([RedisCommands::JSON_SET->value, Converter::prefix($key), '$.' . $property, $value]);
     }
 
     /**
@@ -324,6 +341,72 @@ final class PredisClient implements RedisClientInterface
     /**
      * @inheritdoc
      */
+    public function hGetAllMultiple(array $keys): array
+    {
+        $pipeline = $this->redis->pipeline();
+        foreach ($keys as $key) {
+            $pipeline->hgetall(Converter::prefix($key));
+        }
+        $results = $pipeline->execute();
+
+        $data = [];
+        foreach ($keys as $i => $key) {
+            if (!empty($results[$i])) {
+                $data[$key] = $results[$i];
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function jsonGetMultiple(array $keys): array
+    {
+        $results = $this->redis->pipeline(function ($pipeline) use ($keys) {
+            foreach ($keys as $key) {
+                // Predis pipelines have no executeRaw(); queue a RawCommand via executeCommand()
+                // so we can invoke JSON.GET (a non-core command) without the factory resolving it.
+                $pipeline->executeCommand(new RawCommand(RedisCommands::JSON_GET->value, [Converter::prefix($key)]));
+            }
+        });
+
+        $data = [];
+        foreach ($keys as $i => $key) {
+            $data[$key] = $results[$i] !== false ? $results[$i] : null;
+        }
+
+        return $data;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function multi(): void
+    {
+        $this->redis->multi();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function exec(): void
+    {
+        $this->redis->exec();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function discard(): void
+    {
+        $this->redis->discard();
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function keys(string $pattern): array
     {
         return $this->redis->keys($pattern);
@@ -332,11 +415,11 @@ final class PredisClient implements RedisClientInterface
     /**
      * @inheritdoc
      */
-    public function search(string $prefixKey, array $search, array $orderBy, ?string $format = RedisFormat::HASH->value, ?int $numberOfResults = null, int $offset = 0, ?string $searchType = Property::INDEX_TAG): array
+    public function search(string $prefixKey, array $search, array $orderBy, ?string $format = RedisFormat::HASH->value, ?int $numberOfResults = null, int $offset = 0, ?string $searchType = Property::INDEX_TAG, array $rangeFilters = []): array
     {
         $arguments = [RedisCommands::SEARCH->value, Converter::prefix($prefixKey)];
 
-        if ($search === []) {
+        if ($search === [] && $rangeFilters === []) {
             $arguments[] = '*';
         } else {
             $criteria = '';
@@ -349,6 +432,10 @@ final class PredisClient implements RedisClientInterface
                 } else {
                     $criteria .= sprintf('@%s:%s', $property, $value);
                 }
+            }
+
+            foreach ($rangeFilters as $rangeQuery) {
+                $criteria .= $rangeQuery;
             }
 
             $arguments[] = $criteria;

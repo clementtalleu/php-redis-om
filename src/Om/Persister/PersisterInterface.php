@@ -32,4 +32,10 @@ interface PersisterInterface
      * Deletes an object from redis.
      */
     public function doDelete(array $objectsToRemove): void;
+
+    /**
+     * @param ObjectToPersist[] $objectsToMerge
+     * Partially update objects in redis (only changed fields).
+     */
+    public function doMerge(array $objectsToMerge): void;
 }

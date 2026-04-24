@@ -19,7 +19,16 @@ interface RedisObjectManagerInterface
     public function remove(object $object): void;
 
     /**
+     * Merge an object: only persist changed properties (partial update).
+     * The object must have been previously loaded via find().
+     */
+    public function merge(object $object): void;
+
+    /**
      * Get object by class name (FQCN) and id.
+     * @template T of object
+     * @param class-string<T> $className
+     * @return T|null
      */
     public function find(string $className, $id): ?object;
 
@@ -45,6 +54,9 @@ interface RedisObjectManagerInterface
 
     /**
      * Get the repository for a given class name.
+     * @template T of object
+     * @param class-string<T> $className
+     * @return RepositoryInterface<T>
      */
     public function getRepository(string $className): RepositoryInterface;
 

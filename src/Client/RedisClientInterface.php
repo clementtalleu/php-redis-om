@@ -21,6 +21,11 @@ interface RedisClientInterface
     public function hMSet(string $key, array $data): void;
 
     /**
+     * Set a single field in a hash.
+     */
+    public function hSet(string $key, string $field, string $value): void;
+
+    /**
      * Get all properties of a hash object from the Redis datastore by given key.
      */
     public function hGetAll(string $key): array;
@@ -49,6 +54,11 @@ interface RedisClientInterface
      * Set a JSON object to the Redis datastore by given key.
      */
     public function jsonSet(string $key, ?string $path = '$', ?string $value = '{}'): void;
+
+    /**
+     * Set a specific property of a JSON object.
+     */
+    public function jsonSetProperty(string $key, string $property, string $value): void;
 
     /**
      * Set multiple JSON objects to the Redis datastore.
@@ -80,7 +90,10 @@ interface RedisClientInterface
     /**
      * Search objects by given prefix key and criterias.
      */
-    public function search(string $prefixKey, array $search, array $orderBy, ?string $format = RedisFormat::HASH->value, ?int $numberOfResults = null, int $offset = 0, ?string $searchType = Property::INDEX_TAG): array;
+    /**
+     * @param array<string, string> $rangeFilters Pre-built NUMERIC range queries keyed by property
+     */
+    public function search(string $prefixKey, array $search, array $orderBy, ?string $format = RedisFormat::HASH->value, ?int $numberOfResults = null, int $offset = 0, ?string $searchType = Property::INDEX_TAG, array $rangeFilters = []): array;
 
     /**
      * Search objects by given prefix and a complete custom query command.
@@ -111,4 +124,33 @@ interface RedisClientInterface
      * Get the expiration time as timestamp
      */
     public function expireTime(string $key): int;
+
+    /**
+     * Retrieve multiple hash objects in a single pipeline call.
+     * @param string[] $keys
+     * @return array<string, array>
+     */
+    public function hGetAllMultiple(array $keys): array;
+
+    /**
+     * Retrieve multiple JSON objects in a single pipeline call.
+     * @param string[] $keys
+     * @return array<string, string|null>
+     */
+    public function jsonGetMultiple(array $keys): array;
+
+    /**
+     * Begin a Redis transaction (MULTI).
+     */
+    public function multi(): void;
+
+    /**
+     * Execute a Redis transaction (EXEC).
+     */
+    public function exec(): void;
+
+    /**
+     * Discard a Redis transaction (DISCARD).
+     */
+    public function discard(): void;
 }

@@ -104,6 +104,25 @@ final class GenerateSchema
                     continue;
                 }
 
+                // Backed enums indexed based on backing type and storage format
+                if (is_subclass_of($propertyType, \BackedEnum::class)) {
+                    $reflectionEnum = new \ReflectionEnum($propertyType);
+                    $backingType = $reflectionEnum->getBackingType()?->getName();
+
+                    if ($backingType === 'string') {
+                        // String enums: TAG + TEXT for both HASH and JSON
+                        $prefix = $format === RedisFormat::JSON->value ? '$.' : '';
+                        $propertiesToIndex[] = new PropertyToIndex($prefix . $propertyName, $propertyName, Property::INDEX_TAG);
+                        $propertiesToIndex[] = new PropertyToIndex($prefix . $propertyName, $propertyName . '_text', Property::INDEX_TEXT);
+                    } elseif ($backingType === 'int' && $format === RedisFormat::HASH->value) {
+                        // Int enums in HASH: TAG + NUMERIC (Redis auto-parses strings)
+                        $propertiesToIndex[] = new PropertyToIndex($propertyName, $propertyName, Property::INDEX_TAG);
+                        $propertiesToIndex[] = new PropertyToIndex($propertyName, $propertyName . '_numeric', Property::INDEX_NUMERIC);
+                    }
+                    // Int enums in JSON: not indexable (stored as JSON number, incompatible with TAG/TEXT)
+                    continue;
+                }
+
                 if (in_array($propertyType, AbstractDateTimeConverter::DATETYPES_NAMES)) {
                     if ($format === RedisFormat::HASH->value) {
                         $propertiesToIndex[] = new PropertyToIndex("$propertyName#timestamp", $propertyName, Property::INDEX_TAG);
@@ -115,7 +134,12 @@ final class GenerateSchema
                 } elseif ($propertyType === 'int' || $propertyType === 'float') {
                     if ($format === RedisFormat::HASH->value) {
                         $propertiesToIndex[] = new PropertyToIndex($propertyName, $propertyName, Property::INDEX_TAG);
+                        $propertiesToIndex[] = new PropertyToIndex($propertyName, $propertyName . '_numeric', Property::INDEX_NUMERIC);
                     } else {
+                        // JSON: scalar values are stored as strings by ScalarConverter, which makes
+                        // automatic NUMERIC indexing unreliable (RediSearch rejects string values at
+                        // a NUMERIC path). Users who need numeric sort/range on JSON must declare it
+                        // explicitly via #[Property(index: [... => 'NUMERIC'])] on numeric data.
                         $propertiesToIndex[] = new PropertyToIndex('$.' . $propertyName, $propertyName, Property::INDEX_TAG);
                     }
                 } elseif (class_exists($propertyType)) {

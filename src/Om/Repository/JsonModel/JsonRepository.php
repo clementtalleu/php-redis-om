@@ -29,6 +29,24 @@ final class JsonRepository extends AbstractObjectRepository
     /**
      * @inheritdoc
      */
+    public function findMultiple(array $identifiers): array
+    {
+        $keys = array_map(fn ($id) => "$this->prefix:$id", $identifiers);
+        $results = $this->redisClient->jsonGetMultiple($keys);
+
+        $objects = [];
+        foreach ($results as $json) {
+            if ($json !== null) {
+                $objects[] = $this->converter->revert(\json_decode($json, true), $this->className);
+            }
+        }
+
+        return $objects;
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function getPropertyValue($identifier, string $property): mixed
     {
         try {

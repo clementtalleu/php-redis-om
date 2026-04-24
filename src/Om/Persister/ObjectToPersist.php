@@ -15,6 +15,7 @@ final class ObjectToPersist
         public ?ConverterInterface $converter = null,
         public object|array|null   $value = null,
         public ?int                $ttl = null,
+        public ?array              $changedFields = null,
     ) {
     }
 }

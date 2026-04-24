@@ -31,4 +31,17 @@ final class HashPersister extends AbstractPersister
             $this->redis->del($objectToRemove->redisKey);
         }
     }
+
+    public function doMerge(array $objectsToMerge): void
+    {
+        foreach ($objectsToMerge as $objectToMerge) {
+            if ($objectToMerge->changedFields === null) {
+                continue;
+            }
+
+            foreach ($objectToMerge->changedFields as $field => $value) {
+                $this->redis->hSet($objectToMerge->redisKey, $field, (string) $value);
+            }
+        }
+    }
 }

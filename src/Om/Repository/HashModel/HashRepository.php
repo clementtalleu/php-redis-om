@@ -29,6 +29,22 @@ final class HashRepository extends AbstractObjectRepository
     /**
      * @inheritdoc
      */
+    public function findMultiple(array $identifiers): array
+    {
+        $keys = array_map(fn ($id) => "$this->prefix:$id", $identifiers);
+        $results = $this->redisClient->hGetAllMultiple($keys);
+
+        $objects = [];
+        foreach ($results as $data) {
+            $objects[] = $this->converter->revert($data, $this->className);
+        }
+
+        return $objects;
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function getPropertyValue($identifier, string $property): mixed
     {
         try {
