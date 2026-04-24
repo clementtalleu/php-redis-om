@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Talleu\RedisOm\Client;
 
 use Predis\Client as Predis;
+use Predis\Command\RawCommand;
 use Predis\Connection\StreamConnection;
 use Talleu\RedisOm\Client\Helper\Converter;
 use Talleu\RedisOm\Command\PropertyToIndex;
@@ -365,7 +366,9 @@ final class PredisClient implements RedisClientInterface
     {
         $results = $this->redis->pipeline(function ($pipeline) use ($keys) {
             foreach ($keys as $key) {
-                $pipeline->executeRaw([RedisCommands::JSON_GET->value, Converter::prefix($key)]);
+                // Predis pipelines have no executeRaw(); queue a RawCommand via executeCommand()
+                // so we can invoke JSON.GET (a non-core command) without the factory resolving it.
+                $pipeline->executeCommand(new RawCommand(RedisCommands::JSON_GET->value, [Converter::prefix($key)]));
             }
         });
 
