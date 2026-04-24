@@ -85,8 +85,8 @@ final class GenerateSchema
                 $propertyType = $propertyReflectionType->getName();
                 $propertyName = $reflectionProperty->getName();
 
-                // Index disabled
-                if (empty($property->index)) {
+                // Index disabled (Id properties are always indexed automatically)
+                if (empty($property->index) && $reflectionProperty->getAttributes(Id::class) === []) {
                     continue;
                 }
 
