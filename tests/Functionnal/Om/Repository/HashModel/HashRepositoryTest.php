@@ -93,6 +93,26 @@ final class HashRepositoryTest extends RedisAbstractTestCase
         }
     }
 
+    public function testFindByOrderByFloatSortsNumerically()
+    {
+        static::emptyRedis();
+        static::generateIndex();
+
+        $om = new RedisObjectManager(RedisAbstractTestCase::createRedisClient());
+        $om->persist(DummyHash::create(id: 10, age: 20, price: 9.5, name: 'Alice'));
+        $om->persist(DummyHash::create(id: 11, age: 21, price: 14.5, name: 'Alice'));
+        $om->persist(DummyHash::create(id: 12, age: 22, price: 100.0, name: 'Alice'));
+        $om->flush();
+
+        $repository = $this->objectManager->getRepository(DummyHash::class);
+
+        $asc = $repository->findBy(['name' => 'Alice'], ['price' => 'ASC']);
+        $this->assertSame([9.5, 14.5, 100.0], array_map(fn ($d) => $d->price, $asc));
+
+        $desc = $repository->findBy(['name' => 'Alice'], ['price' => 'DESC']);
+        $this->assertSame([100.0, 14.5, 9.5], array_map(fn ($d) => $d->price, $desc));
+    }
+
     public function testFindByMultiCriterias()
     {
         static::emptyRedis();

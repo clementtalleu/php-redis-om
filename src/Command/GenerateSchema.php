@@ -136,6 +136,10 @@ final class GenerateSchema
                         $propertiesToIndex[] = new PropertyToIndex($propertyName, $propertyName, Property::INDEX_TAG);
                         $propertiesToIndex[] = new PropertyToIndex($propertyName, $propertyName . '_numeric', Property::INDEX_NUMERIC);
                     } else {
+                        // JSON: scalar values are stored as strings by ScalarConverter, which makes
+                        // automatic NUMERIC indexing unreliable (RediSearch rejects string values at
+                        // a NUMERIC path). Users who need numeric sort/range on JSON must declare it
+                        // explicitly via #[Property(index: [... => 'NUMERIC'])] on numeric data.
                         $propertiesToIndex[] = new PropertyToIndex('$.' . $propertyName, $propertyName, Property::INDEX_TAG);
                     }
                 } elseif (class_exists($propertyType)) {

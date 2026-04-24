@@ -49,7 +49,7 @@ abstract class AbstractObjectRepository implements RepositoryInterface
         $data = $this->redisClient->search(
             $this->prefix,
             $criteria,
-            $orderBy ?? [],
+            $this->rewriteOrderBy($orderBy),
             $this->format,
             $limit,
             offset: $offset,
@@ -103,7 +103,7 @@ abstract class AbstractObjectRepository implements RepositoryInterface
         $data = $this->redisClient->search(
             prefixKey: $this->prefix,
             search: $transformedCriteria,
-            orderBy: $orderBy ?? [],
+            orderBy: $this->rewriteOrderBy($orderBy),
             format: $this->format,
             numberOfResults: $limit,
             offset: $offset,
@@ -183,7 +183,7 @@ abstract class AbstractObjectRepository implements RepositoryInterface
         $data = $this->redisClient->search(
             $this->prefix,
             $criteria,
-            $orderBy ?? [],
+            $this->rewriteOrderBy($orderBy),
             $this->format,
             $itemsPerPage,
             offset: $offset,
@@ -231,7 +231,7 @@ abstract class AbstractObjectRepository implements RepositoryInterface
         $this->convertObjects($criteria);
         $this->convertDates($criteria);
         $this->convertSpecial($criteria);
-        $data = $this->redisClient->search($this->prefix, $criteria, $orderBy ?? [], $this->format, 1, rangeFilters: $rangeFilters);
+        $data = $this->redisClient->search($this->prefix, $criteria, $this->rewriteOrderBy($orderBy), $this->format, 1, rangeFilters: $rangeFilters);
 
         if ($data === []) {
             return null;
@@ -253,7 +253,7 @@ abstract class AbstractObjectRepository implements RepositoryInterface
             unset($criteria[$property]);
         }
 
-        $data = $this->redisClient->search(prefixKey: $this->prefix, search: $criteria, orderBy: $orderBy ?? [], format: $this->format, numberOfResults: 1, searchType: Property::INDEX_TEXT);
+        $data = $this->redisClient->search(prefixKey: $this->prefix, search: $criteria, orderBy: $this->rewriteOrderBy($orderBy), format: $this->format, numberOfResults: 1, searchType: Property::INDEX_TEXT);
 
         if ($data === []) {
             return null;
@@ -485,5 +485,64 @@ abstract class AbstractObjectRepository implements RepositoryInterface
                 $criteria[$property] = $value->getTimestamp();
             }
         }
+    }
+
+    /**
+     * Rewrite sort keys so int/float properties sort numerically instead of lexicographically.
+     *
+     * RediSearch TAG fields sort as strings ("10.2" < "100.0" < "9.5"), so sorting floats
+     * or ints via the default alias yields wrong order. For these types the schema exposes
+     * a parallel NUMERIC alias `{property}_numeric` (SORTABLE); this method swaps the key
+     * so SORTBY targets that alias instead.
+     *
+     * @param array<string, string>|null $orderBy
+     * @return array<string, string>
+     */
+    protected function rewriteOrderBy(?array $orderBy): array
+    {
+        if (empty($orderBy) || $this->className === null) {
+            return $orderBy ?? [];
+        }
+
+        $rewritten = [];
+        foreach ($orderBy as $property => $direction) {
+            $rewritten[$this->resolveSortField((string) $property)] = $direction;
+        }
+
+        return $rewritten;
+    }
+
+    private function resolveSortField(string $property): string
+    {
+        // Auto-rewriting to the NUMERIC alias is only safe for HASH: Redis parses string values
+        // at indexing time so a NUMERIC index on a string HASH field just works. In JSON format
+        // ScalarConverter stores scalars as strings, and RediSearch rejects string values at a
+        // NUMERIC JSONPath — so users must opt in via #[Property(index: [... => 'NUMERIC'])].
+        if ($this->format !== RedisFormat::HASH->value) {
+            return $property;
+        }
+
+        if (!property_exists($this->className, $property)) {
+            return $property;
+        }
+
+        $reflectionType = (new \ReflectionProperty($this->className, $property))->getType();
+        if (!$reflectionType instanceof \ReflectionNamedType) {
+            return $property;
+        }
+
+        $typeName = $reflectionType->getName();
+        if ($typeName === 'int' || $typeName === 'float') {
+            return $property . '_numeric';
+        }
+
+        if (class_exists($typeName) && is_subclass_of($typeName, \BackedEnum::class)) {
+            $backingType = (new \ReflectionEnum($typeName))->getBackingType()?->getName();
+            if ($backingType === 'int') {
+                return $property . '_numeric';
+            }
+        }
+
+        return $property;
     }
 }

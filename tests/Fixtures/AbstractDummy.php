@@ -24,7 +24,7 @@ abstract class AbstractDummy
     #[RedisOm\Property(index: true)]
     public ?int $age = null;
 
-    #[RedisOm\Property]
+    #[RedisOm\Property(index: true)]
     public ?float $price = null;
 
     #[RedisOm\Property(index: true)]
