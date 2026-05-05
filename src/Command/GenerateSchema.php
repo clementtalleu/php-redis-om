@@ -127,6 +127,7 @@ final class GenerateSchema
                     if ($format === RedisFormat::HASH->value) {
                         $propertiesToIndex[] = new PropertyToIndex("$propertyName#timestamp", $propertyName, Property::INDEX_TAG);
                         $propertiesToIndex[] = new PropertyToIndex("$propertyName#timestamp", $propertyName . '_text', Property::INDEX_TEXT);
+                        $propertiesToIndex[] = new PropertyToIndex("$propertyName#timestamp", $propertyName . '_numeric', Property::INDEX_NUMERIC);
                     } else {
                         $propertiesToIndex[] = new PropertyToIndex('$.' . "$propertyName.timestamp", $propertyName, Property::INDEX_TAG);
                         $propertiesToIndex[] = new PropertyToIndex('$.' . "$propertyName.timestamp", $propertyName . "_text", Property::INDEX_TEXT);

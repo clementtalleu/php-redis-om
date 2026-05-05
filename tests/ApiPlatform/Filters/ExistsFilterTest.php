@@ -9,7 +9,7 @@ use Talleu\RedisOm\Om\RedisObjectManager;
 use Talleu\RedisOm\Tests\ApiPlatform\Entity\Dummy;
 use Talleu\RedisOm\Tests\RedisAbstractTestCase;
 
-class BooleanFilterTest extends RedisAbstractTestCase
+class ExistsFilterTest extends RedisAbstractTestCase
 {
     private RedisObjectManager $objectManager;
 
@@ -19,19 +19,31 @@ class BooleanFilterTest extends RedisAbstractTestCase
         parent::setUp();
     }
 
-    #[DataProvider('provideTrueValues')]
-    public function testBooleanTrue(string $value): void
+    private function loadFixtures(): void
     {
         self::emptyRedis();
         self::generateIndex();
-        self::loadRedisFixtures(Dummy::class);
+        $dummies = self::loadRedisFixtures(Dummy::class);
 
-        $response = self::createClient()->request('GET', "/api/dummies?enabled=$value");
+        // dummy1 and dummy2 get a description, dummy3 stays null
+        $dummies[0]->description = 'Has a description';
+        $dummies[1]->description = 'Also has one';
+        $this->objectManager->persist($dummies[0]);
+        $this->objectManager->persist($dummies[1]);
+        $this->objectManager->flush();
+    }
+
+    #[DataProvider('provideTrueValues')]
+    public function testExistsTrue(string $value): void
+    {
+        $this->loadFixtures();
+
+        $response = self::createClient()->request('GET', "/api/dummies?exists[description]=$value");
         $this->assertEquals(200, $response->getStatusCode());
         $responseContent = $response->toArray();
         $this->assertEquals(2, $responseContent['totalItems']);
         foreach ($responseContent['member'] as $result) {
-            $this->assertEquals(true, $result['enabled']);
+            $this->assertNotNull($result['description']);
         }
     }
 
@@ -44,18 +56,16 @@ class BooleanFilterTest extends RedisAbstractTestCase
     }
 
     #[DataProvider('provideFalseValues')]
-    public function testBooleanFalse(string $value): void
+    public function testExistsFalse(string $value): void
     {
-        self::emptyRedis();
-        self::generateIndex();
-        self::loadRedisFixtures(Dummy::class);
+        $this->loadFixtures();
 
-        $response = self::createClient()->request('GET', "/api/dummies?enabled=$value");
+        $response = self::createClient()->request('GET', "/api/dummies?exists[description]=$value");
         $this->assertEquals(200, $response->getStatusCode());
         $responseContent = $response->toArray();
         $this->assertEquals(1, $responseContent['totalItems']);
         foreach ($responseContent['member'] as $result) {
-            $this->assertEquals(false, $result['enabled']);
+            $this->assertTrue(!isset($result['description']) || $result['description'] === null);
         }
     }
 
@@ -67,22 +77,12 @@ class BooleanFilterTest extends RedisAbstractTestCase
         ];
     }
 
-    #[DataProvider('provideInvalidValues')]
-    public function testBooleanInvalidIgnored(string $value): void
+    public function testExistsInvalidIgnored(): void
     {
-        self::emptyRedis();
-        self::generateIndex();
-        self::loadRedisFixtures(Dummy::class);
+        $this->loadFixtures();
 
-        $response = self::createClient()->request('GET', "/api/dummies?enabled=$value");
+        $response = self::createClient()->request('GET', '/api/dummies?exists[description]=foo');
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertEquals(3, $response->toArray()['totalItems']);
-    }
-
-    public static function provideInvalidValues(): array
-    {
-        return [
-            'non-boolean string' => ['foo'],
-        ];
     }
 }

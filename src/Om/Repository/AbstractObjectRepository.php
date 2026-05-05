@@ -39,10 +39,10 @@ abstract class AbstractObjectRepository implements RepositoryInterface
     /**
      * @inheritdoc
      */
-    public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = 0): array
+    public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = 0, array $additionalRangeFilters = []): array
     {
         $limit = $this->defineLimit($limit);
-        $rangeFilters = $this->extractRangeFilters($criteria);
+        $rangeFilters = array_merge($this->extractRangeFilters($criteria), $additionalRangeFilters);
         $this->convertObjects($criteria);
         $this->convertDates($criteria);
         $this->convertSpecial($criteria);
@@ -67,28 +67,28 @@ abstract class AbstractObjectRepository implements RepositoryInterface
     /**
      * @inheritdoc
      */
-    public function findByLike(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = 0): array
+    public function findByLike(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = 0, array $additionalRangeFilters = []): array
     {
-        return $this->findByPattern($criteria, '*%s*', $orderBy, $limit, $offset);
+        return $this->findByPattern($criteria, '*%s*', $orderBy, $limit, $offset, $additionalRangeFilters);
     }
 
     /**
      * @inheritdoc
      */
-    public function findByStartWith(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = 0): array
+    public function findByStartWith(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = 0, array $additionalRangeFilters = []): array
     {
-        return $this->findByPattern($criteria, '%s*', $orderBy, $limit, $offset);
+        return $this->findByPattern($criteria, '%s*', $orderBy, $limit, $offset, $additionalRangeFilters);
     }
 
     /**
      * @inheritdoc
      */
-    public function findByEndWith(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = 0): array
+    public function findByEndWith(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = 0, array $additionalRangeFilters = []): array
     {
-        return $this->findByPattern($criteria, '*%s', $orderBy, $limit, $offset);
+        return $this->findByPattern($criteria, '*%s', $orderBy, $limit, $offset, $additionalRangeFilters);
     }
 
-    private function findByPattern(array $criteria, string $pattern, ?array $orderBy, ?int $limit, ?int $offset): array
+    private function findByPattern(array $criteria, string $pattern, ?array $orderBy, ?int $limit, ?int $offset, array $additionalRangeFilters = []): array
     {
         $limit = $this->defineLimit($limit);
         $this->convertObjects($criteria);
@@ -107,7 +107,8 @@ abstract class AbstractObjectRepository implements RepositoryInterface
             format: $this->format,
             numberOfResults: $limit,
             offset: $offset,
-            searchType: Property::INDEX_TEXT
+            searchType: Property::INDEX_TEXT,
+            rangeFilters: $additionalRangeFilters
         );
 
         return array_map(
@@ -265,11 +266,14 @@ abstract class AbstractObjectRepository implements RepositoryInterface
     /**
      * @inheritdoc
      */
-    public function count(array $criteria = []): int
+    public function count(array $criteria = [], array $additionalRangeFilters = []): int
     {
+        $rangeFilters = array_merge($this->extractRangeFilters($criteria), $additionalRangeFilters);
         $this->convertObjects($criteria);
+        $this->convertDates($criteria);
+        $this->convertSpecial($criteria);
 
-        return $this->redisClient->count($this->prefix, $criteria);
+        return $this->redisClient->count($this->prefix, $criteria, rangeFilters: $rangeFilters);
     }
 
     /**

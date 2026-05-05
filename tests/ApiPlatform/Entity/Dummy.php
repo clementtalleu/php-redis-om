@@ -7,8 +7,11 @@ namespace Talleu\RedisOm\Tests\ApiPlatform\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\QueryParameter;
 use Talleu\RedisOm\ApiPlatform\Filters\BooleanFilter;
+use Talleu\RedisOm\ApiPlatform\Filters\DateFilter;
+use Talleu\RedisOm\ApiPlatform\Filters\ExistsFilter;
 use Talleu\RedisOm\ApiPlatform\Filters\NumericFilter;
 use Talleu\RedisOm\ApiPlatform\Filters\OrderFilter;
+use Talleu\RedisOm\ApiPlatform\Filters\RangeFilter;
 use Talleu\RedisOm\ApiPlatform\Filters\SearchFilter;
 use Talleu\RedisOm\ApiPlatform\Filters\SearchStrategy;
 use Talleu\RedisOm\ApiPlatform\State\RedisProcessor;
@@ -26,9 +29,11 @@ use Talleu\RedisOm\Tests\Fixtures\Hash\DummyHash;
 #[QueryParameter(key: 'startWithName', filter: new SearchFilter(strategy: SearchStrategy::Start))]
 #[QueryParameter(key: 'endWithName', filter: new SearchFilter(strategy: SearchStrategy::End))]
 #[QueryParameter(key: 'age', filter: new NumericFilter())]
-#[QueryParameter(key: 'price', filter: new NumericFilter())]
+#[QueryParameter(key: 'price', filter: new RangeFilter())]
+#[QueryParameter(key: 'createdAt', filter: new DateFilter())]
 #[QueryParameter(key: 'enabled', filter: new BooleanFilter())]
 #[QueryParameter(key: 'order[:property]', filter: new OrderFilter(properties: ['age', 'id', 'name']))]
+#[QueryParameter(key: 'exists[:property]', filter: new ExistsFilter())]
 class Dummy extends DummyHash
 {
     #[RedisOm\Property(index: true)]
@@ -39,4 +44,7 @@ class Dummy extends DummyHash
 
     #[RedisOm\Property(index: true)]
     public ?string $endWithName = 'Martin';
+
+    #[RedisOm\Property(index: true)]
+    public ?string $description = null;
 }

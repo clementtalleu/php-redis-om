@@ -97,9 +97,14 @@ final class RedisPaginator implements PaginatorInterface, HasNextPagePaginatorIn
     public function getTotalItems(): float
     {
         $criteria = $this->params['criteria'] ?? [];
-        $method = $this->strategy === SearchStrategy::Exact ? 'count' : 'countByLike';
 
-        return (float)($this->totalItems ?? $this->totalItems = $this->repository->$method($criteria));
+        if ($this->strategy !== SearchStrategy::Exact) {
+            return (float)($this->totalItems ?? $this->totalItems = $this->repository->countByLike($criteria));
+        }
+
+        $additionalRangeFilters = $this->params['additionalRangeFilters'] ?? [];
+
+        return (float)($this->totalItems ?? $this->totalItems = $this->repository->count($criteria, $additionalRangeFilters));
     }
 
     /**
