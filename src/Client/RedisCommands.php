@@ -13,4 +13,5 @@ enum RedisCommands: string
     case CREATE_INDEX = 'FT.CREATE';
     case DROP_INDEX = 'FT.DROPINDEX';
     case SEARCH = 'FT.SEARCH';
+    case INFO_INDEX = 'FT.INFO';
 }
