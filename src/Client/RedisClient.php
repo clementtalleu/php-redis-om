@@ -248,23 +248,28 @@ final class RedisClient implements RedisClientInterface
     /**
      * @inheritdoc
      */
-    public function count(string $prefixKey, array $criterias = [], ?string $searchType = Property::INDEX_TAG): int
+    public function count(string $prefixKey, array $criterias = [], ?string $searchType = Property::INDEX_TAG, array $rangeFilters = []): int
     {
         $arguments = [RedisCommands::SEARCH->value, Converter::prefix($prefixKey)];
 
-        if ($criterias === []) {
+        if ($criterias === [] && $rangeFilters === []) {
             $arguments[] = '*';
         } else {
+            $criteria = '';
             foreach ($criterias as $property => $value) {
                 if (is_string($value) && str_contains($value, '-')) {
                     $value = str_replace('-', '\-', $value);
                 }
                 if ($searchType === Property::INDEX_TAG) {
-                    $arguments[] = sprintf('@%s:{%s}', $property, $value);
+                    $criteria .= sprintf('@%s:{%s}', $property, $value);
                 } else {
-                    $arguments[] = sprintf('@%s:%s', $property, $value);
+                    $criteria .= sprintf('@%s:%s', $property, $value);
                 }
             }
+            foreach ($rangeFilters as $rangeQuery) {
+                $criteria .= $rangeQuery;
+            }
+            $arguments[] = $criteria;
         }
 
         $rawResult = call_user_func_array([$this->redis, 'rawCommand'], $arguments);

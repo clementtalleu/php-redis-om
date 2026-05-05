@@ -267,9 +267,12 @@ abstract class AbstractObjectRepository implements RepositoryInterface
      */
     public function count(array $criteria = []): int
     {
+        $rangeFilters = $this->extractRangeFilters($criteria);
         $this->convertObjects($criteria);
+        $this->convertDates($criteria);
+        $this->convertSpecial($criteria);
 
-        return $this->redisClient->count($this->prefix, $criteria);
+        return $this->redisClient->count($this->prefix, $criteria, rangeFilters: $rangeFilters);
     }
 
     /**

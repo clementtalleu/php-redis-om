@@ -10,7 +10,14 @@ class BooleanFilter extends RedisAbstractFilter
 {
     public function __invoke(array $params, ?Parameter $parameter = null, array $context = []): array
     {
-        $params['criteria'][$parameter->getProperty() ?? $parameter->getKey()] = $parameter->getValue();
+        $raw = $parameter->getValue();
+        $normalized = filter_var($raw, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+        if ($normalized === null) {
+            return $params;
+        }
+
+        $params['criteria'][$parameter->getProperty() ?? $parameter->getKey()] = $normalized ? 'true' : 'false';
+
         return $params;
     }
 }

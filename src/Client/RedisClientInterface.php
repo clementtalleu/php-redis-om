@@ -85,7 +85,7 @@ interface RedisClientInterface
     /**
      * Count all objects by given prefix key and criterias.
      */
-    public function count(string $prefixKey, array $criterias = [], ?string $searchType = Property::INDEX_TAG): int;
+    public function count(string $prefixKey, array $criterias = [], ?string $searchType = Property::INDEX_TAG, array $rangeFilters = []): int;
 
     /**
      * Search objects by given prefix key and criterias.
