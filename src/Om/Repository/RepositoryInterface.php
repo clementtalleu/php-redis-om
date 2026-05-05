@@ -39,7 +39,7 @@ interface RepositoryInterface
      * @param array<string, string>|null $orderBy as ['property' => 'ASC|DESC']
      * @return T[]
      */
-    public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): array;
+    public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null, array $additionalRangeFilters = []): array;
 
     /**
      * Find objects whose properties contain a given value (case insensitive, partial match).
@@ -47,7 +47,7 @@ interface RepositoryInterface
      * @param array<string, string>|null $orderBy
      * @return T[]
      */
-    public function findByLike(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = 0): array;
+    public function findByLike(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = 0, array $additionalRangeFilters = []): array;
 
     /**
      * Find objects whose properties start with a given value.
@@ -55,7 +55,7 @@ interface RepositoryInterface
      * @param array<string, string>|null $orderBy
      * @return T[]
      */
-    public function findByStartWith(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = 0): array;
+    public function findByStartWith(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = 0, array $additionalRangeFilters = []): array;
 
     /**
      * Find objects whose properties end with a given value.
@@ -63,7 +63,7 @@ interface RepositoryInterface
      * @param array<string, string>|null $orderBy
      * @return T[]
      */
-    public function findByEndWith(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = 0): array;
+    public function findByEndWith(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = 0, array $additionalRangeFilters = []): array;
 
     /**
      * Find objects by a full text search.
@@ -111,7 +111,7 @@ interface RepositoryInterface
      * Count objects by a set of criteria.
      * @param array<string, mixed> $criteria
      */
-    public function count(array $criteria = []): int;
+    public function count(array $criteria = [], array $additionalRangeFilters = []): int;
 
     /**
      * Count objects by a set of criteria with a "LIKE" strategy.
