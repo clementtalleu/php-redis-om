@@ -420,6 +420,41 @@ final class PredisClient implements RedisClientInterface
     /**
      * @inheritdoc
      */
+    public function getIndexInfo(string $prefixKey): array
+    {
+        $result = $this->redis->executeRaw([RedisCommands::INFO_INDEX->value, Converter::prefix($prefixKey)]);
+        if ($result === false) {
+            return [];
+        }
+
+        return $this->parseIndexAttributes((array) $result);
+    }
+
+    private function parseIndexAttributes(array $rawInfo): array
+    {
+        for ($i = 0, $max = count($rawInfo) - 1; $i < $max; $i++) {
+            if ($rawInfo[$i] !== 'attributes') {
+                continue;
+            }
+
+            $attributes = [];
+            foreach ((array) $rawInfo[$i + 1] as $attrRaw) {
+                $attr = [];
+                for ($j = 0, $jMax = count($attrRaw) - 1; $j < $jMax; $j += 2) {
+                    $attr[$attrRaw[$j]] = $attrRaw[$j + 1];
+                }
+                $attributes[] = $attr;
+            }
+
+            return $attributes;
+        }
+
+        return [];
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function search(string $prefixKey, array $search, array $orderBy, ?string $format = RedisFormat::HASH->value, ?int $numberOfResults = null, int $offset = 0, ?string $searchType = Property::INDEX_TAG, array $rangeFilters = []): array
     {
         $arguments = [RedisCommands::SEARCH->value, Converter::prefix($prefixKey)];

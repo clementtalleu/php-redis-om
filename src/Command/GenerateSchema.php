@@ -101,6 +101,11 @@ final class GenerateSchema
 
                 // Property type not supported for indexing
                 if (!in_array($propertyType, ['int', 'string', 'float', 'bool']) && !class_exists($propertyType)) {
+                    if ($reflectionProperty->getAttributes(Id::class) !== []) {
+                        throw new BadIdentifierConfigurationException(
+                            sprintf("Identifier '%s' in %s has unsupported type '%s'. Supported types: int, string, float, bool.", $propertyName, $fqcn, $propertyType)
+                        );
+                    }
                     continue;
                 }
 

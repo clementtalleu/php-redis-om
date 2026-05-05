@@ -153,4 +153,12 @@ interface RedisClientInterface
      * Discard a Redis transaction (DISCARD).
      */
     public function discard(): void;
+
+    /**
+     * Return parsed attributes from FT.INFO for the given index.
+     * Each entry has keys: identifier, attribute, type, and any extra flags.
+     *
+     * @return array<int, array<string, string>>
+     */
+    public function getIndexInfo(string $prefixKey): array;
 }
