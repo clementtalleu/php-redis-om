@@ -6,6 +6,7 @@ namespace Talleu\RedisOm\ApiPlatform\State;
 
 use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
+use ApiPlatform\Metadata\Post;
 use ApiPlatform\State\ProcessorInterface;
 use Talleu\RedisOm\Om\RedisObjectManagerInterface;
 
@@ -28,7 +29,12 @@ final class RedisProcessor implements ProcessorInterface
             return null;
         }
 
-        $this->redisObjectManager->persist($data);
+        if ($operation instanceof Post) {
+            $this->redisObjectManager->persist($data);
+        } else {
+            $this->redisObjectManager->merge($data);
+        }
+
         $this->redisObjectManager->flush();
 
         return $data;
