@@ -48,6 +48,9 @@ SearchFilter
 NumericFilter
 BooleanFilter
 OrderFilter
+RangeFilter
+DateFilter
+ExistsFilter
 ```
 
 Implement them as follows:
@@ -56,7 +59,6 @@ Implement them as follows:
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\QueryParameter;
-use Talleu\RedisOm\ApiPlatform\Filters\ExactSearchFilter;
 use Talleu\RedisOm\ApiPlatform\Filters\BooleanFilter;
 use Talleu\RedisOm\ApiPlatform\Filters\NumericFilter;
 use Talleu\RedisOm\ApiPlatform\Filters\OrderFilter;
