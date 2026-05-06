@@ -19,8 +19,12 @@ $objectManager->clear();
 // Will remove the object from Redis on flush
 $objectManager->remove($user); 
 
-// Will refresh the object from the redis state
+// Will refresh the object from the redis state (updates the object in place)
 $objectManager->refresh($user);
+
+// Will merge the object: only persist properties that changed since the last find()
+// Falls back to a full persist if the object was not loaded via find()
+$objectManager->merge($user);
 
 // Check if the object is managed by the object manager
 $objectManager->contains($user); 
@@ -69,6 +73,30 @@ $userRepository->count(['name' => 'John']);
 // Will retrieve only the property "name" of the object for the id 3.
 $userRepository->getPropertyValue(identifier: 3, property: 'name'); 
 // ⚠️ Warning: this method cannot retrieve array or nested objects when HASH format
+
+// Will retrieve multiple objects by their identifiers in a single pipeline round-trip
+$userRepository->findMultiple([1, 2, 3]);
+
+// Will retrieve all users whose name starts with 'Jo'
+$userRepository->findByStartWith(['name' => 'Jo']);
+
+// Will retrieve all users whose name ends with 'Doe'
+$userRepository->findByEndWith(['name' => 'Doe']);
+
+// Will count all users whose name contains 'John'
+$userRepository->countByLike(['name' => 'John']);
+
+// Will paginate results: returns a Paginator with items and total count
+$paginator = $userRepository->paginate(criteria: ['name' => 'John'], page: 1, itemsPerPage: 20);
+
+// Will retrieve users within 10km of a given geographic point
+$userRepository->findByGeoRadius(
+    geoField: 'location',
+    longitude: 2.3522,
+    latitude: 48.8566,
+    radius: 10,
+    unit: 'km'
+);
 ```
 
 #### You can also request objects or collection by nested objects properties

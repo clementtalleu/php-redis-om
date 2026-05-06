@@ -31,7 +31,7 @@ For others PHP applications
 ```php
 // Set the persistent connection to true
 $objectManager = new RedisObjectManager();
-$bjectManager->getRedisClient()->createPersistentConnection();
+$objectManager->getRedisClient()->createPersistentConnection();
 
 // Then you can use the ObjectManager normally
 $objectManager->persist($user);

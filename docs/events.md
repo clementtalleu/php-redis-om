@@ -8,6 +8,7 @@ Here is an example without Symfony
 
 use Talleu\RedisOm\Event\EventManager;
 use Talleu\RedisOm\Event\Events;
+use Talleu\RedisOm\Event\LifecycleEventArgs;
 use Talleu\RedisOm\Om\RedisObjectManager;
 
 $eventManager = new EventManager();

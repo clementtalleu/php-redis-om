@@ -16,7 +16,6 @@ use Talleu\RedisOm\Om\RedisFormat;
         format: RedisFormat::JSON->value,
         converter: new MyCustomConverter(),
         repository: new MyCustomRepository(),
-        redisClient: new MyCustomRedisClient(),
         ttl: 3600
 )]
 class User
@@ -54,13 +53,6 @@ Each of these parameters are optional and can be omitted. Here is a description 
     - Default: `null`
     - Type: `RepositoryInterface`
     - Note: The repository must implement the `RepositoryInterface` interface.
-- redisClient: 
-    - The redis client to use to connect to your Redis server. If not set, the default redis client will be used.
-    - Example: `new MyCustomRedisClient()`
-    - Default: `null`
-    - Type: `RedisClientInterface`
-    - Note: The redis client must implement the `RedisClientInterface` interface, it could be a php-redis client 
-or any other client that implements the interface.
 
 You could alternate from JSON format to HASH format in each entity by setting the format parameter to `RedisFormat::HASH->value` or `RedisFormat::JSON->value`.
 But be careful, if you switch the format in an entity that already has data stored in Redis, you will lose all the index stored in the previous format.
@@ -97,19 +89,13 @@ class User
     )]
     public string $name;
 
-    #[RedisOm\Property(
-        index: ['age_numeric' => Property::INDEX_NUMERIC, 'age_text' => Property::INDEX_TEXT],
-    )]
+    #[RedisOm\Property(index: ['age_numeric' => Property::INDEX_NUMERIC, 'age_text' => Property::INDEX_TEXT])]
     public int $age;
     
     #[RedisOm\Property]
     public ?string $description;
 
-    #[
-        RedisOm\Property(
-            index: ['createdAt#timestamp' => RedisOm\Property::INDEX_NUMERIC],
-        )
-    ]
+    #[RedisOm\Property(index: ['createdAt#timestamp' => RedisOm\Property::INDEX_NUMERIC])]
     private ?DateTimeInterface $createdAt = null;
 }
 ```
@@ -118,7 +104,10 @@ Each of these parameters are optional and can be omitted. Here is a description 
 
 - index:
     - The index in Redis. If not set, the property is false by default and could not be queryable.
-    - Example: `true` Will create default index (TAG + TEXT)
+    - Example: `true` Creates default indexes depending on the property type:
+        - `string` / object : TAG + TEXT
+        - `int` / `float` : TAG + NUMERIC
+        - `DateTime` : TAG + TEXT + NUMERIC
     - Example: `['age' => Property::INDEX_NUMERIC]`
     - Default: `false`
     - Type: `boolean | array`
