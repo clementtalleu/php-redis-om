@@ -12,13 +12,25 @@ final class Runner
     public static function generateSchema(string $dirPath, ?RedisClientInterface $redisClient = null): void
     {
         if (!is_dir($dirPath)) {
-            // Not a valid directory absolute path, try to find the directory in the project root
-            $dirPath = __DIR__ . '/../../../../../' . $dirPath;
+            $dirPath = self::projectRoot() . '/' . $dirPath;
             if (!is_dir($dirPath)) {
                 throw new \InvalidArgumentException(sprintf('Directory %s not found', $dirPath));
             }
         }
 
         GenerateSchema::generateSchema($dirPath, $redisClient);
+    }
+
+    private static function projectRoot(): string
+    {
+        $dir = __DIR__;
+        while ($dir !== dirname($dir)) {
+            if (file_exists($dir . '/vendor/autoload.php')) {
+                return $dir;
+            }
+            $dir = dirname($dir);
+        }
+
+        throw new \RuntimeException('Cannot locate project root');
     }
 }
