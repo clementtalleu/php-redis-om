@@ -16,7 +16,6 @@ use Talleu\RedisOm\Om\Converters\JsonModel\JsonObjectConverter;
 use Talleu\RedisOm\Om\Key\KeyGenerator;
 use Talleu\RedisOm\Exception\UniqueConstraintViolationException;
 use Talleu\RedisOm\Om\Mapping\Entity;
-use Talleu\RedisOm\Om\Mapping\Unique;
 use Talleu\RedisOm\Om\Metadata\ClassMetadata;
 use Talleu\RedisOm\Om\Metadata\MetadataFactory;
 use Talleu\RedisOm\Om\Persister\HashModel\HashPersister;
@@ -36,6 +35,9 @@ final class RedisObjectManager implements RedisObjectManagerInterface
 
     /** @var array<string, Entity> */
     private array $entityMapperCache = [];
+
+    /** @var array<string, ClassMetadata> */
+    private array $classMetadataCache = [];
 
     /** @var array<string, array<string|int, object>> Identity map: className -> id -> object */
     private array $identityMap = [];
@@ -246,68 +248,22 @@ final class RedisObjectManager implements RedisObjectManagerInterface
             foreach ($objectsByOperation as $operation => $objectsToPersist) {
                 foreach ($objectsToPersist as $objectToPersist) {
                     $object = $objectToPersist->value;
-                    $reflection = new \ReflectionClass($object);
-                    $idProperty = $this->keyGenerator->getIdentifier($reflection);
-                    $currentId = (string) $object->{$idProperty->getName()};
-                    $className = $reflection->getName();
+                    $className = get_class($object);
+                    $metadata = $this->getCachedClassMetadata($className);
 
-                    // Property-level #[Unique]
-                    foreach ($reflection->getProperties() as $property) {
-                        if ($property->getAttributes(Unique::class) === []) {
-                            continue;
-                        }
-
-                        $property->setAccessible(true);
-                        $fieldName = $property->getName();
-                        $currentValue = (string) $property->getValue($object);
-                        $uniqueKey = sprintf('unique:%s:%s:%s', $className, $fieldName, $currentValue);
-
-                        if ($operation === PersisterOperations::OPERATION_DELETE->value) {
-                            $watch[$uniqueKey] = true;
-                            $dels[] = $uniqueKey;
-                            continue;
-                        }
-
-                        if ($operation === PersisterOperations::OPERATION_MERGE->value) {
-                            $oldValue = isset($objectToPersist->previousValues[$fieldName])
-                                ? (string) $objectToPersist->previousValues[$fieldName]
-                                : null;
-
-                            if ($oldValue !== null && $oldValue !== $currentValue) {
-                                $oldUniqueKey = sprintf('unique:%s:%s:%s', $className, $fieldName, $oldValue);
-                                $watch[$oldUniqueKey] = true;
-                                $dels[] = $oldUniqueKey;
-                                $watch[$uniqueKey] = true;
-                                $checks[$uniqueKey] = ['allowedId' => $currentId, 'class' => $className, 'fields' => [$fieldName], 'values' => [$currentValue]];
-                                $sets[$uniqueKey] = $currentId;
-                            }
-                            continue;
-                        }
-
-                        if (isset($sets[$uniqueKey]) && $sets[$uniqueKey] !== $currentId) {
-                            throw UniqueConstraintViolationException::forFields($className, [$fieldName], [$currentValue]);
-                        }
-
-                        $watch[$uniqueKey] = true;
-                        $checks[$uniqueKey] = ['allowedId' => $currentId, 'class' => $className, 'fields' => [$fieldName], 'values' => [$currentValue]];
-                        $sets[$uniqueKey] = $currentId;
+                    if (!$metadata->hasUniqueConstraints()) {
+                        continue;
                     }
 
-                    // Class-level #[Unique(properties: [...])]
-                    foreach ($reflection->getAttributes(Unique::class) as $attrRef) {
-                        $unique = $attrRef->newInstance();
-                        if ($unique->properties === []) {
-                            continue;
-                        }
+                    $idFieldName = $metadata->identifier[0];
+                    $currentId = (string) (new \ReflectionProperty($className, $idFieldName))->getValue($object);
 
-                        $fields = $unique->properties;
+                    foreach ($metadata->uniqueConstraints as $fields) {
                         sort($fields);
 
                         $currentValues = [];
                         foreach ($fields as $field) {
-                            $prop = $reflection->getProperty($field);
-                            $prop->setAccessible(true);
-                            $currentValues[$field] = (string) $prop->getValue($object);
+                            $currentValues[$field] = (string) (new \ReflectionProperty($className, $field))->getValue($object);
                         }
 
                         $fieldKey = implode(',', $fields);
@@ -360,6 +316,11 @@ final class RedisObjectManager implements RedisObjectManagerInterface
         }
 
         return ['watch' => $watch, 'checks' => $checks, 'sets' => $sets, 'dels' => $dels];
+    }
+
+    private function getCachedClassMetadata(string $className): ClassMetadata
+    {
+        return $this->classMetadataCache[$className] ??= (new MetadataFactory())->createClassMetadata($className);
     }
 
     /**

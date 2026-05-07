@@ -182,4 +182,22 @@ interface RedisClientInterface
      * @return array<int, array<string, string>>
      */
     public function getIndexInfo(string $prefixKey): array;
+
+    /**
+     * Search and return only key names (NOCONTENT) — no document data deserialized.
+     * @return string[]
+     */
+    public function searchKeys(string $prefixKey, array $criteria, int $limit, int $offset): array;
+
+    /**
+     * Search and return key names with selected field values.
+     * Each entry: ['key' => string, 'fields' => ['field' => value]].
+     */
+    public function searchKeysWithFields(string $prefixKey, array $criteria, array $fields, int $limit, int $offset): array;
+
+    /**
+     * Delete multiple keys in a single DEL command.
+     * @param string[] $keys Raw Redis keys (already normalized, e.g. from searchKeys/searchKeysWithFields).
+     */
+    public function delMultiple(array $keys): void;
 }

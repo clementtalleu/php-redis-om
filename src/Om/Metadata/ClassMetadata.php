@@ -12,6 +12,8 @@ class ClassMetadata implements MetadataInterface
         public ?array $fieldsMapping = [],
         public ?array $associations = [],
         public ?array $typesFields = [],
+        /** @var string[][] Each entry is a group of field names forming a unique constraint */
+        public array $uniqueConstraints = [],
     ) {
     }
 
@@ -133,5 +135,21 @@ class ClassMetadata implements MetadataInterface
     public function setTypesFields(array $fields)
     {
         $this->typesFields = $fields;
+    }
+
+    public function setUniqueConstraints(array $constraints): void
+    {
+        $this->uniqueConstraints = $constraints;
+    }
+
+    public function hasUniqueConstraints(): bool
+    {
+        return $this->uniqueConstraints !== [];
+    }
+
+    /** @return string[] All field names involved in any unique constraint */
+    public function getUniqueFields(): array
+    {
+        return array_unique(array_merge(...$this->uniqueConstraints));
     }
 }
