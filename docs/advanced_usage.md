@@ -33,6 +33,23 @@ $objectManager->contains($user);
 $objectManager->getExpirationTime($user); 
 ```
 
+### Handling unique constraint violations
+
+If any entity has a `#[Unique]` constraint, `flush()` may throw `UniqueConstraintViolationException`. Wrap it where needed:
+
+```php
+use Talleu\RedisOm\Exception\UniqueConstraintViolationException;
+
+try {
+    $objectManager->persist($user);
+    $objectManager->flush();
+} catch (UniqueConstraintViolationException $e) {
+    // $e->getMessage() describes which field(s) and value(s) conflicted
+}
+```
+
+See [mapping.md](mapping.md#unique-constraints) for the full reference: composite constraints, merge/remove behavior, concurrency guarantees, and limitations.
+
 You can also retrieve and query your objects with the ObjectManager or a given repository
 ```php
 $objectManager = new RedisObjectManager(); // For Symfony users directly inject RedisObjectManagerInterface in your constructor

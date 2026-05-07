@@ -10,7 +10,7 @@ use Attribute;
  * This attribute should be used to persist the properties of an entity in the Redis datastore.
  * You could leave the index true to benefits of automatic indexing,
  * #[Property(index: true)]  will enable an index for this property, by default it will be a text + tag index
- * Or you couldd specify the indexe(s) type(s) for each property you want to query :
+ * Or you could specify the indexe(s) type(s) for each property you want to query :
  * #[Property(type: ['title' => 'TEXT', 'title_tag' => 'TAG'])]
  * #[Property(type: ['price' => 'NUMERIC', 'price_tag' => 'TAG'])]
  */
