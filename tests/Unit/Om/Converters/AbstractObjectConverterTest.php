@@ -131,8 +131,14 @@ class AOCTestPrivateWithGetter
     #[RedisOm\Property]
     private string $secret = '';
 
-    public function getSecret(): string { return $this->secret; }
-    public function setSecret(string $s): void { $this->secret = $s; }
+    public function getSecret(): string
+    {
+        return $this->secret;
+    }
+    public function setSecret(string $s): void
+    {
+        $this->secret = $s;
+    }
 }
 
 #[RedisOm\Entity]
@@ -145,8 +151,14 @@ class AOCTestPrivateWithCustomGetter
     #[RedisOm\Property(getter: 'fetchValue')]
     private string $value = '';
 
-    public function fetchValue(): string { return $this->value; }
-    public function setMyValue(string $v): void { $this->value = $v; }
+    public function fetchValue(): string
+    {
+        return $this->value;
+    }
+    public function setMyValue(string $v): void
+    {
+        $this->value = $v;
+    }
 }
 
 #[RedisOm\Entity]
@@ -181,8 +193,14 @@ class AOCTestPrivateWithCustomSetter
     #[RedisOm\Property(setter: 'writeValue')]
     private string $value = '';
 
-    public function writeValue(string $v): void { $this->value = $v; }
-    public function readValue(): string { return $this->value; }
+    public function writeValue(string $v): void
+    {
+        $this->value = $v;
+    }
+    public function readValue(): string
+    {
+        return $this->value;
+    }
 }
 
 #[RedisOm\Entity]
@@ -206,5 +224,8 @@ class AOCTestPrivateInvalidSetter
     #[RedisOm\Property(setter: 'nonExistentSetter')]
     private string $value = '';
 
-    public function getValue(): string { return $this->value; }
+    public function getValue(): string
+    {
+        return $this->value;
+    }
 }

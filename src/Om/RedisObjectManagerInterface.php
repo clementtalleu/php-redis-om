@@ -38,6 +38,19 @@ interface RedisObjectManagerInterface
     public function clear(): void;
 
     /**
+     * Iterate over objects of a class, clearing the identity map after each batch.
+     * Keeps memory bounded for long-running jobs. Pending unflushed operations are discarded
+     * at each batch boundary — call flush() before streaming if you have queued writes.
+     * Objects from a previous batch are detached once the next batch starts; merge() on them
+     * falls back to a full persist.
+     * @template T of object
+     * @param class-string<T> $className
+     * @param array<string, mixed> $criteria
+     * @return \Generator<int, T>
+     */
+    public function stream(string $className, array $criteria = [], int $batchSize = 100): \Generator;
+
+    /**
      * Detach an object from the current unit of work, it will not be persisted nor deleted on flush.
      */
     public function detach(object $object): void;
