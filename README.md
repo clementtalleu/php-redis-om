@@ -25,7 +25,9 @@ with Redis.
 - PHP enum support (backed enums)
 - Identity map and dirty tracking with partial updates
 - Atomic transactions (MULTI/EXEC)
+- Unique constraints (single-field and composite)
 - Pagination with total count
+- Memory-efficient streaming of large collections
 - GEO queries (radius search)
 - Pipeline batch reads
 - API Platform support (beta)
@@ -284,6 +286,72 @@ Search objects within a geographic radius (requires a GEO-indexed property):
 public string $location; // Format: "longitude,latitude"
 
 $nearby = $repository->findByGeoRadius('location', 2.3522, 48.8566, 10, 'km');
+```
+
+## Unique Constraints 🔒
+
+Enforce uniqueness on one or more fields using `#[Unique]`.
+
+**Single field:**
+```php
+#[RedisOm\Entity]
+class User
+{
+    #[RedisOm\Id]
+    #[RedisOm\Property]
+    public int $id;
+
+    #[RedisOm\Property(index: true)]
+    #[RedisOm\Unique]
+    public string $email;
+}
+```
+
+**Composite (combination of fields must be unique):**
+```php
+#[RedisOm\Entity]
+#[RedisOm\Unique(properties: ['username', 'tenantId'])]
+class User
+{
+    #[RedisOm\Id]
+    #[RedisOm\Property]
+    public int $id;
+
+    #[RedisOm\Property]
+    public string $username;
+
+    #[RedisOm\Property]
+    public int $tenantId;
+}
+```
+
+`flush()` throws `UniqueConstraintViolationException` on conflict. Violations within the same `flush()` call are detected before hitting Redis. Concurrent writes are protected via Redis `WATCH`/`MULTI`/`EXEC`.
+
+```php
+use Talleu\RedisOm\Exception\UniqueConstraintViolationException;
+
+try {
+    $objectManager->persist($user);
+    $objectManager->flush();
+} catch (UniqueConstraintViolationException $e) {
+    // $e->getMessage() describes the conflicting field(s) and value(s)
+}
+```
+
+## Streaming Large Collections 🌊
+
+`findAll()` loads everything into memory. `stream()` fetches objects in batches and yields them one by one, keeping memory bounded regardless of collection size.
+
+```php
+// Via repository — full control
+foreach ($repository->stream(['status' => 'active'], batchSize: 500) as $user) {
+    // process $user — break works normally
+}
+
+// Via object manager — identity map is cleared automatically between batches
+foreach ($objectManager->stream(User::class, ['status' => 'active']) as $user) {
+    // process $user
+}
 ```
 
 ## Advanced documentation 📚

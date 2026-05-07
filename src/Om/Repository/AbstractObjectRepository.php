@@ -204,23 +204,25 @@ abstract class AbstractObjectRepository implements RepositoryInterface
      */
     public function findAll(): iterable
     {
-        $limit = self::DEFAULT_SEARCH_LIMIT;
+        return $this->stream(batchSize: self::DEFAULT_SEARCH_LIMIT);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function stream(
+        array $criteria = [],
+        ?array $orderBy = null,
+        int $batchSize = 100,
+    ): \Generator {
         $offset = 0;
-
         do {
-            $results = $this->findBy([], offset: $offset, limit: $limit);
-
-            if (empty($results)) {
-                break;
+            $batch = $this->findBy($criteria, $orderBy, $batchSize, $offset);
+            foreach ($batch as $object) {
+                yield $object;
             }
-
-            foreach ($results as $result) {
-                yield $result;
-            }
-
-            $offset += $limit;
-
-        } while (true);
+            $offset += $batchSize;
+        } while (count($batch) === $batchSize);
     }
 
     /**

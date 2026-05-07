@@ -27,8 +27,10 @@ final class EventManagerTest extends TestCase
     public function testAddAndDispatchListener(): void
     {
         $called = false;
-        $listener = new class($called) {
-            public function __construct(private bool &$called) {}
+        $listener = new class ($called) {
+            public function __construct(private bool &$called)
+            {
+            }
             public function onTest(EventArgs $args): void
             {
                 $this->called = true;
@@ -44,8 +46,10 @@ final class EventManagerTest extends TestCase
 
     public function testRemoveEventListener(): void
     {
-        $listener = new class {
-            public function onTest(): void {}
+        $listener = new class () {
+            public function onTest(): void
+            {
+            }
         };
 
         $this->eventManager->addEventListener('onTest', $listener);
@@ -57,9 +61,13 @@ final class EventManagerTest extends TestCase
 
     public function testAddMultipleEvents(): void
     {
-        $listener = new class {
-            public function event1(): void {}
-            public function event2(): void {}
+        $listener = new class () {
+            public function event1(): void
+            {
+            }
+            public function event2(): void
+            {
+            }
         };
 
         $this->eventManager->addEventListener(['event1', 'event2'], $listener);
@@ -75,12 +83,14 @@ final class EventManagerTest extends TestCase
 
     public function testRemoveEventSubscriber(): void
     {
-        $subscriber = new class implements EventSubscriberInterface {
+        $subscriber = new class () implements EventSubscriberInterface {
             public function getSubscribedEvents(): array
             {
                 return ['event1' => 'onEvent1'];
             }
-            public function event1(): void {}
+            public function event1(): void
+            {
+            }
         };
 
         $this->eventManager->addEventSubscriber($subscriber);
@@ -93,8 +103,10 @@ final class EventManagerTest extends TestCase
     public function testDispatchWithCallableListener(): void
     {
         $called = false;
-        $listener = new class($called) {
-            public function __construct(private bool &$called) {}
+        $listener = new class ($called) {
+            public function __construct(private bool &$called)
+            {
+            }
             public function __invoke(EventArgs $args): void
             {
                 $this->called = true;
@@ -109,13 +121,23 @@ final class EventManagerTest extends TestCase
     public function testMultipleListenersOnSameEvent(): void
     {
         $count = 0;
-        $listener1 = new class($count) {
-            public function __construct(private int &$count) {}
-            public function onEvent(EventArgs $args): void { $this->count++; }
+        $listener1 = new class ($count) {
+            public function __construct(private int &$count)
+            {
+            }
+            public function onEvent(EventArgs $args): void
+            {
+                $this->count++;
+            }
         };
-        $listener2 = new class($count) {
-            public function __construct(private int &$count) {}
-            public function onEvent(EventArgs $args): void { $this->count++; }
+        $listener2 = new class ($count) {
+            public function __construct(private int &$count)
+            {
+            }
+            public function onEvent(EventArgs $args): void
+            {
+                $this->count++;
+            }
         };
 
         $this->eventManager->addEventListener('onEvent', $listener1);
@@ -127,7 +149,7 @@ final class EventManagerTest extends TestCase
 
     public function testRemoveListenerForNonExistentEvent(): void
     {
-        $listener = new class {};
+        $listener = new class () {};
 
         // Should not throw
         $this->eventManager->removeEventListener('nonExistent', $listener);

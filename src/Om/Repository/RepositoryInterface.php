@@ -78,6 +78,19 @@ interface RepositoryInterface
     public function findAll(): iterable;
 
     /**
+     * Iterate over objects without loading the full collection in memory.
+     * Fetches $batchSize objects at a time and yields them one by one.
+     * @param array<string, mixed> $criteria
+     * @param array<string, string>|null $orderBy
+     * @return \Generator<int, T>
+     */
+    public function stream(
+        array $criteria = [],
+        ?array $orderBy = null,
+        int $batchSize = 100,
+    ): \Generator;
+
+    /**
      * Find one object by a set of criteria.
      * @param array<string, mixed> $criteria
      * @param array<string, string>|null $orderBy

@@ -398,6 +398,22 @@ final class RedisObjectManager implements RedisObjectManagerInterface
     /**
      * @inheritdoc
      */
+    public function stream(string $className, array $criteria = [], int $batchSize = 100): \Generator
+    {
+        $offset = 0;
+        do {
+            $batch = $this->getRepository($className)->findBy($criteria, null, $batchSize, $offset);
+            foreach ($batch as $object) {
+                yield $object;
+            }
+            $this->clear();
+            $offset += $batchSize;
+        } while (count($batch) === $batchSize);
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function detach(object $object): void
     {
         $identifier = $this->keyGenerator->getIdentifier(new \ReflectionClass($object));

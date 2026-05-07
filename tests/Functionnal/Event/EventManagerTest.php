@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Talleu\RedisOm\Tests\Functionnal\Event;
 
@@ -19,7 +21,7 @@ final class EventManagerTest extends TestCase
 
     public function testAddEventListener(): void
     {
-        $listener = new class {
+        $listener = new class () {
             public bool $called = false;
 
             public function prePersist(EventArgs $args): void
@@ -35,7 +37,7 @@ final class EventManagerTest extends TestCase
 
     public function testAddEventListenerWithMultipleEvents(): void
     {
-        $listener = new class {
+        $listener = new class () {
             public int $callCount = 0;
 
             public function prePersist(EventArgs $args): void
@@ -58,7 +60,7 @@ final class EventManagerTest extends TestCase
 
     public function testRemoveEventListener(): void
     {
-        $listener = new class {
+        $listener = new class () {
             public bool $called = false;
 
             public function prePersist(EventArgs $args): void
@@ -76,7 +78,7 @@ final class EventManagerTest extends TestCase
 
     public function testAddEventSubscriber(): void
     {
-        $subscriber = new class implements EventSubscriberInterface {
+        $subscriber = new class () implements EventSubscriberInterface {
             public bool $called = false;
 
             public function getSubscribedEvents(): array
@@ -100,7 +102,7 @@ final class EventManagerTest extends TestCase
 
     public function testRemoveEventSubscriber(): void
     {
-        $subscriber = new class implements EventSubscriberInterface {
+        $subscriber = new class () implements EventSubscriberInterface {
             public bool $called = false;
 
             public function getSubscribedEvents(): array
@@ -128,7 +130,7 @@ final class EventManagerTest extends TestCase
         $object = new \stdClass();
         $object->name = 'test';
 
-        $listener = new class {
+        $listener = new class () {
             public ?object $receivedObject = null;
 
             public function prePersist(EventArgs $args): void
@@ -148,8 +150,10 @@ final class EventManagerTest extends TestCase
     {
         $this->assertFalse($this->eventManager->hasListeners(Events::PRE_PERSIST));
 
-        $listener = new class {
-            public function prePersist(EventArgs $args): void {}
+        $listener = new class () {
+            public function prePersist(EventArgs $args): void
+            {
+            }
         };
 
         $this->eventManager->addEventListener(Events::PRE_PERSIST, $listener);
@@ -158,11 +162,15 @@ final class EventManagerTest extends TestCase
 
     public function testGetListeners(): void
     {
-        $listener1 = new class {
-            public function prePersist(EventArgs $args): void {}
+        $listener1 = new class () {
+            public function prePersist(EventArgs $args): void
+            {
+            }
         };
-        $listener2 = new class {
-            public function prePersist(EventArgs $args): void {}
+        $listener2 = new class () {
+            public function prePersist(EventArgs $args): void
+            {
+            }
         };
 
         $this->eventManager->addEventListener(Events::PRE_PERSIST, $listener1);
@@ -198,8 +206,10 @@ final class EventManagerTest extends TestCase
     {
         $order = [];
 
-        $listener1 = new class($order) {
-            public function __construct(private array &$order) {}
+        $listener1 = new class ($order) {
+            public function __construct(private array &$order)
+            {
+            }
 
             public function prePersist(EventArgs $args): void
             {
@@ -207,8 +217,10 @@ final class EventManagerTest extends TestCase
             }
         };
 
-        $listener2 = new class($order) {
-            public function __construct(private array &$order) {}
+        $listener2 = new class ($order) {
+            public function __construct(private array &$order)
+            {
+            }
 
             public function prePersist(EventArgs $args): void
             {

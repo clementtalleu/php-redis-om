@@ -137,6 +137,58 @@ $userRepository->findOneBy(['createdAt' => '2021-01-01 00:00:00']);
 $userRepository->findBy(['createdAt' => '2021-01-01 00:00:00']); 
 ```
 
+## Streaming large collections
+
+`findAll()` loads the full collection in memory. For large datasets, use `stream()` which fetches objects in batches and yields them one by one, keeping memory bounded.
+
+### Via the repository
+
+```php
+// All objects, default batch size of 100
+foreach ($repository->stream() as $user) {
+    // process $user
+}
+
+// With criteria and custom batch size
+foreach ($repository->stream(['active' => true], batchSize: 500) as $user) {
+    // process $user
+}
+
+// With ordering
+foreach ($repository->stream(orderBy: ['createdAt' => 'ASC']) as $user) {
+    // process $user
+}
+```
+
+`break` works normally — the remaining batches are never fetched.
+
+Memory management is manual. If you call `merge()` inside the loop, the identity map grows by one entry per object. For long-running jobs, call `$objectManager->clear()` periodically to release it:
+
+```php
+foreach ($repository->stream(batchSize: 500) as $i => $user) {
+    // process...
+    if ($i % 500 === 499) {
+        $objectManager->flush();
+        $objectManager->clear();
+    }
+}
+```
+
+### Via the object manager (auto-clear)
+
+`RedisObjectManager::stream()` clears the identity map automatically after each batch, keeping memory flat with no manual intervention:
+
+```php
+foreach ($objectManager->stream(User::class, ['active' => true]) as $user) {
+    // process $user
+}
+```
+
+Two constraints to keep in mind:
+
+- Do not call `merge()` on an object once the generator has advanced past its batch — the snapshot is gone and the merge will silently fall back to a full persist.
+- Any pending operations not yet flushed are discarded at each batch boundary. Call `flush()` before streaming if you have queued writes.
+
 ## Repository
 
 You can create your own repository to query your objects in Redis. Then inject it in the
