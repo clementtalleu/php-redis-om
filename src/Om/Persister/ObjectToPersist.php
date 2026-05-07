@@ -16,6 +16,7 @@ final class ObjectToPersist
         public object|array|null   $value = null,
         public ?int                $ttl = null,
         public ?array              $changedFields = null,
+        public ?array              $previousValues = null,
     ) {
     }
 }

@@ -14,7 +14,9 @@ use Talleu\RedisOm\Event\LifecycleEventArgs;
 use Talleu\RedisOm\Om\Converters\HashModel\HashObjectConverter;
 use Talleu\RedisOm\Om\Converters\JsonModel\JsonObjectConverter;
 use Talleu\RedisOm\Om\Key\KeyGenerator;
+use Talleu\RedisOm\Exception\UniqueConstraintViolationException;
 use Talleu\RedisOm\Om\Mapping\Entity;
+use Talleu\RedisOm\Om\Mapping\Unique;
 use Talleu\RedisOm\Om\Metadata\ClassMetadata;
 use Talleu\RedisOm\Om\Metadata\MetadataFactory;
 use Talleu\RedisOm\Om\Persister\HashModel\HashPersister;
@@ -124,6 +126,7 @@ final class RedisObjectManager implements RedisObjectManagerInterface
             converter: $objectMapper->converter,
             value: $object,
             changedFields: $changedFields,
+            previousValues: $this->snapshots[$snapshotKey],
         );
 
         $this->objectsToFlush[$objectToMerge->persisterClass][$objectToMerge->operation][$objectToMerge->redisKey] = $objectToMerge;
@@ -169,25 +172,194 @@ final class RedisObjectManager implements RedisObjectManagerInterface
             return;
         }
 
+        $uniquePlan = $this->buildUniqueConstraintPlan();
+
+        if ($uniquePlan === null) {
+            $this->redisClient->multi();
+            try {
+                $this->doFlushOperations();
+                $this->redisClient->exec();
+            } catch (\Throwable $e) {
+                $this->redisClient->discard();
+                throw $e;
+            }
+            return;
+        }
+
+        $this->redisClient->watch(...array_keys($uniquePlan['watch']));
+
+        foreach ($uniquePlan['checks'] as $uniqueKey => $meta) {
+            $existingId = $this->redisClient->get($uniqueKey);
+            if ($existingId !== null && $existingId !== $meta['allowedId']) {
+                $this->redisClient->unwatch();
+                throw UniqueConstraintViolationException::forFields($meta['class'], $meta['fields'], $meta['values']);
+            }
+        }
+
         $this->redisClient->multi();
         try {
-            foreach ($this->objectsToFlush as $persisterClassName => $objectsByOperation) {
-                foreach ($objectsByOperation as $operation => $objectToPersists) {
-                    $this->persisters[$persisterClassName]->{$operation}($objectToPersists);
-                    foreach ($objectToPersists as $objectToPersist) {
-                        $this->eventManager->dispatchEvent(
-                            Events::POST_FLUSH,
-                            new LifecycleEventArgs($objectToPersist->value, $this)
-                        );
-                    }
-                    unset($this->objectsToFlush[$persisterClassName][$operation]);
-                }
+            $this->doFlushOperations();
+            foreach ($uniquePlan['sets'] as $uniqueKey => $id) {
+                $this->redisClient->set($uniqueKey, $id);
             }
-            $this->redisClient->exec();
+            foreach ($uniquePlan['dels'] as $uniqueKey) {
+                $this->redisClient->del($uniqueKey);
+            }
+            $committed = $this->redisClient->exec();
         } catch (\Throwable $e) {
             $this->redisClient->discard();
             throw $e;
         }
+
+        if (!$committed) {
+            throw UniqueConstraintViolationException::concurrentModification();
+        }
+    }
+
+    private function doFlushOperations(): void
+    {
+        foreach ($this->objectsToFlush as $persisterClassName => $objectsByOperation) {
+            foreach ($objectsByOperation as $operation => $objectToPersists) {
+                $this->persisters[$persisterClassName]->{$operation}($objectToPersists);
+                foreach ($objectToPersists as $objectToPersist) {
+                    $this->eventManager->dispatchEvent(
+                        Events::POST_FLUSH,
+                        new LifecycleEventArgs($objectToPersist->value, $this)
+                    );
+                }
+                unset($this->objectsToFlush[$persisterClassName][$operation]);
+            }
+        }
+    }
+
+    /**
+     * @return array{watch: array<string,true>, checks: array<string,array>, sets: array<string,string>, dels: list<string>}|null
+     */
+    private function buildUniqueConstraintPlan(): ?array
+    {
+        $watch = [];
+        $checks = [];
+        $sets = [];
+        $dels = [];
+
+        foreach ($this->objectsToFlush as $objectsByOperation) {
+            foreach ($objectsByOperation as $operation => $objectsToPersist) {
+                foreach ($objectsToPersist as $objectToPersist) {
+                    $object = $objectToPersist->value;
+                    $reflection = new \ReflectionClass($object);
+                    $idProperty = $this->keyGenerator->getIdentifier($reflection);
+                    $currentId = (string) $object->{$idProperty->getName()};
+                    $className = $reflection->getName();
+
+                    // Property-level #[Unique]
+                    foreach ($reflection->getProperties() as $property) {
+                        if ($property->getAttributes(Unique::class) === []) {
+                            continue;
+                        }
+
+                        $property->setAccessible(true);
+                        $fieldName = $property->getName();
+                        $currentValue = (string) $property->getValue($object);
+                        $uniqueKey = sprintf('unique:%s:%s:%s', $className, $fieldName, $currentValue);
+
+                        if ($operation === PersisterOperations::OPERATION_DELETE->value) {
+                            $watch[$uniqueKey] = true;
+                            $dels[] = $uniqueKey;
+                            continue;
+                        }
+
+                        if ($operation === PersisterOperations::OPERATION_MERGE->value) {
+                            $oldValue = isset($objectToPersist->previousValues[$fieldName])
+                                ? (string) $objectToPersist->previousValues[$fieldName]
+                                : null;
+
+                            if ($oldValue !== null && $oldValue !== $currentValue) {
+                                $oldUniqueKey = sprintf('unique:%s:%s:%s', $className, $fieldName, $oldValue);
+                                $watch[$oldUniqueKey] = true;
+                                $dels[] = $oldUniqueKey;
+                                $watch[$uniqueKey] = true;
+                                $checks[$uniqueKey] = ['allowedId' => $currentId, 'class' => $className, 'fields' => [$fieldName], 'values' => [$currentValue]];
+                                $sets[$uniqueKey] = $currentId;
+                            }
+                            continue;
+                        }
+
+                        if (isset($sets[$uniqueKey]) && $sets[$uniqueKey] !== $currentId) {
+                            throw UniqueConstraintViolationException::forFields($className, [$fieldName], [$currentValue]);
+                        }
+
+                        $watch[$uniqueKey] = true;
+                        $checks[$uniqueKey] = ['allowedId' => $currentId, 'class' => $className, 'fields' => [$fieldName], 'values' => [$currentValue]];
+                        $sets[$uniqueKey] = $currentId;
+                    }
+
+                    // Class-level #[Unique(properties: [...])]
+                    foreach ($reflection->getAttributes(Unique::class) as $attrRef) {
+                        $unique = $attrRef->newInstance();
+                        if ($unique->properties === []) {
+                            continue;
+                        }
+
+                        $fields = $unique->properties;
+                        sort($fields);
+
+                        $currentValues = [];
+                        foreach ($fields as $field) {
+                            $prop = $reflection->getProperty($field);
+                            $prop->setAccessible(true);
+                            $currentValues[$field] = (string) $prop->getValue($object);
+                        }
+
+                        $fieldKey = implode(',', $fields);
+                        $uniqueKey = sprintf('unique:%s:%s:%s', $className, $fieldKey, implode(':', array_values($currentValues)));
+
+                        if ($operation === PersisterOperations::OPERATION_DELETE->value) {
+                            $watch[$uniqueKey] = true;
+                            $dels[] = $uniqueKey;
+                            continue;
+                        }
+
+                        if ($operation === PersisterOperations::OPERATION_MERGE->value) {
+                            $oldValues = [];
+                            $anyChanged = false;
+                            foreach ($fields as $field) {
+                                $oldVal = isset($objectToPersist->previousValues[$field])
+                                    ? (string) $objectToPersist->previousValues[$field]
+                                    : null;
+                                $oldValues[$field] = $oldVal;
+                                if ($oldVal !== $currentValues[$field]) {
+                                    $anyChanged = true;
+                                }
+                            }
+
+                            if ($anyChanged && !in_array(null, $oldValues, true)) {
+                                $oldUniqueKey = sprintf('unique:%s:%s:%s', $className, $fieldKey, implode(':', array_values($oldValues)));
+                                $watch[$oldUniqueKey] = true;
+                                $dels[] = $oldUniqueKey;
+                                $watch[$uniqueKey] = true;
+                                $checks[$uniqueKey] = ['allowedId' => $currentId, 'class' => $className, 'fields' => $fields, 'values' => array_values($currentValues)];
+                                $sets[$uniqueKey] = $currentId;
+                            }
+                            continue;
+                        }
+
+                        if (isset($sets[$uniqueKey]) && $sets[$uniqueKey] !== $currentId) {
+                            throw UniqueConstraintViolationException::forFields($className, $fields, array_values($currentValues));
+                        }
+
+                        $watch[$uniqueKey] = true;
+                        $checks[$uniqueKey] = ['allowedId' => $currentId, 'class' => $className, 'fields' => $fields, 'values' => array_values($currentValues)];
+                        $sets[$uniqueKey] = $currentId;
+                    }
+                }
+            }
+        }
+
+        if ($watch === []) {
+            return null;
+        }
+
+        return ['watch' => $watch, 'checks' => $checks, 'sets' => $sets, 'dels' => $dels];
     }
 
     /**

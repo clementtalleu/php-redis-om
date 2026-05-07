@@ -140,14 +140,35 @@ interface RedisClientInterface
     public function jsonGetMultiple(array $keys): array;
 
     /**
+     * Get a string value by key. Returns null when the key does not exist.
+     */
+    public function get(string $key): ?string;
+
+    /**
+     * Set a string value by key.
+     */
+    public function set(string $key, string $value): void;
+
+    /**
+     * Watch one or more keys for changes before a MULTI/EXEC transaction.
+     */
+    public function watch(string ...$keys): void;
+
+    /**
+     * Cancel all WATCHed keys without starting a transaction.
+     */
+    public function unwatch(): void;
+
+    /**
      * Begin a Redis transaction (MULTI).
      */
     public function multi(): void;
 
     /**
      * Execute a Redis transaction (EXEC).
+     * Returns false when a WATCHed key was modified and the transaction was aborted.
      */
-    public function exec(): void;
+    public function exec(): bool;
 
     /**
      * Discard a Redis transaction (DISCARD).

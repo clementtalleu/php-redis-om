@@ -124,6 +124,139 @@ Each of these parameters are optional and can be omitted. Here is a description 
 
 The #[RedisOm\Id] attribute is by default indexed and could be requested.
 
+## Unique constraints
+
+`#[Unique]` guarantees that no two objects of the same class share the same value for a given field (or combination of fields) at the time of `flush()`.
+
+### Single-field constraint
+
+Place `#[RedisOm\Unique]` on a property alongside `#[RedisOm\Property]`:
+
+```php
+<?php
+
+use Talleu\RedisOm\Om\Mapping as RedisOm;
+
+#[RedisOm\Entity]
+class User
+{
+    #[RedisOm\Id]
+    #[RedisOm\Property]
+    public int $id;
+
+    #[RedisOm\Property(index: true)]
+    #[RedisOm\Unique]
+    public string $email;
+
+    #[RedisOm\Property]
+    public string $name;
+}
+```
+
+Attempting to persist two objects with the same email throws on `flush()`:
+
+```php
+use Talleu\RedisOm\Exception\UniqueConstraintViolationException;
+
+$alice = new User(); $alice->id = 1; $alice->email = 'alice@example.com';
+$bob   = new User(); $bob->id   = 2; $bob->email   = 'alice@example.com'; // duplicate
+
+$objectManager->persist($alice);
+$objectManager->persist($bob);
+
+try {
+    $objectManager->flush();
+} catch (UniqueConstraintViolationException $e) {
+    echo $e->getMessage();
+    // Unique constraint violation on App\Entity\User::email, value "alice@example.com" already exists.
+}
+```
+
+### Composite constraint
+
+Place `#[RedisOm\Unique(properties: [...])]` at the **class level** to enforce uniqueness on a combination of fields.
+The attribute is repeatable, so multiple independent constraints can be declared on the same class.
+
+```php
+<?php
+
+use Talleu\RedisOm\Om\Mapping as RedisOm;
+
+#[RedisOm\Entity]
+#[RedisOm\Unique(properties: ['username', 'tenantId'])]
+#[RedisOm\Unique(properties: ['email',    'tenantId'])]
+class User
+{
+    #[RedisOm\Id]
+    #[RedisOm\Property]
+    public int $id;
+
+    #[RedisOm\Property]
+    public string $username;
+
+    #[RedisOm\Property]
+    public int $tenantId;
+
+    #[RedisOm\Property]
+    public string $email;
+}
+```
+
+The same `username` is allowed across different tenants; only the combination `(username, tenantId)` must be unique:
+
+```php
+// OK: same username, different tenants
+$u1 = new User(); $u1->id = 1; $u1->username = 'john'; $u1->tenantId = 1;
+$u2 = new User(); $u2->id = 2; $u2->username = 'john'; $u2->tenantId = 2;
+$objectManager->persist($u1);
+$objectManager->persist($u2);
+$objectManager->flush(); // succeeds
+
+// NOT OK: duplicate combination
+$u3 = new User(); $u3->id = 3; $u3->username = 'john'; $u3->tenantId = 1;
+$objectManager->persist($u3);
+$objectManager->flush(); // throws UniqueConstraintViolationException
+// Unique constraint violation on App\Entity\User: combination (tenantId="1", username="john") already exists.
+```
+
+### Behavior during merge and remove
+
+**merge():** when you load an object via `find()`, change a unique field, and call `merge()`, the library detects the change, deletes the old unique key and claims the new one — atomically. If the new value is already taken, `flush()` throws.
+
+```php
+$user = $objectManager->find(User::class, 1); // email = 'old@example.com'
+$user->email = 'new@example.com';
+
+$objectManager->merge($user);
+$objectManager->flush(); // old key released, new key claimed
+```
+
+**remove():** unique keys are deleted inside the same transaction as the object, so the value becomes immediately available for another object:
+
+```php
+$objectManager->remove($user);
+$objectManager->flush(); // unique key released
+
+$other->email = $user->email;
+$objectManager->persist($other);
+$objectManager->flush(); // succeeds
+```
+
+### Concurrency guarantee
+
+`flush()` uses Redis [WATCH][watch] + [MULTI][multi]/[EXEC][exec] to prevent race conditions: all relevant unique keys are watched before the transaction, checked for collisions, then written atomically. If a concurrent process claims the same key between `WATCH` and `EXEC`, the transaction is aborted and `UniqueConstraintViolationException::concurrentModification()` is thrown.
+
+### Limitations
+
+- Violations are detected only at `flush()` time, not at `persist()` or `merge()` time.
+- Unique fields must be scalar values (string, int, float). Arrays and nested objects are not supported.
+- `#[Unique]` does not imply `#[Property(index: true)]`. Add the index separately if you need to query by that field.
+- The library does not scan existing data when `#[Unique]` is added to an existing class. Run your own deduplication before deploying the constraint.
+
+[watch]: https://redis.io/docs/latest/commands/watch/
+[multi]: https://redis.io/docs/latest/commands/multi/
+[exec]:  https://redis.io/docs/latest/commands/exec/
+
 ## Update the schema
 After each modification of your classes, you have to update the schema in Redis. You can do it by running the following command:
 

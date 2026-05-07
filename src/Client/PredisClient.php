@@ -388,6 +388,38 @@ final class PredisClient implements RedisClientInterface
     /**
      * @inheritdoc
      */
+    public function get(string $key): ?string
+    {
+        return $this->redis->get(Converter::prefix($key));
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function set(string $key, string $value): void
+    {
+        $this->redis->set(Converter::prefix($key), $value);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function watch(string ...$keys): void
+    {
+        $this->redis->watch(...array_map([Converter::class, 'prefix'], $keys));
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function unwatch(): void
+    {
+        $this->redis->unwatch();
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function multi(): void
     {
         $this->redis->multi();
@@ -396,9 +428,9 @@ final class PredisClient implements RedisClientInterface
     /**
      * @inheritdoc
      */
-    public function exec(): void
+    public function exec(): bool
     {
-        $this->redis->exec();
+        return $this->redis->exec() !== null;
     }
 
     /**

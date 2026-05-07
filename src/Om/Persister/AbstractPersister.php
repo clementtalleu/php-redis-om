@@ -43,6 +43,7 @@ abstract class AbstractPersister implements PersisterInterface
             persisterClass: get_class($this),
             operation: PersisterOperations::OPERATION_DELETE->value,
             redisKey: $key,
+            value: $object,
         );
     }
 
