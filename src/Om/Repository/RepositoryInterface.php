@@ -155,4 +155,22 @@ interface RepositoryInterface
      * Create a new QueryBuilder instance.
      */
     public function createQueryBuilder(): QueryBuilder;
+
+    /**
+     * Delete all objects matching $criteria without loading them into memory.
+     * Unique-constraint keys are cleaned up automatically.
+     * Returns the number of deleted objects.
+     * @param array<string, mixed> $criteria
+     */
+    public function bulkDelete(array $criteria = []): int;
+
+    /**
+     * Update specific fields on all objects matching $criteria without loading them.
+     * Throws BulkOperationException if $changes targets a field covered by a unique constraint.
+     * Supports scalar types (string, int, float, bool, null). Use stream() + merge() + flush() for complex types.
+     * Returns the number of updated objects.
+     * @param array<string, mixed> $criteria
+     * @param array<string, mixed> $changes  field => new value
+     */
+    public function bulkUpdate(array $criteria, array $changes): int;
 }

@@ -7,6 +7,7 @@ namespace Talleu\RedisOm\Om\Metadata;
 use Talleu\RedisOm\Om\Mapping\Entity;
 use Talleu\RedisOm\Om\Mapping\Id;
 use Talleu\RedisOm\Om\Mapping\Property;
+use Talleu\RedisOm\Om\Mapping\Unique;
 
 class MetadataFactory
 {
@@ -19,6 +20,7 @@ class MetadataFactory
         $classMetadata->setFieldsMapping($this->buildFieldsMapping());
         $classMetadata->setAssociations($this->buildAssociations());
         $classMetadata->setTypesFields($this->buildTypesFields());
+        $classMetadata->setUniqueConstraints($this->buildUniqueConstraints());
 
         return $classMetadata;
     }
@@ -94,5 +96,25 @@ class MetadataFactory
         }
 
         return $fields;
+    }
+
+    private function buildUniqueConstraints(): array
+    {
+        $constraints = [];
+
+        foreach ($this->reflectionClass->getProperties() as $property) {
+            if ($property->getAttributes(Unique::class) !== []) {
+                $constraints[] = [$property->getName()];
+            }
+        }
+
+        foreach ($this->reflectionClass->getAttributes(Unique::class) as $attr) {
+            $unique = $attr->newInstance();
+            if ($unique->properties !== []) {
+                $constraints[] = $unique->properties;
+            }
+        }
+
+        return $constraints;
     }
 }

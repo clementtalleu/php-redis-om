@@ -581,6 +581,95 @@ final class RedisClient implements RedisClientInterface
         return $this->extractRedisData($result, $format, $numberOfResults);
     }
 
+    /**
+     * @inheritdoc
+     */
+    public function searchKeys(string $prefixKey, array $criteria, int $limit, int $offset): array
+    {
+        $arguments = [RedisCommands::SEARCH->value, Converter::prefix($prefixKey)];
+        $arguments[] = $criteria === [] ? '*' : $this->buildSearchCriteria($criteria);
+        $arguments[] = 'NOCONTENT';
+        $arguments[] = 'LIMIT';
+        $arguments[] = $offset;
+        $arguments[] = $limit;
+
+        try {
+            $result = call_user_func_array([$this->redis, 'rawCommand'], $arguments);
+        } catch (\RedisException $e) {
+            $this->handleError(RedisCommands::SEARCH->value, $e->getMessage(), $e);
+        }
+
+        if ($result === false || $result[0] === 0) {
+            return [];
+        }
+
+        return array_slice($result, 1);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function searchKeysWithFields(string $prefixKey, array $criteria, array $fields, int $limit, int $offset): array
+    {
+        $arguments = [RedisCommands::SEARCH->value, Converter::prefix($prefixKey)];
+        $arguments[] = $criteria === [] ? '*' : $this->buildSearchCriteria($criteria);
+        $arguments[] = 'RETURN';
+        $arguments[] = (string) count($fields);
+        foreach ($fields as $field) {
+            $arguments[] = $field;
+        }
+        $arguments[] = 'LIMIT';
+        $arguments[] = $offset;
+        $arguments[] = $limit;
+
+        try {
+            $result = call_user_func_array([$this->redis, 'rawCommand'], $arguments);
+        } catch (\RedisException $e) {
+            $this->handleError(RedisCommands::SEARCH->value, $e->getMessage(), $e);
+        }
+
+        if ($result === false || $result[0] === 0) {
+            return [];
+        }
+
+        $entries = [];
+        for ($i = 1, $max = count($result); $i < $max; $i += 2) {
+            $rawFields = (array) ($result[$i + 1] ?? []);
+            $parsed = [];
+            for ($j = 0, $jMax = count($rawFields); $j < $jMax; $j += 2) {
+                $parsed[$rawFields[$j]] = $rawFields[$j + 1] ?? null;
+            }
+            $entries[] = ['key' => $result[$i], 'fields' => $parsed];
+        }
+
+        return $entries;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function delMultiple(array $keys): void
+    {
+        if ($keys === []) {
+            return;
+        }
+
+        $this->redis->del(array_map([Converter::class, 'prefix'], $keys));
+    }
+
+    private function buildSearchCriteria(array $criteria): string
+    {
+        $query = '';
+        foreach ($criteria as $property => $value) {
+            if (is_string($value) && str_contains($value, '-')) {
+                $value = str_replace('-', '\-', $value);
+            }
+            $query .= sprintf('@%s:{%s}', $property, $value);
+        }
+
+        return $query;
+    }
+
     private function handleError(string $command, ?string $errorMessage = 'Unknown error', ?\Throwable $previous = null): never
     {
         throw new RedisClientResponseException(

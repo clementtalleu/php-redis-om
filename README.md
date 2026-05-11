@@ -28,6 +28,7 @@ with Redis.
 - Unique constraints (single-field and composite)
 - Pagination with total count
 - Memory-efficient streaming of large collections
+- Bulk delete and update without loading objects into memory
 - GEO queries (radius search)
 - Pipeline batch reads
 - API Platform support (beta)
@@ -337,6 +338,22 @@ try {
     // $e->getMessage() describes the conflicting field(s) and value(s)
 }
 ```
+
+## Bulk Operations ⚡
+
+Delete or update large numbers of objects without loading them into PHP memory.
+
+```php
+$repository = $objectManager->getRepository(User::class);
+
+// Delete all inactive users — unique-constraint keys are cleaned up automatically
+$deleted = $repository->bulkDelete(['status' => 'inactive']);
+
+// Update a scalar field on many objects at once
+$updated = $repository->bulkUpdate(['country' => 'FR'], ['currency' => 'EUR']);
+```
+
+`bulkUpdate()` throws `BulkOperationException` when `$changes` targets a `#[Unique]` field. Use `stream()` + `merge()` + `flush()` instead for those cases.
 
 ## Streaming Large Collections 🌊
 

@@ -189,6 +189,61 @@ Two constraints to keep in mind:
 - Do not call `merge()` on an object once the generator has advanced past its batch — the snapshot is gone and the merge will silently fall back to a full persist.
 - Any pending operations not yet flushed are discarded at each batch boundary. Call `flush()` before streaming if you have queued writes.
 
+## Bulk operations
+
+`bulkDelete()` and `bulkUpdate()` act directly on Redis keys without loading objects into PHP. They are designed for mass operations on large collections where per-object instantiation would be too costly.
+
+### `bulkDelete(array $criteria = []): int`
+
+Deletes all objects matching `$criteria` without loading them. Returns the number of deleted objects.
+
+Unique-constraint keys (`unique:*`) are cleaned up automatically so the deleted values become reusable immediately.
+
+```php
+$repository = $objectManager->getRepository(User::class);
+
+// Delete all inactive users
+$count = $repository->bulkDelete(['status' => 'inactive']);
+
+// Delete everything
+$count = $repository->bulkDelete();
+```
+
+### `bulkUpdate(array $criteria, array $changes): int`
+
+Updates specific fields on all objects matching `$criteria` without loading them. Returns the number of updated objects.
+
+Supports scalar types: `string`, `int`, `float`, `bool`, `null`. For complex types (dates, nested objects, enums), use `stream()` + `merge()` + `flush()`.
+
+```php
+// Set all trial users to active
+$count = $repository->bulkUpdate(['status' => 'trial'], ['status' => 'active']);
+
+// Reset a numeric field
+$count = $repository->bulkUpdate(['country' => 'FR'], ['score' => 0]);
+```
+
+Throws `BulkOperationException` if `$changes` targets a field covered by a `#[Unique]` constraint — updating a unique field in bulk would require complex collision handling that cannot be done safely without loading the objects:
+
+```php
+use Talleu\RedisOm\Exception\BulkOperationException;
+
+try {
+    $repository->bulkUpdate(['name' => 'John'], ['email' => 'new@example.com']);
+} catch (BulkOperationException $e) {
+    // Use stream() + merge() + flush() instead for unique fields
+}
+```
+
+### When to use bulk vs stream
+
+| Scenario | Recommended approach |
+|----------|----------------------|
+| Delete by criteria, no business logic | `bulkDelete()` |
+| Update scalar non-unique fields on many objects | `bulkUpdate()` |
+| Update unique fields | `stream()` + `merge()` + `flush()` |
+| Apply complex transformations or trigger events | `stream()` + `merge()` + `flush()` |
+
 ## Repository
 
 You can create your own repository to query your objects in Redis. Then inject it in the

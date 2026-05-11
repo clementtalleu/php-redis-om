@@ -7,10 +7,13 @@ namespace Talleu\RedisOm\Om\Repository;
 use Talleu\RedisOm\Client\Helper\Converter;
 use Talleu\RedisOm\Client\RedisClientInterface;
 use Talleu\RedisOm\Exception\BadIdentifierConfigurationException;
+use Talleu\RedisOm\Exception\BulkOperationException;
 use Talleu\RedisOm\Om\Converters\AbstractDateTimeConverter;
 use Talleu\RedisOm\Om\Converters\ConverterInterface;
 use Talleu\RedisOm\Om\Mapping\Id;
 use Talleu\RedisOm\Om\Mapping\Property;
+use Talleu\RedisOm\Om\Metadata\ClassMetadata;
+use Talleu\RedisOm\Om\Metadata\MetadataFactory;
 use Talleu\RedisOm\Om\Paginator;
 use Talleu\RedisOm\Om\QueryBuilder;
 use Talleu\RedisOm\Om\RedisFormat;
@@ -21,9 +24,16 @@ abstract class AbstractObjectRepository implements RepositoryInterface
     public ?string $className = null;
     protected ?RedisClientInterface $redisClient = null;
     protected ?ConverterInterface $converter = null;
+    private ?ClassMetadata $classMetadata = null;
     private const DEFAULT_SEARCH_LIMIT = 10000;
+
     public function __construct(public ?string $format = null)
     {
+    }
+
+    protected function getClassMetadata(): ClassMetadata
+    {
+        return $this->classMetadata ??= (new MetadataFactory())->createClassMetadata($this->className);
     }
 
     /**
@@ -292,6 +302,149 @@ abstract class AbstractObjectRepository implements RepositoryInterface
         }
 
         return $this->redisClient->count($this->prefix, $criteria, Property::INDEX_TEXT);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function bulkDelete(array $criteria = []): int
+    {
+        $metadata = $this->getClassMetadata();
+        $uniqueConstraints = $metadata->uniqueConstraints;
+        $batchSize = 100;
+        $deleted = 0;
+        $batchCount = 0;
+
+        $this->convertObjects($criteria);
+        $this->convertDates($criteria);
+        $this->convertSpecial($criteria);
+
+        do {
+            if ($uniqueConstraints === []) {
+                // No unique keys to clean up: fetch only key names
+                $keys = $this->redisClient->searchKeys($this->prefix, $criteria, $batchSize, 0);
+                $batchCount = count($keys);
+                if ($batchCount > 0) {
+                    $this->redisClient->delMultiple($keys);
+                    $deleted += $batchCount;
+                }
+            } else {
+                // Fetch key names + unique-field values to delete constraint keys
+                $uniqueFields = $metadata->getUniqueFields();
+                $searchFields = $this->format === RedisFormat::JSON->value
+                    ? array_map(fn ($f) => '$.' . $f, $uniqueFields)
+                    : $uniqueFields;
+
+                $entries = $this->redisClient->searchKeysWithFields($this->prefix, $criteria, $searchFields, $batchSize, 0);
+                $batchCount = count($entries);
+                if ($batchCount > 0) {
+                    $isJson = $this->format === RedisFormat::JSON->value;
+                    $keysToDelete = [];
+                    foreach ($entries as $entry) {
+                        $keysToDelete[] = $entry['key'];
+                        $fieldValues = $this->normalizeFieldNames($entry['fields']);
+                        foreach ($uniqueConstraints as $fields) {
+                            $sortedFields = $fields;
+                            sort($sortedFields);
+                            $values = array_map(function (string $f) use ($fieldValues, $isJson): string {
+                                $raw = (string) ($fieldValues[$f] ?? '');
+                                // FT.SEARCH RETURN wraps JSON path results in an array: ["actual_value"]
+                                if ($isJson && str_starts_with($raw, '[')) {
+                                    $decoded = json_decode($raw, true);
+                                    return (string) (is_array($decoded) ? ($decoded[0] ?? '') : $decoded);
+                                }
+                                return $raw;
+                            }, $sortedFields);
+                            $keysToDelete[] = sprintf(
+                                'unique:%s:%s:%s',
+                                $this->className,
+                                implode(',', $sortedFields),
+                                implode(':', $values),
+                            );
+                        }
+                    }
+                    $this->redisClient->delMultiple($keysToDelete);
+                    $deleted += $batchCount;
+                }
+            }
+        } while ($batchCount === $batchSize);
+
+        return $deleted;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function bulkUpdate(array $criteria, array $changes): int
+    {
+        $metadata = $this->getClassMetadata();
+        $conflictingFields = array_values(array_intersect(array_keys($changes), $metadata->getUniqueFields()));
+        if ($conflictingFields !== []) {
+            throw BulkOperationException::uniqueFieldsCannotBeBulkUpdated($this->className, $conflictingFields);
+        }
+
+        $this->convertObjects($criteria);
+        $this->convertDates($criteria);
+        $this->convertSpecial($criteria);
+
+        $isJson = $this->format === RedisFormat::JSON->value;
+        $batchSize = 100;
+        $offset = 0;
+        $updated = 0;
+
+        do {
+            $keys = $this->redisClient->searchKeys($this->prefix, $criteria, $batchSize, $offset);
+            $batchCount = count($keys);
+
+            if ($batchCount > 0) {
+                if ($isJson) {
+                    foreach ($keys as $key) {
+                        foreach ($changes as $field => $value) {
+                            $this->redisClient->jsonSetProperty($key, $field, (string) json_encode($value));
+                        }
+                    }
+                } else {
+                    $convertedChanges = $this->convertChangesForHash($changes);
+                    foreach ($keys as $key) {
+                        $this->redisClient->hMSet($key, $convertedChanges);
+                    }
+                }
+                $updated += $batchCount;
+            }
+
+            $offset += $batchSize;
+        } while ($batchCount === $batchSize);
+
+        return $updated;
+    }
+
+    /**
+     * Strips `$.` JSON path prefix from field names returned by FT.SEARCH RETURN.
+     * @param array<string, mixed> $fields
+     * @return array<string, mixed>
+     */
+    private function normalizeFieldNames(array $fields): array
+    {
+        $normalized = [];
+        foreach ($fields as $fieldName => $value) {
+            $normalized[str_starts_with($fieldName, '$.') ? substr($fieldName, 2) : $fieldName] = $value;
+        }
+
+        return $normalized;
+    }
+
+    private function convertChangesForHash(array $changes): array
+    {
+        $converted = [];
+        foreach ($changes as $field => $value) {
+            $converted[$field] = match (true) {
+                is_null($value) => 'null',
+                is_bool($value) => $value ? 'true' : 'false',
+                default => (string) $value,
+            };
+        }
+
+        return $converted;
     }
 
     /**
